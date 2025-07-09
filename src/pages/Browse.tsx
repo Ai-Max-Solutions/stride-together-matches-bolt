@@ -607,22 +607,16 @@ export default function Browse() {
             ))}
           </div>
         ) : filteredProfiles.length === 0 ? (
-          <Card className="text-center py-12">
-            <CardContent>
-              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No matches found</h3>
-              <p className="text-muted-foreground mb-4">
-                Try adjusting your filters or check back later for new members
-              </p>
-              <Button variant="outline" onClick={() => {
-                setSearchQuery('');
-                setSelectedSport('all');
-                setSelectedExperience('all');
-              }}>
-                Clear Filters
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="text-center py-16 animate-fade-in">
+            <div className="text-6xl mb-4">🏃‍♀️</div>
+            <h3 className="text-xl font-semibold mb-2">No matches yet?</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Keep your profile up to date and come back soon! More amazing workout partners join every day.
+            </p>
+            <Button onClick={() => navigate('/profile-setup')} className="button-bounce">
+              Update Profile
+            </Button>
+          </div>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
