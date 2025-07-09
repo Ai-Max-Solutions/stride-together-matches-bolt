@@ -7,7 +7,8 @@ import {
   MessageCircle, 
   User,
   Menu,
-  X
+  X,
+  Settings
 } from "lucide-react";
 import { useState } from "react";
 
@@ -18,7 +19,7 @@ const Navigation = () => {
   const navItems = [
     { label: "Browse", path: "/browse", icon: Search },
     { label: "Messages", path: "/messages", icon: MessageCircle },
-    { label: "Profile", path: "/profile", icon: User },
+    { label: "Profile", path: "/profile/setup", icon: User },
   ];
 
   return (
@@ -58,6 +59,11 @@ const Navigation = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
+            <Link to="/settings">
+              <Button variant="ghost" size="icon">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </Link>
             <Badge variant="outline" className="text-xs">
               Beta
             </Badge>
