@@ -34,6 +34,7 @@ import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { SafetyTipsSheet } from '@/components/chat/SafetyTipsSheet';
 import { useMobileDetection } from '@/hooks/use-mobile-detection';
 import { MobileNav } from '@/components/ui/mobile-nav';
+import { useUserPresence } from '@/hooks/use-user-presence';
 import { cn } from '@/lib/utils';
 
 interface Message {
@@ -86,8 +87,15 @@ export default function Chat() {
   const [otherUserTyping, setOtherUserTyping] = useState(false);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
   const [showSafetyTips, setShowSafetyTips] = useState(false);
+  const [messageSentFeedback, setMessageSentFeedback] = useState<string | null>(null);
   
   const { isMobile } = useMobileDetection();
+  
+  // Get other user's presence status
+  const otherUserId = conversation?.participant_1_id === user?.id 
+    ? conversation.participant_2_id 
+    : conversation?.participant_1_id;
+  const { isOnline, statusText, statusColor } = useUserPresence(otherUserId);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -264,6 +272,12 @@ export default function Chat() {
       
       setNewMessage('');
       setShowSuggestions(false);
+      
+      // Show feedback based on user's online status
+      if (!isOnline) {
+        setMessageSentFeedback(`Message sent! ${otherUserProfile?.full_name} will see it when they're back online.`);
+        setTimeout(() => setMessageSentFeedback(null), 3000);
+      }
       
     } catch (err: any) {
       toast({
@@ -452,6 +466,15 @@ export default function Chat() {
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold">{otherUserProfile?.full_name}</h3>
+                  {/* Status indicator */}
+                  <div className={cn(
+                    "px-2 py-1 rounded-full text-xs font-medium animate-fade-in",
+                    isOnline ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" : 
+                    statusColor === 'recently-active' ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300" :
+                    "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                  )}>
+                    {statusText}
+                  </div>
                   {/* Always visible Report button on mobile */}
                   {isMobile && (
                     <Button
@@ -744,7 +767,11 @@ export default function Chat() {
               
               <div className="flex-1 flex gap-3">
                 <Input
-                  placeholder={`Type your message to ${otherUserProfile?.full_name || 'connect'}...`}
+                  placeholder={
+                    isOnline 
+                      ? `Type your message to ${otherUserProfile?.full_name?.split(' ')[0] || 'them'}...`
+                      : `They'll see your message when they're back online...`
+                  }
                   value={newMessage}
                   onChange={(e) => handleTyping(e.target.value)}
                   onKeyPress={(e) => {

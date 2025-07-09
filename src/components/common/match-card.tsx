@@ -1,11 +1,14 @@
+import { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, MapPin, Clock, Star } from "lucide-react";
+import { MessageCircle, MapPin, Clock, Star, Zap } from "lucide-react";
 import { SportsBadges } from "./sports-badges";
 import { TrustBadges } from "./TrustBadges";
 import { BlockReportDialog } from "@/components/chat/BlockReportDialog";
+import { MatchToast } from "./MatchToast";
+import { useUserPresence } from "@/hooks/use-user-presence";
 import { cn } from '@/lib/utils';
 
 interface Profile {
@@ -38,9 +41,14 @@ interface MatchCardProps {
   matchScore?: MatchScore;
   onConnect: (profileId: string) => void;
   className?: string;
+  currentUserId?: string;
 }
 
-export function MatchCard({ profile, matchScore, onConnect, className }: MatchCardProps) {
+export function MatchCard({ profile, matchScore, onConnect, className, currentUserId }: MatchCardProps) {
+  const [showMatchToast, setShowMatchToast] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+  const [hasConnected, setHasConnected] = useState(false);
+  const { isOnline, statusText, statusColor } = useUserPresence(profile.user_id);
   const formatLocation = (profile: Profile) => {
     if (!profile.location_visible) return 'Location private';
     if (profile.city && profile.region) {
@@ -57,26 +65,60 @@ export function MatchCard({ profile, matchScore, onConnect, className }: MatchCa
     return `Available ${activeDays.length} days/week`;
   };
 
+  const handleConnect = async () => {
+    setConnecting(true);
+    setHasConnected(true);
+    
+    // Add a small delay for button animation
+    setTimeout(() => {
+      // Simulate checking if it's a mutual match (for demo purposes)
+      const isMatch = Math.random() > 0.7; // 30% chance of mutual match
+      
+      setShowMatchToast(true);
+      onConnect(profile.user_id);
+      setConnecting(false);
+    }, 600);
+  };
+
+  const handleStartChat = () => {
+    setShowMatchToast(false);
+    // Navigate to chat would happen in onConnect
+  };
+
+  const handleDismissToast = () => {
+    setShowMatchToast(false);
+  };
+
   return (
     <Card className={cn("hover-lift transition-all duration-300 group", className)}>
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
-          <Avatar className="h-16 w-16 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
-            <AvatarImage src={profile.profile_picture_url} className="object-cover" />
-            <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
-              {profile.full_name?.charAt(0) || 'U'}
-            </AvatarFallback>
-          </Avatar>
+          <div className={cn("relative status-indicator", statusColor)}>
+            <Avatar className="h-16 w-16 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
+              <AvatarImage src={profile.profile_picture_url} className="object-cover" />
+              <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
+                {profile.full_name?.charAt(0) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+          </div>
           
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-lg truncate">{profile.full_name}</h3>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center text-sm text-muted-foreground mt-1">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center text-sm text-muted-foreground">
                     <MapPin className="h-3 w-3 mr-1" />
                     {formatLocation(profile)}
                   </div>
+                  <div className={cn(
+                    "text-xs font-medium animate-fade-in",
+                    isOnline ? "text-green-600" : "text-muted-foreground"
+                  )}>
+                    {statusText}
+                  </div>
+                </div>
                   <TrustBadges profile={profile} size="sm" className="mt-1" />
                 </div>
               </div>
@@ -130,13 +172,32 @@ export function MatchCard({ profile, matchScore, onConnect, className }: MatchCa
             
             <div className="flex gap-2">
               <Button 
-                onClick={() => onConnect(profile.user_id)}
-                className="flex-1 hover-scale"
+                onClick={handleConnect}
+                disabled={connecting || hasConnected}
+                className={cn(
+                  "flex-1 button-bounce transition-all duration-300",
+                  hasConnected && "success-flash",
+                  connecting && "animate-pulse"
+                )}
                 size="sm"
                 variant="hero"
               >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Connect
+                {connecting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                    Connecting...
+                  </>
+                ) : hasConnected ? (
+                  <>
+                    <Zap className="h-4 w-4 mr-2" />
+                    Sent!
+                  </>
+                ) : (
+                  <>
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Connect
+                  </>
+                )}
               </Button>
               <BlockReportDialog 
                 otherUserId={profile.user_id}
@@ -144,6 +205,17 @@ export function MatchCard({ profile, matchScore, onConnect, className }: MatchCa
                 onBlock={() => {}}
               />
             </div>
+            
+            <MatchToast
+              isVisible={showMatchToast}
+              otherUser={{
+                name: profile.full_name || 'User',
+                avatar: profile.profile_picture_url
+              }}
+              isMatch={Math.random() > 0.7} // This would come from actual match logic
+              onStartChat={handleStartChat}
+              onDismiss={handleDismissToast}
+            />
           </div>
         </div>
       </CardContent>

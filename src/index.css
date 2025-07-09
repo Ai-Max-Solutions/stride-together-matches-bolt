@@ -62,6 +62,14 @@ Inspired by modern fitness apps with energetic but professional feel
     /* Animation variables */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-spring: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* Confetti and celebration colors */
+    --confetti-1: 350 85% 60%;
+    --confetti-2: 45 95% 65%;
+    --confetti-3: 185 95% 55%;
+    --confetti-4: 285 85% 70%;
+    --confetti-5: 125 65% 55%;
 
     --radius: 0.5rem;
 
@@ -145,5 +153,161 @@ Inspired by modern fitness apps with energetic but professional feel
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Enhanced Animations for Alive Experience */
+@layer utilities {
+  .hover-lift {
+    @apply transition-all duration-300 ease-out;
+    @apply hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  .button-bounce {
+    @apply transition-transform duration-200 ease-out;
+    @apply active:scale-95 hover:scale-105;
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .bounce-light {
+    animation: bounce-light 1s infinite;
+  }
+
+  .wiggle {
+    animation: wiggle 0.8s ease-in-out;
+  }
+
+  .success-flash {
+    animation: success-flash 0.6s ease-out;
+  }
+
+  .slide-down {
+    animation: slide-down 0.3s ease-out;
+  }
+
+  .fade-in-up {
+    animation: fade-in-up 0.5s ease-out;
+  }
+
+  .confetti-burst {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .confetti-burst::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle, hsl(var(--confetti-1)) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: confetti-explosion 0.8s ease-out;
+    pointer-events: none;
+  }
+
+  /* Status indicator for online/offline */
+  .status-indicator {
+    @apply relative;
+  }
+
+  .status-indicator::after {
+    content: '';
+    @apply absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background;
+  }
+
+  .status-indicator.online::after {
+    @apply bg-green-500;
+    animation: pulse-green 2s infinite;
+  }
+
+  .status-indicator.offline::after {
+    @apply bg-gray-400;
+  }
+
+  .status-indicator.recently-active::after {
+    @apply bg-yellow-500;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px hsl(var(--primary) / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.6), 0 0 30px hsl(var(--primary) / 0.4);
+  }
+}
+
+@keyframes bounce-light {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes wiggle {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+  75% { transform: rotate(-3deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes success-flash {
+  0% { background-color: hsl(var(--primary) / 0.1); }
+  50% { background-color: hsl(var(--success) / 0.2); }
+  100% { background-color: transparent; }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes confetti-explosion {
+  0% {
+    transform: translate(-50%, -50%) scale(0) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.5) rotate(180deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-green {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }

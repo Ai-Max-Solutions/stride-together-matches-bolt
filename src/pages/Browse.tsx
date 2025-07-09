@@ -625,105 +625,18 @@ export default function Browse() {
           </Card>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {paginatedProfiles.map((profile) => {
                 const matchData = matchScores.get(profile.id);
                 return (
-                  <Card 
-                    key={profile.id} 
-                    className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02] cursor-pointer"
-                    onClick={() => handleConnect(profile.user_id)}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Connect with ${profile.full_name}`}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleConnect(profile.user_id);
-                      }
-                    }}
-                  >
-                    <CardContent className="p-6">
-                      <div className="h-16 w-16 mx-auto mb-3 rounded-full overflow-hidden">
-                        <OptimizedImage
-                          src={profile.profile_picture_url}
-                          alt={`${profile.full_name || 'User'} profile picture`}
-                          width={64}
-                          height={64}
-                          fallback="/placeholder.svg"
-                          className="rounded-full"
-                        />
-                      </div>
-
-                      <div className="text-center space-y-3">
-                        <div>
-                          <h3 className="font-semibold text-lg mb-1 truncate">{profile.full_name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {formatLocation(profile)}
-                          </p>
-                        </div>
-
-                        {/* Match Score Badge */}
-                        {matchData && (
-                          <div className="flex justify-center">
-                            <Badge 
-                              variant={matchData.score >= 70 ? "default" : matchData.score >= 50 ? "secondary" : "outline"}
-                              className="gap-1"
-                            >
-                              <Sparkles className="h-3 w-3" />
-                              {matchData.score}% match
-                            </Badge>
-                          </div>
-                        )}
-
-                        {/* Sports and Tags */}
-                        <div className="space-y-2">
-                          <div className="flex flex-wrap gap-1 justify-center">
-                            {profile.sports.slice(0, 2).map((sport, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {sport}
-                              </Badge>
-                            ))}
-                          </div>
-                          
-                          {matchData && matchData.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 justify-center">
-                              {matchData.tags.slice(0, 2).map((tag, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Bio */}
-                        {profile.bio && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {profile.bio}
-                          </p>
-                        )}
-
-                        {/* Experience Level and Availability */}
-                        <div className="text-xs text-muted-foreground space-y-1">
-                          <p className="capitalize">{profile.experience_level} level</p>
-                          <p>{getAvailabilityText(profile.availability)}</p>
-                        </div>
-
-                        {/* Connect Button */}
-                        <Button 
-                          className="w-full mt-4 min-h-[44px]"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleConnect(profile.user_id);
-                          }}
-                          size="sm"
-                        >
-                          Connect
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <MatchCard
+                    key={profile.id}
+                    profile={profile}
+                    matchScore={matchData}
+                    onConnect={handleConnect}
+                    currentUserId={user?.id}
+                    className="animate-fade-in"
+                  />
                 );
               })}
             </div>
