@@ -32,9 +32,13 @@ import {
   Sparkles,
   Shield,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Bot,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
+import { AISuggestions } from '@/components/chat/AISuggestions';
 import { BROWSE_SPORTS_OPTIONS, BROWSE_EXPERIENCE_LEVELS } from '@/constants';
 
 interface Profile {
@@ -93,6 +97,9 @@ export default function Browse() {
   const [selectedSport, setSelectedSport] = useState('all');
   const [selectedExperience, setSelectedExperience] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  
+  // AI Assistant states
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -338,10 +345,58 @@ export default function Browse() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Discover Your Perfect Workout Partners</h1>
-          <p className="text-muted-foreground">
-            Find compatible training buddies based on your fitness level, goals, and location
-          </p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Discover Your Perfect Workout Partners</h1>
+              <p className="text-muted-foreground">
+                Find compatible training buddies based on your fitness level, goals, and location
+              </p>
+            </div>
+            
+            {/* AI Assistant Toggle Button */}
+            <div className="relative">
+              <Button
+                variant={showAIAssistant ? "default" : "outline"}
+                size="lg"
+                onClick={() => setShowAIAssistant(!showAIAssistant)}
+                className="flex items-center gap-2 min-h-[44px] hover-scale transition-all duration-200"
+                aria-label="Toggle AI Assistant"
+              >
+                <Bot className="h-5 w-5" />
+                <span className="hidden sm:inline">AI Assistant</span>
+                {showAIAssistant ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+              
+              {/* AI Suggestions Panel - Positioned below the button */}
+              {showAIAssistant && (
+                <div 
+                  className="absolute top-full right-0 mt-2 w-96 max-w-[calc(100vw-2rem)] z-50 animate-slide-down"
+                  style={{ 
+                    maxHeight: 'calc(100vh - 200px)', 
+                    overflowY: 'auto' 
+                  }}
+                >
+                  <AISuggestions
+                    currentUser={currentUserProfile}
+                    otherUser={null}
+                    conversationHistory={[]}
+                    onSendMessage={(message) => {
+                      toast({
+                        title: "AI Suggestion Generated",
+                        description: "Use this for inspiration when connecting with partners!",
+                      });
+                      // In a real implementation, this could copy to clipboard or show a modal
+                    }}
+                    className="shadow-2xl border-2"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Search and Filters */}

@@ -131,6 +131,20 @@ export default {
 					'100%': { transform: 'translateX(100%)' }
 				},
 				
+				// Slide down animation for dropdowns
+				'slide-down': {
+					'0%': { 
+						transform: 'translateY(-10px)', 
+						opacity: '0',
+						maxHeight: '0'
+					},
+					'100%': { 
+						transform: 'translateY(0)', 
+						opacity: '1',
+						maxHeight: '600px'
+					}
+				},
+				
 				// Pulse glow for emphasis
 				'pulse-glow': {
 					'0%, 100%': { boxShadow: '0 0 0 0 hsl(var(--primary) / 0.4)' },
@@ -153,6 +167,7 @@ export default {
 				'scale-out': 'scale-out 0.2s ease-out',
 				'slide-in-right': 'slide-in-right 0.3s ease-out',
 				'slide-out-right': 'slide-out-right 0.3s ease-out',
+				'slide-down': 'slide-down 0.3s ease-out',
 				
 				// Combined animations
 				'enter': 'fade-in 0.3s ease-out, scale-in 0.2s ease-out',
