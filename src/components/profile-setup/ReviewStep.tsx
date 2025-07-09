@@ -2,25 +2,12 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SportsBadges } from '@/components/common/sports-badges';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Target, Clock, User, Edit } from 'lucide-react';
+import { MapPin, Target, Clock, User, Edit, Activity } from 'lucide-react';
 import { EXPERIENCE_LEVELS, DAYS_OF_WEEK, TIME_SLOTS } from '@/constants';
+import { ProfileData, FitnessDetails } from '@/types/profile';
 
 interface ReviewStepProps {
-  data: {
-    full_name: string;
-    bio: string;
-    sports: string[];
-    experience_level: string;
-    fitness_goals: string[];
-    city: string;
-    region: string;
-    location_visible: boolean;
-    availability: Record<string, string[]>;
-    age_range_min: number;
-    age_range_max: number;
-    gender_preference: string;
-    profile_picture_url?: string;
-  };
+  data: ProfileData;
   onEdit: (step: number) => void;
 }
 
@@ -132,6 +119,77 @@ export function ReviewStep({ data, onEdit }: ReviewStepProps) {
         </div>
       </div>
 
+      {/* Fitness Details */}
+      {data.sports.length > 0 && (
+        <div className="bg-muted/50 p-4 rounded-lg">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-semibold flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Fitness Details
+            </h4>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEdit(2)}
+              className="text-xs"
+            >
+              <Edit className="h-3 w-3 mr-1" />
+              Edit
+            </Button>
+          </div>
+          
+          <div className="space-y-3">
+            {data.sports.map(sport => {
+              const sportDetails = data.fitness_details?.[sport as keyof FitnessDetails];
+              if (!sportDetails || Object.keys(sportDetails).length === 0) return null;
+
+              return (
+                <div key={sport} className="border-l-2 border-primary/20 pl-3">
+                  <h5 className="font-medium text-sm capitalize mb-1">{sport}</h5>
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    {sport === 'running' && sportDetails && 'fiveKTime' in sportDetails && (
+                      <>
+                        {sportDetails.fiveKTime && <div>5K Time: {sportDetails.fiveKTime}</div>}
+                        {sportDetails.averagePace && <div>Average Pace: {sportDetails.averagePace}</div>}
+                        {sportDetails.longestRun && <div>Longest Run: {sportDetails.longestRun}</div>}
+                      </>
+                    )}
+                    {sport === 'cycling' && sportDetails && 'averageDistance' in sportDetails && (
+                      <>
+                        {sportDetails.averageDistance && <div>Average Distance: {sportDetails.averageDistance}</div>}
+                        {'averageSpeed' in sportDetails && sportDetails.averageSpeed && <div>Average Speed: {sportDetails.averageSpeed}</div>}
+                      </>
+                    )}
+                    {sport === 'swimming' && sportDetails && 'preferredStroke' in sportDetails && (
+                      <>
+                        {sportDetails.preferredStroke && <div>Preferred Stroke: {sportDetails.preferredStroke}</div>}
+                        {sportDetails.averageDistance && <div>Average Distance: {sportDetails.averageDistance}</div>}
+                        {sportDetails.comfortablePace && <div>Comfortable Pace: {sportDetails.comfortablePace}</div>}
+                      </>
+                    )}
+                    {(sport === 'gym' || sport === 'strength training') && sportDetails && 'workoutDuration' in sportDetails && (
+                      <>
+                        {sportDetails.workoutDuration && <div>Workout Duration: {sportDetails.workoutDuration}</div>}
+                        {sportDetails.level && <div>Level: {sportDetails.level}</div>}
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            
+            {!data.sports.some(sport => {
+              const sportDetails = data.fitness_details?.[sport as keyof FitnessDetails];
+              return sportDetails && Object.keys(sportDetails).length > 0;
+            }) && (
+              <p className="text-sm text-muted-foreground">
+                No fitness details provided yet. Add them to help find better matches!
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Location & Preferences */}
       <div className="bg-muted/50 p-4 rounded-lg">
         <div className="flex items-center justify-between mb-3">
@@ -142,7 +200,7 @@ export function ReviewStep({ data, onEdit }: ReviewStepProps) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onEdit(2)}
+            onClick={() => onEdit(3)}
             className="text-xs"
           >
             <Edit className="h-3 w-3 mr-1" />
@@ -185,7 +243,7 @@ export function ReviewStep({ data, onEdit }: ReviewStepProps) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onEdit(3)}
+            onClick={() => onEdit(4)}
             className="text-xs"
           >
             <Edit className="h-3 w-3 mr-1" />

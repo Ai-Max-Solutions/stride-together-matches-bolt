@@ -51,6 +51,7 @@ export const useProfileWizard = () => {
           experience_level: data.experience_level || '',
           pace_metrics: (data.pace_metrics as Record<string, any>) || {},
           fitness_goals: data.fitness_goals || [],
+          fitness_details: (data.fitness_details as any) || {},
           city: data.city || '',
           region: data.region || '',
           location_visible: data.location_visible ?? true,
@@ -87,7 +88,7 @@ export const useProfileWizard = () => {
   };
 
   const nextStep = () => {
-    if (currentStep < 4) { // 5 steps total (0-4)
+    if (currentStep < 5) { // 6 steps total (0-5)
       setCurrentStep(currentStep + 1);
     }
   };
@@ -114,15 +115,32 @@ export const useProfileWizard = () => {
         .eq('user_id', user.id)
         .maybeSingle();
 
+      // Prepare data for database with proper JSON conversion
+      const dbData = {
+        email: user.email,
+        full_name: profileData.full_name,
+        bio: profileData.bio,
+        sports: profileData.sports,
+        experience_level: profileData.experience_level,
+        pace_metrics: profileData.pace_metrics,
+        fitness_goals: profileData.fitness_goals,
+        fitness_details: profileData.fitness_details as any,
+        city: profileData.city,
+        region: profileData.region,
+        location_visible: profileData.location_visible,
+        availability: profileData.availability as any,
+        age_range_min: profileData.age_range_min,
+        age_range_max: profileData.age_range_max,
+        gender_preference: profileData.gender_preference,
+        profile_picture_url: profileData.profile_picture_url
+      };
+
       let error;
       if (existingProfile) {
         // Update existing profile
         const result = await supabase
           .from('profiles')
-          .update({
-            email: user.email,
-            ...profileData
-          })
+          .update(dbData)
           .eq('user_id', user.id);
         error = result.error;
       } else {
@@ -131,8 +149,7 @@ export const useProfileWizard = () => {
           .from('profiles')
           .insert({
             user_id: user.id,
-            email: user.email,
-            ...profileData
+            ...dbData
           });
         error = result.error;
       }

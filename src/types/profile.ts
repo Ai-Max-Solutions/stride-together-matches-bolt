@@ -1,3 +1,26 @@
+export interface FitnessDetails {
+  running?: {
+    fiveKTime?: string;
+    averagePace?: string;
+    longestRun?: string;
+    preferredUnit?: 'km' | 'miles';
+  };
+  cycling?: {
+    averageDistance?: string;
+    averageSpeed?: string;
+    preferredUnit?: 'km' | 'miles';
+  };
+  swimming?: {
+    preferredStroke?: string;
+    averageDistance?: string;
+    comfortablePace?: string;
+  };
+  gym?: {
+    workoutDuration?: string;
+    level?: 'beginner' | 'intermediate' | 'advanced';
+  };
+}
+
 export interface ProfileData {
   full_name: string;
   bio: string;
@@ -5,6 +28,7 @@ export interface ProfileData {
   experience_level: string;
   pace_metrics: Record<string, any>;
   fitness_goals: string[];
+  fitness_details: FitnessDetails;
   city: string;
   region: string;
   location_visible: boolean;

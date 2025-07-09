@@ -270,6 +270,7 @@ export type Database = {
           created_at: string
           email: string | null
           experience_level: string | null
+          fitness_details: Json | null
           fitness_goals: string[] | null
           full_name: string | null
           gender_preference: string | null
@@ -291,6 +292,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           experience_level?: string | null
+          fitness_details?: Json | null
           fitness_goals?: string[] | null
           full_name?: string | null
           gender_preference?: string | null
@@ -312,6 +314,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           experience_level?: string | null
+          fitness_details?: Json | null
           fitness_goals?: string[] | null
           full_name?: string | null
           gender_preference?: string | null

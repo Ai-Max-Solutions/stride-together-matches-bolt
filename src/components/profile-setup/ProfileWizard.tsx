@@ -5,6 +5,7 @@ import { useProfileWizard } from '@/hooks/use-profile-wizard';
 
 import { BasicInfoStep } from './BasicInfoStep';
 import { SportsStep } from './SportsStep';
+import { FitnessDetailsStep } from './FitnessDetailsStep';
 import { LocationStep } from './LocationStep';
 import { AvailabilityStep } from './AvailabilityStep';
 import { ReviewStep } from './ReviewStep';
@@ -57,19 +58,26 @@ export default function ProfileWizard() {
         );
       case 2:
         return (
-          <LocationStep 
+          <FitnessDetailsStep 
             data={profileData} 
             onChange={updateProfileData} 
           />
         );
       case 3:
         return (
-          <AvailabilityStep 
+          <LocationStep 
             data={profileData} 
             onChange={updateProfileData} 
           />
         );
       case 4:
+        return (
+          <AvailabilityStep 
+            data={profileData} 
+            onChange={updateProfileData} 
+          />
+        );
+      case 5:
         return (
           <ReviewStep 
             data={profileData} 
