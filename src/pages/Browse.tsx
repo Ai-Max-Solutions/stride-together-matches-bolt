@@ -264,10 +264,25 @@ export default function Browse() {
   };
 
   const handleConnect = async (profileId: string) => {
-    toast({
-      title: "Coming soon!",
-      description: "Chat functionality will be available soon.",
-    });
+    try {
+      // Get or create conversation
+      const { data: conversationId, error } = await supabase
+        .rpc('get_or_create_conversation', {
+          user1_id: user?.id,
+          user2_id: profileId
+        });
+
+      if (error) throw error;
+
+      // Navigate to chat
+      navigate(`/chat/${conversationId}`);
+    } catch (err: any) {
+      toast({
+        title: "Error starting conversation",
+        description: err.message,
+        variant: "destructive"
+      });
+    }
   };
 
   const formatLocation = (profile: Profile) => {
@@ -612,7 +627,7 @@ export default function Browse() {
                     {/* Connect Button */}
                     <Button 
                       className="w-full group-hover:scale-105 transition-transform"
-                      onClick={() => handleConnect(profile.id)}
+                      onClick={() => handleConnect(profile.user_id)}
                     >
                       <MessageCircle className="h-4 w-4 mr-2" />
                       Connect
