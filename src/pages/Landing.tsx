@@ -26,7 +26,7 @@ const Landing = () => {
                 <Users className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                FitConnect
+                Stride Together
               </span>
             </div>
             <div className="flex items-center space-x-4">
@@ -53,31 +53,43 @@ const Landing = () => {
         <div className="max-w-4xl mx-auto">
           <Badge className="mb-6 bg-gradient-accent text-accent-foreground px-4 py-2">
             <Zap className="w-4 h-4 mr-2" />
-            Find Your Perfect Workout Partner
+            AI-Powered Fitness Matching
           </Badge>
           
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent leading-tight">
-            Train Together, 
+            Find Your Perfect 
             <br />
-            Achieve More
+            Workout Buddy
           </h1>
           
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            Connect with runners, cyclists, and fitness enthusiasts at your pace. 
-            Find training partners who match your goals, location, and ability level.
+            Connect with runners, cyclists, and fitness enthusiasts who match your pace, 
+            goals, and schedule. Train together, stay motivated, achieve more.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Link to="/auth">
               <Button variant="hero" size="xl" className="group">
-                Start Matching
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                Create My Free Profile
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
             <Button variant="outline" size="xl" className="group">
               <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-              Watch Demo
+              See How It Works
             </Button>
+          </div>
+
+          {/* Hero Image */}
+          <div className="mb-12 relative">
+            <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+              <img 
+                src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop&crop=center"
+                alt="People running together outdoors" 
+                className="w-full h-64 md:h-80 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20"></div>
+            </div>
           </div>
 
           {/* Social Proof */}
@@ -102,10 +114,11 @@ const Landing = () => {
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            How It Works
+            How Stride Together Works
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Simple steps to find your ideal training partner and start achieving your fitness goals together.
+            Get matched with compatible workout partners in 3 simple steps. 
+            Our AI considers your fitness level, goals, location, and schedule.
           </p>
         </div>
 
@@ -113,25 +126,31 @@ const Landing = () => {
           {[
             {
               icon: Target,
-              title: "Set Your Goals",
-              description: "Tell us your sport, pace, distance goals, and preferred workout times.",
-              color: "running"
+              title: "Create Your Profile",
+              description: "Tell us your sports, fitness level, pace goals, location, and when you're available to train.",
+              color: "running",
+              step: "01"
             },
             {
               icon: Users,
-              title: "Smart Matching",
-              description: "Our AI finds compatible partners based on your fitness level and location.",
-              color: "cycling"
+              title: "Get AI Matches",
+              description: "Our smart algorithm finds workout partners who match your pace, goals, and schedule perfectly.",
+              color: "cycling", 
+              step: "02"
             },
             {
               icon: MessageCircle,
-              title: "Connect & Train",
-              description: "Chat securely, plan meetups, and start training together safely.",
-              color: "fitness"
+              title: "Meet & Train",
+              description: "Chat with matches, plan safe meetups in public spaces, and start achieving your fitness goals together.",
+              color: "fitness",
+              step: "03"
             }
           ].map((feature, index) => (
             <Card key={index} className="relative group hover:shadow-card transition-all duration-300 bg-gradient-card">
               <CardContent className="p-8 text-center">
+                <div className="absolute top-6 right-6 text-4xl font-bold text-muted-foreground/20">
+                  {feature.step}
+                </div>
                 <div className={`w-16 h-16 mx-auto mb-6 rounded-2xl bg-${feature.color}/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                   <feature.icon className={`w-8 h-8 text-${feature.color}`} />
                 </div>
@@ -149,28 +168,65 @@ const Landing = () => {
       <section className="container mx-auto px-4 py-20 bg-muted/30">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Find Partners for Every Sport
+            Every Sport, Every Level
           </h2>
           <p className="text-lg text-muted-foreground">
-            Whether you're a beginner or a pro, find someone at your level.
+            From beginners taking their first steps to experienced athletes pushing limits. 
+            Find your tribe in any sport.
           </p>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
           {[
-            { sport: "Running", icon: "🏃‍♂️", color: "running", count: "150+ runners" },
-            { sport: "Cycling", icon: "🚴‍♀️", color: "cycling", count: "120+ cyclists" },
-            { sport: "Swimming", icon: "🏊‍♂️", color: "fitness", count: "80+ swimmers" },
-            { sport: "Gym Training", icon: "🏋️‍♀️", color: "primary", count: "200+ lifters" }
+            { 
+              sport: "Running", 
+              icon: "🏃‍♂️", 
+              color: "running", 
+              count: "150+ runners",
+              image: "https://images.unsplash.com/photo-1544717297-fa95b6ee9643?w=300&h=200&fit=crop"
+            },
+            { 
+              sport: "Cycling", 
+              icon: "🚴‍♀️", 
+              color: "cycling", 
+              count: "120+ cyclists",
+              image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=200&fit=crop"
+            },
+            { 
+              sport: "Swimming", 
+              icon: "🏊‍♂️", 
+              color: "fitness", 
+              count: "80+ swimmers",
+              image: "https://images.unsplash.com/photo-1530549387789-4c1017266635?w=300&h=200&fit=crop"
+            },
+            { 
+              sport: "Gym Training", 
+              icon: "🏋️‍♀️", 
+              color: "primary", 
+              count: "200+ lifters",
+              image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop"
+            }
           ].map((category, index) => (
-            <Card key={index} className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <div className="text-4xl mb-4">{category.icon}</div>
-                <h3 className="font-semibold mb-2">{category.sport}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{category.count}</p>
-                <Button variant={category.color as any} size="sm" className="w-full">
-                  Find Partners
-                </Button>
+            <Card key={index} className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden">
+              <div className="relative">
+                <img 
+                  src={category.image} 
+                  alt={category.sport}
+                  className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                <div className="absolute bottom-2 left-2 text-white font-semibold">
+                  {category.sport}
+                </div>
+              </div>
+              <CardContent className="p-4 text-center">
+                <div className="text-2xl mb-2">{category.icon}</div>
+                <p className="text-sm text-muted-foreground mb-3">{category.count}</p>
+                <Link to="/auth">
+                  <Button variant={category.color as any} size="sm" className="w-full">
+                    Find Partners
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}
@@ -216,15 +272,16 @@ const Landing = () => {
       <section className="container mx-auto px-4 py-20">
         <div className="max-w-3xl mx-auto text-center bg-gradient-hero rounded-3xl p-12 text-white">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Ready to Find Your Training Partner?
+            Ready to Find Your Workout Buddy?
           </h2>
           <p className="text-xl mb-8 text-white/90">
-            Join hundreds of athletes already training together and achieving their goals.
+            Join thousands of athletes who've already found their perfect training partners. 
+            Start your fitness journey together today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/auth">
               <Button variant="secondary" size="xl" className="bg-white text-primary hover:bg-white/90">
-                Create Free Profile
+                Create My Free Profile
               </Button>
             </Link>
             <Button variant="outline" size="xl" className="border-white text-white hover:bg-white/10">
@@ -243,10 +300,11 @@ const Landing = () => {
                 <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
                   <Users className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-lg font-bold">FitConnect</span>
+                <span className="text-lg font-bold">Stride Together</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Connecting fitness enthusiasts worldwide for better training experiences.
+                Connecting fitness enthusiasts worldwide. Find your perfect workout buddy, 
+                train together safely, and achieve your goals faster.
               </p>
             </div>
             <div>
@@ -275,7 +333,7 @@ const Landing = () => {
             </div>
           </div>
           <div className="border-t pt-8 mt-8 text-center text-sm text-muted-foreground">
-            © 2024 FitConnect. All rights reserved.
+            © 2024 Stride Together. All rights reserved. • Connecting fitness enthusiasts worldwide.
           </div>
         </div>
       </footer>
