@@ -607,6 +607,10 @@ export default function Chat() {
           "flex flex-col rounded-xl shadow-sm bg-gradient-to-b from-background to-muted/20",
           isMobile ? "h-[calc(100vh-280px)]" : "h-[60vh]"
         )}>
+          {/* Debug info */}
+          <div className="sr-only">
+            Debug: Messages length: {messages.length}, Loading: {loading ? 'true' : 'false'}, User: {user?.id || 'none'}
+          </div>
           <CardContent 
             className="flex-1 overflow-y-auto p-4 space-y-4" 
             data-messages-container
