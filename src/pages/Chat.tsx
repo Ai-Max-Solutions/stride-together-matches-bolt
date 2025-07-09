@@ -29,6 +29,7 @@ import Navigation from '@/components/Navigation';
 import { SmartSuggestions } from '@/components/chat/SmartSuggestions';
 import { BlockReportDialog } from '@/components/chat/BlockReportDialog';
 import { ReportUserDialog } from '@/components/chat/ReportUserDialog';
+import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { useMobileDetection } from '@/hooks/use-mobile-detection';
 import { MobileNav } from '@/components/ui/mobile-nav';
 import { cn } from '@/lib/utils';
@@ -79,6 +80,9 @@ export default function Chat() {
   const [showSmartSuggestions, setShowSmartSuggestions] = useState(false);
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [expandedMeetup, setExpandedMeetup] = useState<string | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const [otherUserTyping, setOtherUserTyping] = useState(false);
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
   
   const { isMobile } = useMobileDetection();
 
@@ -151,7 +155,8 @@ export default function Chat() {
   };
 
   const subscribeToMessages = () => {
-    const channel = supabase
+    // Subscribe to new messages
+    const messagesChannel = supabase
       .channel(`messages-${conversationId}`)
       .on(
         'postgres_changes',
@@ -163,7 +168,13 @@ export default function Chat() {
         },
         (payload) => {
           const newMessage = payload.new as Message;
-          setMessages(prev => [...prev, newMessage]);
+          setMessages(prev => {
+            // Avoid duplicates
+            if (prev.some(msg => msg.id === newMessage.id)) {
+              return prev;
+            }
+            return [...prev, newMessage];
+          });
           
           // Mark as read if not from current user
           if (newMessage.sender_id !== user?.id) {
@@ -172,12 +183,43 @@ export default function Chat() {
               .update({ read_at: new Date().toISOString() })
               .eq('id', newMessage.id);
           }
+          
+          // Auto-scroll to bottom after new message
+          setTimeout(() => {
+            scrollToBottom(true);
+          }, 100);
         }
       )
       .subscribe();
 
+    // Subscribe to typing indicators
+    const typingChannel = supabase
+      .channel(`typing-${conversationId}`)
+      .on('presence', { event: 'sync' }, () => {
+        const state = typingChannel.presenceState();
+        const otherUsersTyping = Object.values(state).flat()
+          .filter((presence: any) => presence.user_id !== user?.id && presence.typing);
+        setOtherUserTyping(otherUsersTyping.length > 0);
+      })
+      .on('presence', { event: 'join' }, ({ newPresences }) => {
+        const otherUsersTyping = newPresences
+          .filter((presence: any) => presence.user_id !== user?.id && presence.typing);
+        if (otherUsersTyping.length > 0) {
+          setOtherUserTyping(true);
+        }
+      })
+      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+        const otherUsersTyping = leftPresences
+          .filter((presence: any) => presence.user_id !== user?.id && presence.typing);
+        if (otherUsersTyping.length > 0) {
+          setOtherUserTyping(false);
+        }
+      })
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(typingChannel);
     };
   };
 
@@ -292,6 +334,68 @@ export default function Chat() {
       minute: '2-digit' 
     });
   };
+
+  const scrollToBottom = (smooth = false) => {
+    setTimeout(() => {
+      const messagesContainer = document.querySelector('[data-messages-container]');
+      if (messagesContainer) {
+        messagesContainer.scrollTo({
+          top: messagesContainer.scrollHeight,
+          behavior: smooth ? 'smooth' : 'auto'
+        });
+      }
+    }, 50);
+  };
+
+  const handleTyping = (value: string) => {
+    setNewMessage(value);
+    
+    if (!isTyping && value.length > 0) {
+      setIsTyping(true);
+      
+      // Send typing status
+      const typingChannel = supabase.channel(`typing-${conversationId}`);
+      typingChannel.track({
+        user_id: user?.id,
+        typing: true,
+        timestamp: Date.now()
+      });
+    }
+    
+    // Clear existing timeout
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+    }
+    
+    // Set new timeout to stop typing
+    const timeout = setTimeout(() => {
+      setIsTyping(false);
+      const typingChannel = supabase.channel(`typing-${conversationId}`);
+      typingChannel.track({
+        user_id: user?.id,
+        typing: false,
+        timestamp: Date.now()
+      });
+    }, 2000);
+    
+    setTypingTimeout(timeout);
+  };
+
+  // Auto-scroll when messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      scrollToBottom(true);
+    }
+  }, [messages]);
+
+  // Cleanup typing timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+      }
+    };
+  }, [typingTimeout]);
 
   if (authLoading || loading) {
     return (
@@ -427,79 +531,94 @@ export default function Chat() {
           "flex flex-col rounded-xl shadow-sm bg-gradient-to-b from-background to-muted/20",
           isMobile ? "h-[calc(100vh-280px)]" : "h-[60vh]"
         )}>
-          <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+          <CardContent 
+            className="flex-1 overflow-y-auto p-4 space-y-4" 
+            data-messages-container
+            style={{
+              scrollBehavior: 'smooth',
+              overscrollBehavior: 'contain'
+            }}
+          >
             {messages.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <p>Start your conversation! Ask about their workout routine or suggest a meetup.</p>
               </div>
             ) : (
-              messages.map((message) => {
-                const isOwn = message.sender_id === user?.id;
-                const isAiSuggestion = message.message_type === 'ai_suggestion';
-                const isLongContent = message.content.length > 280;
-                const isExpanded = expandedMeetup === message.id;
-                
-                return (
-                  <div
-                    key={message.id}
-                    className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
-                  >
+              <>
+                {messages.map((message) => {
+                  const isOwn = message.sender_id === user?.id;
+                  const isAiSuggestion = message.message_type === 'ai_suggestion';
+                  const isLongContent = message.content.length > 280;
+                  const isExpanded = expandedMeetup === message.id;
+                  
+                  return (
                     <div
-                      className={`max-w-[85%] ${isMobile ? 'max-w-[90%]' : ''} rounded-2xl px-4 py-3 ${
-                        isAiSuggestion
-                          ? 'bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-2xl'
-                          : isOwn
-                          ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-md'
-                          : 'bg-muted rounded-2xl rounded-bl-md'
-                      }`}
+                      key={message.id}
+                      className={`flex ${isOwn ? 'justify-end' : 'justify-start'} animate-fade-in`}
                     >
-                      {isAiSuggestion && (
-                        <div className="flex items-center gap-1 mb-2 text-xs text-primary font-medium">
-                          <Sparkles className="h-3 w-3" />
-                          AI Suggestion
-                        </div>
-                      )}
-                      
-                      <div>
-                        {isAiSuggestion && isLongContent ? (
-                          <>
-                            <p className="whitespace-pre-wrap">
-                              {isExpanded ? message.content : message.content.substring(0, 280) + '...'}
-                            </p>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setExpandedMeetup(isExpanded ? null : message.id)}
-                              className="mt-2 p-0 h-auto text-xs text-primary hover:text-primary/80"
-                            >
-                              {isExpanded ? (
-                                <>
-                                  <ChevronUp className="h-3 w-3 mr-1" />
-                                  Show less
-                                </>
-                              ) : (
-                                <>
-                                  <ChevronDown className="h-3 w-3 mr-1" />
-                                  View details
-                                </>
-                              )}
-                            </Button>
-                          </>
-                        ) : (
-                          <p className="whitespace-pre-wrap">{message.content}</p>
+                      <div
+                        className={`max-w-[85%] ${isMobile ? 'max-w-[90%]' : ''} rounded-2xl px-4 py-3 transition-all duration-200 ${
+                          isAiSuggestion
+                            ? 'bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-2xl'
+                            : isOwn
+                            ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-md'
+                            : 'bg-muted rounded-2xl rounded-bl-md'
+                        }`}
+                      >
+                        {isAiSuggestion && (
+                          <div className="flex items-center gap-1 mb-2 text-xs text-primary font-medium">
+                            <Sparkles className="h-3 w-3" />
+                            AI Suggestion
+                          </div>
                         )}
-                      </div>
-                      
-                      <div className={`flex items-center justify-end gap-1 mt-2 text-xs ${
-                        isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                      }`}>
-                        <Clock className="h-3 w-3" />
-                        {formatTime(message.created_at)}
+                        
+                        <div>
+                          {isAiSuggestion && isLongContent ? (
+                            <>
+                              <p className="whitespace-pre-wrap">
+                                {isExpanded ? message.content : message.content.substring(0, 280) + '...'}
+                              </p>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setExpandedMeetup(isExpanded ? null : message.id)}
+                                className="mt-2 p-0 h-auto text-xs text-primary hover:text-primary/80"
+                              >
+                                {isExpanded ? (
+                                  <>
+                                    <ChevronUp className="h-3 w-3 mr-1" />
+                                    Show less
+                                  </>
+                                ) : (
+                                  <>
+                                    <ChevronDown className="h-3 w-3 mr-1" />
+                                    View details
+                                  </>
+                                )}
+                              </Button>
+                            </>
+                          ) : (
+                            <p className="whitespace-pre-wrap">{message.content}</p>
+                          )}
+                        </div>
+                        
+                        <div className={`flex items-center justify-end gap-1 mt-2 text-xs ${
+                          isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                        }`}>
+                          <Clock className="h-3 w-3" />
+                          {formatTime(message.created_at)}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })
+                  );
+                })}
+                
+                {/* Typing Indicator */}
+                <TypingIndicator 
+                  userProfile={otherUserProfile} 
+                  isVisible={otherUserTyping} 
+                />
+              </>
             )}
           </CardContent>
 
@@ -540,7 +659,7 @@ export default function Chat() {
                 <Input
                   placeholder="Type your message..."
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
+                  onChange={(e) => handleTyping(e.target.value)}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -554,10 +673,15 @@ export default function Chat() {
                         getAiSuggestions(lastMessage.content);
                       }
                     }
+                    // Scroll to bottom when focusing input on mobile
+                    if (isMobile) {
+                      setTimeout(() => scrollToBottom(true), 300);
+                    }
                   }}
                   className={cn(
-                    "rounded-full border-2 bg-background/80 backdrop-blur-sm",
-                    isMobile && "min-h-[44px] text-base"
+                    "rounded-full border-2 bg-background/80 backdrop-blur-sm transition-all",
+                    isMobile && "min-h-[44px] text-base",
+                    "focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
                   )}
                 />
                 <Button 
