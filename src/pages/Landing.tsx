@@ -195,7 +195,7 @@ const Landing = () => {
               icon: "🚴‍♀️", 
               color: "cycling", 
               count: "120+ cyclists",
-              image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=200&fit=crop"
+              image: "/lovable-uploads/d2784c9d-f260-4c80-9845-3c4dce3ad979.png"
             },
             { 
               sport: "Swimming", 
