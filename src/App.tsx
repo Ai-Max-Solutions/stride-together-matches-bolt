@@ -8,6 +8,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { AccessibilitySkipNav } from "@/components/ui/accessibility-skip-nav";
 import { BetaBadge } from "@/components/common/BetaBadge";
+import { FloatingAssistant } from "@/components/common/FloatingAssistant";
 import { useAnalytics } from "@/hooks/use-analytics";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
@@ -34,6 +35,7 @@ const AppContent = () => {
   return (
     <>
       <BetaBadge />
+      <FloatingAssistant />
       <AccessibilitySkipNav />
       <Toaster />
       <Sonner />
