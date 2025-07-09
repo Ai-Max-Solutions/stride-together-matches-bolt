@@ -740,7 +740,7 @@ export default function Chat() {
               
               <div className="flex-1 flex gap-3">
                 <Input
-                  placeholder="Type your message..."
+                  placeholder={`Type your message to ${otherUserProfile?.full_name || 'connect'}...`}
                   value={newMessage}
                   onChange={(e) => handleTyping(e.target.value)}
                   onKeyPress={(e) => {
