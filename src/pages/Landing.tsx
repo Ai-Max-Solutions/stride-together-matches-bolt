@@ -202,7 +202,7 @@ const Landing = () => {
               icon: "🏊‍♂️", 
               color: "fitness", 
               count: "80+ swimmers",
-              image: "https://images.unsplash.com/photo-1530549387789-4c1017266635?w=300&h=200&fit=crop"
+              image: "/lovable-uploads/0df162cc-d0d3-455b-8ee3-441bdb35b13c.png"
             },
             { 
               sport: "Gym Training", 
