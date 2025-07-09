@@ -8,26 +8,21 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { MatchCard } from '@/components/common/match-card';
 import { 
   Search, 
   Filter, 
-  MapPin, 
-  Clock, 
-  Target, 
-  Star, 
-  Zap,
-  MessageCircle,
-  Calendar,
-  Activity,
   Users,
   Sparkles,
   Shield
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
+import { BROWSE_SPORTS_OPTIONS, BROWSE_EXPERIENCE_LEVELS } from '@/constants';
 
 interface Profile {
   id: string;
@@ -54,12 +49,6 @@ interface MatchScore {
   tags: string[];
 }
 
-const SPORTS_OPTIONS = [
-  'all', 'running', 'cycling', 'gym', 'swimming', 'tennis', 'basketball',
-  'soccer', 'volleyball', 'hiking', 'yoga', 'crossfit', 'boxing'
-];
-
-const EXPERIENCE_LEVELS = ['all', 'beginner', 'intermediate', 'advanced'];
 
 export default function Browse() {
   const { user, loading: authLoading } = useAuth();
@@ -301,16 +290,13 @@ export default function Browse() {
     return `Available ${activeDays.length} days/week`;
   };
 
-  if (authLoading || loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
         <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Finding your perfect workout partners...</p>
-            </div>
+            <LoadingSpinner size="lg" message="Finding your perfect workout partners..." />
           </div>
         </div>
       </div>
@@ -354,7 +340,7 @@ export default function Browse() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {SPORTS_OPTIONS.map(sport => (
+                    {BROWSE_SPORTS_OPTIONS.map(sport => (
                       <SelectItem key={sport} value={sport}>
                         {sport === 'all' ? 'All Sports' : sport.charAt(0).toUpperCase() + sport.slice(1)}
                       </SelectItem>
@@ -367,7 +353,7 @@ export default function Browse() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {EXPERIENCE_LEVELS.map(level => (
+                    {BROWSE_EXPERIENCE_LEVELS.map(level => (
                       <SelectItem key={level} value={level}>
                         {level === 'all' ? 'All Levels' : level.charAt(0).toUpperCase() + level.slice(1)}
                       </SelectItem>
@@ -508,7 +494,31 @@ export default function Browse() {
         </div>
 
         {/* Results */}
-        {filteredProfiles.length === 0 ? (
+        {loading ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Card key={index} className="p-6">
+                <div className="flex items-start gap-4 mb-4">
+                  <Skeleton className="h-16 w-16 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                    <Skeleton className="h-3 w-2/3" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Skeleton className="h-6 w-16" />
+                    <Skeleton className="h-6 w-20" />
+                  </div>
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-3/4" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : filteredProfiles.length === 0 ? (
           <Card className="text-center py-12">
             <CardContent>
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -530,110 +540,12 @@ export default function Browse() {
             {filteredProfiles.map((profile) => {
               const matchData = matchScores.get(profile.id);
               return (
-                <Card key={profile.id} className="group hover:shadow-lg transition-all duration-300">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start gap-4">
-                      <Avatar className="h-16 w-16">
-                        <AvatarImage src={profile.profile_picture_url} />
-                        <AvatarFallback>
-                          {profile.full_name?.charAt(0) || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-semibold truncate">{profile.full_name}</h3>
-                          {matchData && matchData.score >= 70 && (
-                            <Star className="h-4 w-4 text-warning fill-warning" />
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center text-sm text-muted-foreground mb-2">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          {formatLocation(profile)}
-                        </div>
-
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {getAvailabilityText(profile.availability)}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Match Tags */}
-                    {matchData && matchData.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-3">
-                        {matchData.tags.slice(0, 3).map((tag, index) => (
-                          <Badge 
-                            key={index} 
-                            variant={tag === 'top match' ? 'default' : 'secondary'}
-                            className="text-xs"
-                          >
-                            {tag === 'top match' && <Zap className="h-3 w-3 mr-1" />}
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </CardHeader>
-
-                  <CardContent className="pt-0">
-                    {/* Sports */}
-                    <div className="mb-4">
-                      <div className="flex flex-wrap gap-1">
-                        {profile.sports.slice(0, 3).map((sport, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {sport}
-                          </Badge>
-                        ))}
-                        {profile.sports.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{profile.sports.length - 3} more
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Experience Level */}
-                    <div className="flex items-center mb-4 text-sm">
-                      <Target className="h-3 w-3 mr-2 text-muted-foreground" />
-                      <span className="capitalize">{profile.experience_level} level</span>
-                    </div>
-
-                    {/* Bio */}
-                    {profile.bio && (
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                        {profile.bio}
-                      </p>
-                    )}
-
-                    {/* AI Match Explanation */}
-                    {matchData && matchData.score > 0 && (
-                      <div className="mb-4 p-3 bg-primary/5 rounded-lg border border-primary/10">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Sparkles className="h-4 w-4 text-primary" />
-                          <span className="text-sm font-medium text-primary">
-                            {matchData.score}% Match
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {matchData.reasons.slice(0, 2).join(' • ')}
-                        </p>
-                      </div>
-                    )}
-
-                    <Separator className="mb-4" />
-
-                    {/* Connect Button */}
-                    <Button 
-                      className="w-full group-hover:scale-105 transition-transform"
-                      onClick={() => handleConnect(profile.user_id)}
-                    >
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      Connect
-                    </Button>
-                  </CardContent>
-                </Card>
+                <MatchCard
+                  key={profile.id}
+                  profile={profile}
+                  matchScore={matchData}
+                  onConnect={handleConnect}
+                />
               );
             })}
           </div>

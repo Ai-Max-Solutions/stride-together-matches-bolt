@@ -32,7 +32,7 @@ const Navigation = () => {
               <Users className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              FitConnect
+              Stride Together
             </span>
           </Link>
 

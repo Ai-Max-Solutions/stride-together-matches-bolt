@@ -5,38 +5,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Upload, User, MapPin, Clock, Target, Camera } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { SportsBadges } from '@/components/common/sports-badges';
+import { AvailabilityPicker } from '@/components/common/availability-picker';
+import { User, MapPin, Target, Camera, Clock } from 'lucide-react';
+import { EXPERIENCE_LEVELS, FITNESS_GOALS, SPORTS_OPTIONS, DAYS_OF_WEEK, TIME_SLOTS } from '@/constants';
 
-const SPORTS_OPTIONS = [
-  'running', 'cycling', 'gym', 'swimming', 'tennis', 'basketball',
-  'soccer', 'volleyball', 'hiking', 'yoga', 'crossfit', 'boxing'
-];
-
-const EXPERIENCE_LEVELS = [
-  { value: 'beginner', label: 'Beginner' },
-  { value: 'intermediate', label: 'Intermediate' },
-  { value: 'advanced', label: 'Advanced' }
-];
-
-const FITNESS_GOALS = [
-  'weight_loss', 'muscle_gain', 'endurance', 'strength', 'flexibility',
-  'general_fitness', 'competition_prep', 'stress_relief'
-];
-
-const DAYS_OF_WEEK = [
-  'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'
-];
-
-const TIME_SLOTS = ['morning', 'afternoon', 'evening'];
 
 interface ProfileData {
   full_name: string;
@@ -230,10 +212,7 @@ export default function ProfileSetup() {
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
+        <LoadingSpinner size="lg" message="Loading..." />
       </div>
     );
   }
@@ -323,20 +302,11 @@ export default function ProfileSetup() {
               {/* Sports */}
               <div>
                 <Label className="text-base font-semibold mb-3 block">Sports & Activities *</Label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {SPORTS_OPTIONS.map(sport => (
-                    <div key={sport} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={sport}
-                        checked={profileData.sports.includes(sport)}
-                        onCheckedChange={() => handleSportToggle(sport)}
-                      />
-                      <Label htmlFor={sport} className="capitalize">
-                        {sport.replace('_', ' ')}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
+                <SportsBadges 
+                  selectedSports={profileData.sports}
+                  onSportToggle={handleSportToggle}
+                  variant="interactive"
+                />
               </div>
 
               {/* Experience Level */}
@@ -417,35 +387,10 @@ export default function ProfileSetup() {
               </div>
 
               {/* Availability */}
-              <div>
-                <Label className="text-base font-semibold mb-3 block flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  When are you usually available?
-                </Label>
-                <div className="space-y-3">
-                  {DAYS_OF_WEEK.map(day => (
-                    <div key={day} className="flex items-center space-x-4">
-                      <div className="w-20 capitalize font-medium">
-                        {day.slice(0, 3)}
-                      </div>
-                      <div className="flex gap-2">
-                        {TIME_SLOTS.map(timeSlot => (
-                          <div key={timeSlot} className="flex items-center space-x-1">
-                            <Checkbox
-                              id={`${day}-${timeSlot}`}
-                              checked={profileData.availability[day]?.includes(timeSlot) || false}
-                              onCheckedChange={() => handleAvailabilityToggle(day, timeSlot)}
-                            />
-                            <Label htmlFor={`${day}-${timeSlot}`} className="capitalize text-sm">
-                              {timeSlot}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <AvailabilityPicker
+                availability={profileData.availability}
+                onAvailabilityToggle={handleAvailabilityToggle}
+              />
 
               {/* Matching Preferences */}
               <div className="space-y-4">
