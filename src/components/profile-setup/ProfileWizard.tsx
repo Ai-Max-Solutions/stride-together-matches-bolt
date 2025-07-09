@@ -158,6 +158,8 @@ export default function ProfileWizard() {
           user_id: user.id,
           email: user.email,
           ...profileData
+        }, {
+          onConflict: 'user_id'
         });
 
       if (error) throw error;
