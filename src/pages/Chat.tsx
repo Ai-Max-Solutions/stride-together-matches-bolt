@@ -23,7 +23,8 @@ import {
   Flag,
   AlertTriangle,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Bot
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { AISuggestions } from '@/components/chat/AISuggestions';
@@ -490,15 +491,44 @@ export default function Chat() {
                       <Calendar className="h-4 w-4 mr-2" />
                       Plan Meetup
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setShowSmartSuggestions(!showSmartSuggestions)}
-                      className="rounded-full"
-                    >
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      AI Assist
-                    </Button>
+                    
+                    {/* AI Assistant Button with Dropdown */}
+                    <div className="relative">
+                      <Button 
+                        variant={showSmartSuggestions ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setShowSmartSuggestions(!showSmartSuggestions)}
+                        className="rounded-full min-h-[44px] hover-scale transition-all duration-200"
+                      >
+                        <Bot className="h-4 w-4 mr-2" />
+                        AI Assistant
+                        {showSmartSuggestions ? (
+                          <ChevronUp className="h-3 w-3 ml-1" />
+                        ) : (
+                          <ChevronDown className="h-3 w-3 ml-1" />
+                        )}
+                      </Button>
+                      
+                      {/* AI Suggestions Panel - Positioned below the button */}
+                      {showSmartSuggestions && currentUserProfile && otherUserProfile && (
+                        <div 
+                          className="absolute top-full right-0 mt-2 w-96 max-w-[calc(100vw-2rem)] z-50 animate-slide-down"
+                          style={{ 
+                            maxHeight: 'calc(100vh - 200px)', 
+                            overflowY: 'auto' 
+                          }}
+                        >
+                          <AISuggestions
+                            currentUser={currentUserProfile}
+                            otherUser={otherUserProfile}
+                            conversationHistory={messages}
+                            onSendMessage={sendMessage}
+                            className="shadow-2xl border-2"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    
                     {/* Desktop Report button */}
                     <Button
                       variant="ghost"
@@ -519,28 +549,54 @@ export default function Chat() {
               </div>
             </div>
             
-            {/* Mobile-only Plan Meetup button */}
+            {/* Mobile-only buttons */}
             {isMobile && (
-              <div className="flex gap-2 mt-3">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={requestMeetup}
-                  className="flex-1 rounded-full"
-                  title="Get AI location & safety suggestions for a meetup"
-                >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Plan Meetup
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setShowSmartSuggestions(!showSmartSuggestions)}
-                  className="flex-1 rounded-full"
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  AI Assist
-                </Button>
+              <div className="relative">
+                <div className="flex gap-2 mt-3">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={requestMeetup}
+                    className="flex-1 rounded-full"
+                    title="Get AI location & safety suggestions for a meetup"
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Plan Meetup
+                  </Button>
+                  <Button 
+                    variant={showSmartSuggestions ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setShowSmartSuggestions(!showSmartSuggestions)}
+                    className="flex-1 rounded-full hover-scale transition-all duration-200"
+                  >
+                    <Bot className="h-4 w-4 mr-2" />
+                    AI Assistant
+                    {showSmartSuggestions ? (
+                      <ChevronUp className="h-3 w-3 ml-1" />
+                    ) : (
+                      <ChevronDown className="h-3 w-3 ml-1" />
+                    )}
+                  </Button>
+                </div>
+                
+                {/* Mobile AI Suggestions Panel */}
+                {showSmartSuggestions && currentUserProfile && otherUserProfile && (
+                  <div 
+                    className="mt-3 w-full animate-slide-down"
+                    style={{ 
+                      maxHeight: 'calc(100vh - 400px)', 
+                      overflowY: 'auto' 
+                    }}
+                  >
+                    <AISuggestions
+                      currentUser={currentUserProfile}
+                      otherUser={otherUserProfile}
+                      conversationHistory={messages}
+                      onSendMessage={sendMessage}
+                      className="shadow-lg border"
+                    />
+                  </div>
+                )}
               </div>
             )}
           </CardHeader>
@@ -724,17 +780,7 @@ export default function Chat() {
           </div>
         </Card>
 
-        {/* Smart AI Suggestions */}
-        {showSmartSuggestions && currentUserProfile && otherUserProfile && (
-          <div className="mt-4">
-            <AISuggestions
-              currentUser={currentUserProfile}
-              otherUser={otherUserProfile}
-              conversationHistory={messages}
-              onSendMessage={sendMessage}
-            />
-          </div>
-        )}
+        {/* Smart AI Suggestions - Now handled in header dropdown */}
 
         {/* Safety Notice */}
         <Alert className="mt-4 rounded-xl border-primary/20 glass-effect animate-fade-in">
