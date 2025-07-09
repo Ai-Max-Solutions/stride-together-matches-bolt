@@ -67,7 +67,7 @@ export const LandingSportsCategories = () => {
                 <Button 
                   variant={category.sport === "Gym Training" ? "default" : category.color as "running" | "cycling" | "fitness" | "default"} 
                   size="sm" 
-                  className={`w-full ${category.sport === "Gym Training" ? "bg-black text-white hover:bg-gray-800" : ""}`}
+                  className={`w-full ${category.sport === "Gym Training" ? "bg-black text-white hover:bg-gray-800 shadow-lg hover:shadow-xl hover:scale-105" : ""}`}
                 >
                   Find Partners
                 </Button>
