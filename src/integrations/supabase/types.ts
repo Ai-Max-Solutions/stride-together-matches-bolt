@@ -329,6 +329,45 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          action_taken: string | null
+          details: string | null
+          id: string
+          reason: string
+          reported_at: string
+          reported_user_id: string
+          reporter_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          action_taken?: string | null
+          details?: string | null
+          id?: string
+          reason: string
+          reported_at?: string
+          reported_user_id: string
+          reporter_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          action_taken?: string | null
+          details?: string | null
+          id?: string
+          reason?: string
+          reported_at?: string
+          reported_user_id?: string
+          reporter_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       user_blocks: {
         Row: {
           blocked_id: string

@@ -29,7 +29,7 @@ export function MobileNav({ unreadCount = 0, className }: MobileNavProps) {
     {
       icon: Home,
       label: 'Home',
-      path: '/'
+      path: '/browse'
     },
     {
       icon: Search,

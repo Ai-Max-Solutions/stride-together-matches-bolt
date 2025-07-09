@@ -19,11 +19,16 @@ import {
   Shield,
   MoreVertical,
   Sparkles,
-  Clock
+  Clock,
+  Flag,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { SmartSuggestions } from '@/components/chat/SmartSuggestions';
 import { BlockReportDialog } from '@/components/chat/BlockReportDialog';
+import { ReportUserDialog } from '@/components/chat/ReportUserDialog';
 import { useMobileDetection } from '@/hooks/use-mobile-detection';
 import { MobileNav } from '@/components/ui/mobile-nav';
 import { cn } from '@/lib/utils';
@@ -72,6 +77,8 @@ export default function Chat() {
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showSmartSuggestions, setShowSmartSuggestions] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [expandedMeetup, setExpandedMeetup] = useState<string | null>(null);
   
   const { isMobile } = useMobileDetection();
 
@@ -262,7 +269,17 @@ export default function Chat() {
       });
 
       if (data?.response) {
-        await sendMessage(`🏃‍♀️ Meetup Suggestion:\n\n${data.response}`, 'ai_suggestion');
+        // Shorten AI response to first 3 suggestions or 280 characters max
+        const shortResponse = data.response
+          .split('\n')
+          .filter((line: string) => line.trim())
+          .slice(0, 3)
+          .join('\n')
+          .substring(0, 280);
+        
+        const fullResponse = data.response;
+        
+        await sendMessage(`🏃‍♀️ Quick Meetup Ideas:\n\n${shortResponse}${fullResponse.length > 280 ? '...' : ''}`, 'ai_suggestion');
       }
     } catch (err) {
       console.error('Error requesting meetup:', err);
@@ -301,34 +318,45 @@ export default function Chat() {
         isMobile ? "pt-4 pb-20" : "py-4"
       )}>
         {/* Chat Header */}
-        <Card className="mb-4">
+        <Card className="mb-4 rounded-xl shadow-sm">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-4">
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => navigate('/messages')}
-                className="p-2"
+                className="p-2 rounded-full"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               
-              <Avatar className="h-12 w-12">
+              <Avatar className="h-12 w-12 ring-2 ring-primary/10">
                 <AvatarImage src={otherUserProfile?.profile_picture_url} />
-                <AvatarFallback>
+                <AvatarFallback className="bg-gradient-primary text-white">
                   {otherUserProfile?.full_name?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
               
               <div className="flex-1">
-                <h3 className="font-semibold">{otherUserProfile?.full_name}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold">{otherUserProfile?.full_name}</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowReportDialog(true)}
+                    className="p-1 h-6 w-6 rounded-full text-muted-foreground hover:text-destructive"
+                    title="Report user"
+                  >
+                    <Flag className="h-3 w-3" />
+                  </Button>
+                </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <MapPin className="h-3 w-3" />
                   {otherUserProfile?.city}, {otherUserProfile?.region}
                 </div>
                 <div className="flex gap-1 mt-1">
                   {otherUserProfile?.sports?.slice(0, 2).map((sport, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
+                    <Badge key={index} variant="secondary" className="text-xs rounded-full">
                       {sport}
                     </Badge>
                   ))}
@@ -336,18 +364,29 @@ export default function Chat() {
               </div>
 
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={requestMeetup}>
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Plan Meetup
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setShowSmartSuggestions(!showSmartSuggestions)}
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  AI Assist
-                </Button>
+                {!isMobile && (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={requestMeetup}
+                      className="rounded-full"
+                      title="Get AI location & safety suggestions for a meetup"
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Plan Meetup
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setShowSmartSuggestions(!showSmartSuggestions)}
+                      className="rounded-full"
+                    >
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      AI Assist
+                    </Button>
+                  </>
+                )}
                 <BlockReportDialog 
                   otherUserId={otherUserProfile?.user_id || ''}
                   otherUserName={otherUserProfile?.full_name || 'User'}
@@ -355,11 +394,39 @@ export default function Chat() {
                 />
               </div>
             </div>
+            
+            {/* Mobile-only Plan Meetup button */}
+            {isMobile && (
+              <div className="flex gap-2 mt-3">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={requestMeetup}
+                  className="flex-1 rounded-full"
+                  title="Get AI location & safety suggestions for a meetup"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Plan Meetup
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowSmartSuggestions(!showSmartSuggestions)}
+                  className="flex-1 rounded-full"
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  AI Assist
+                </Button>
+              </div>
+            )}
           </CardHeader>
         </Card>
 
         {/* Messages */}
-        <Card className="flex flex-col h-[60vh]">
+        <Card className={cn(
+          "flex flex-col rounded-xl shadow-sm bg-gradient-to-b from-background to-muted/20",
+          isMobile ? "h-[calc(100vh-280px)]" : "h-[60vh]"
+        )}>
           <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
@@ -369,6 +436,8 @@ export default function Chat() {
               messages.map((message) => {
                 const isOwn = message.sender_id === user?.id;
                 const isAiSuggestion = message.message_type === 'ai_suggestion';
+                const isLongContent = message.content.length > 280;
+                const isExpanded = expandedMeetup === message.id;
                 
                 return (
                   <div
@@ -376,22 +445,52 @@ export default function Chat() {
                     className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                      className={`max-w-[85%] ${isMobile ? 'max-w-[90%]' : ''} rounded-2xl px-4 py-3 ${
                         isAiSuggestion
-                          ? 'bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20'
+                          ? 'bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-2xl'
                           : isOwn
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted'
+                          ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-md'
+                          : 'bg-muted rounded-2xl rounded-bl-md'
                       }`}
                     >
                       {isAiSuggestion && (
-                        <div className="flex items-center gap-1 mb-2 text-xs text-primary">
+                        <div className="flex items-center gap-1 mb-2 text-xs text-primary font-medium">
                           <Sparkles className="h-3 w-3" />
                           AI Suggestion
                         </div>
                       )}
-                      <p className="whitespace-pre-wrap">{message.content}</p>
-                      <div className={`flex items-center justify-end gap-1 mt-1 text-xs ${
+                      
+                      <div>
+                        {isAiSuggestion && isLongContent ? (
+                          <>
+                            <p className="whitespace-pre-wrap">
+                              {isExpanded ? message.content : message.content.substring(0, 280) + '...'}
+                            </p>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setExpandedMeetup(isExpanded ? null : message.id)}
+                              className="mt-2 p-0 h-auto text-xs text-primary hover:text-primary/80"
+                            >
+                              {isExpanded ? (
+                                <>
+                                  <ChevronUp className="h-3 w-3 mr-1" />
+                                  Show less
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="h-3 w-3 mr-1" />
+                                  View details
+                                </>
+                              )}
+                            </Button>
+                          </>
+                        ) : (
+                          <p className="whitespace-pre-wrap">{message.content}</p>
+                        )}
+                      </div>
+                      
+                      <div className={`flex items-center justify-end gap-1 mt-2 text-xs ${
                         isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
                       }`}>
                         <Clock className="h-3 w-3" />
@@ -428,13 +527,16 @@ export default function Chat() {
           )}
 
           {/* Message Input */}
-          <div className="p-4 border-t">
-            <div className="flex gap-2">
-              <Button variant="ghost" size="icon" className="flex-shrink-0">
+          <div className={cn(
+            "p-4 border-t bg-background/80 backdrop-blur-sm",
+            isMobile && "pb-6"
+          )}>
+            <div className="flex gap-3">
+              <Button variant="ghost" size="icon" className="flex-shrink-0 rounded-full">
                 <ImageIcon className="h-4 w-4" />
               </Button>
               
-              <div className="flex-1 flex gap-2">
+              <div className="flex-1 flex gap-3">
                 <Input
                   placeholder="Type your message..."
                   value={newMessage}
@@ -453,13 +555,18 @@ export default function Chat() {
                       }
                     }
                   }}
+                  className={cn(
+                    "rounded-full border-2 bg-background/80 backdrop-blur-sm",
+                    isMobile && "min-h-[44px] text-base"
+                  )}
                 />
                 <Button 
                   onClick={() => sendMessage(newMessage)}
                   disabled={!newMessage.trim() || sending}
                   size="icon"
+                  className="rounded-full min-h-[44px] min-w-[44px]"
                 >
-                  <Send className="h-4 w-4" />
+                  <Send className="h-5 w-5" />
                 </Button>
               </div>
             </div>
@@ -479,14 +586,24 @@ export default function Chat() {
         )}
 
         {/* Safety Notice */}
-        <Alert className="mt-4">
-          <Shield className="h-4 w-4" />
-          <AlertDescription>
+        <Alert className="mt-4 rounded-xl border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
+          <Shield className="h-4 w-4 text-primary" />
+          <AlertDescription className="text-sm">
             <strong>Stay Safe:</strong> Meet in public places, tell someone your plans, and trust your instincts. 
-            Report any inappropriate behavior.
+            <span className="text-muted-foreground">
+              {' '}Tip: Report inappropriate behavior anytime.
+            </span>
           </AlertDescription>
         </Alert>
       </div>
+      
+      {/* Report Dialog */}
+      <ReportUserDialog
+        open={showReportDialog}
+        onOpenChange={setShowReportDialog}
+        reportedUserId={otherUserProfile?.user_id || ''}
+        reportedUserName={otherUserProfile?.full_name || 'User'}
+      />
       
       {isMobile && <MobileNav />}
     </div>
