@@ -88,7 +88,12 @@ const Landing = () => {
                 alt="People running together outdoors" 
                 className="w-full h-64 md:h-80 object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20"></div>
+            <div 
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: 'url(/lovable-uploads/5c3d2b7b-4d6d-46ba-8599-c2c76c3470c9.png)' }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/60 to-accent/60"></div>
+            </div>
             </div>
           </div>
 
