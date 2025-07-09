@@ -8,13 +8,15 @@ import { LandingFooter } from "@/components/landing/LandingFooter";
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-accent/10">
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-accent/10 animate-fade-in">
       <LandingHeader />
-      <LandingHero />
-      <LandingFeatures />
-      <LandingSportsCategories />
-      <LandingSafety />
-      <LandingCTA />
+      <main className="animate-fade-in">
+        <LandingHero />
+        <LandingFeatures />
+        <LandingSportsCategories />
+        <LandingSafety />
+        <LandingCTA />
+      </main>
       <LandingFooter />
     </div>
   );

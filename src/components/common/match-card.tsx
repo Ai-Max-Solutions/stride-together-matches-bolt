@@ -58,12 +58,12 @@ export function MatchCard({ profile, matchScore, onConnect, className }: MatchCa
   };
 
   return (
-    <Card className={`hover:shadow-lg transition-shadow ${className}`}>
+    <Card className={cn("hover-lift transition-all duration-300 group", className)}>
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={profile.profile_picture_url} />
-            <AvatarFallback>
+          <Avatar className="h-16 w-16 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
+            <AvatarImage src={profile.profile_picture_url} className="object-cover" />
+            <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
               {profile.full_name?.charAt(0) || 'U'}
             </AvatarFallback>
           </Avatar>
@@ -81,14 +81,14 @@ export function MatchCard({ profile, matchScore, onConnect, className }: MatchCa
                 </div>
               </div>
               {matchScore && (
-                <div className="flex flex-col items-end">
-                  <Badge className="bg-primary text-primary-foreground mb-1">
+                <div className="flex flex-col items-end animate-fade-in">
+                  <Badge className="bg-gradient-primary text-primary-foreground mb-1 shadow-primary animate-pulse-glow">
                     {matchScore.score}% match
                   </Badge>
                   {matchScore.score >= 70 && (
-                    <div className="flex items-center text-amber-500">
+                    <div className="flex items-center text-amber-500 animate-bounce-light">
                       <Star className="h-3 w-3 mr-1 fill-current" />
-                      <span className="text-xs">Top Match</span>
+                      <span className="text-xs font-medium">Top Match</span>
                     </div>
                   )}
                 </div>
@@ -131,8 +131,9 @@ export function MatchCard({ profile, matchScore, onConnect, className }: MatchCa
             <div className="flex gap-2">
               <Button 
                 onClick={() => onConnect(profile.user_id)}
-                className="flex-1"
+                className="flex-1 hover-scale"
                 size="sm"
+                variant="hero"
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Connect

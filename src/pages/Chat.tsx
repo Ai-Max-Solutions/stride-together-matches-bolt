@@ -737,8 +737,8 @@ export default function Chat() {
         )}
 
         {/* Safety Notice */}
-        <Alert className="mt-4 rounded-xl border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
-          <Shield className="h-4 w-4 text-primary" />
+        <Alert className="mt-4 rounded-xl border-primary/20 glass-effect animate-fade-in">
+          <Shield className="h-4 w-4 text-primary animate-pulse" />
           <AlertDescription className="text-sm">
             <strong>Stay Safe:</strong> Meet in public places, tell someone your plans, and trust your instincts. 
             <span className="text-muted-foreground">

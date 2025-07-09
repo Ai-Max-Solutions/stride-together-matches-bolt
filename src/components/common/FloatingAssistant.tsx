@@ -220,8 +220,8 @@ export function FloatingAssistant({ className }: FloatingAssistantProps) {
           onClick={() => setIsOpen(true)}
           size="icon"
           className={cn(
-            "fixed z-50 h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-all duration-200",
-            "bg-gradient-primary text-white hover:scale-105",
+            "fixed z-50 h-12 w-12 rounded-full shadow-card hover:shadow-primary transition-all duration-300",
+            "bg-gradient-primary text-white hover-lift animate-pulse-glow",
             buttonPositionClass,
             className
           )}
@@ -239,7 +239,7 @@ export function FloatingAssistant({ className }: FloatingAssistantProps) {
             ? "inset-x-4 bottom-4 top-16" 
             : "bottom-6 right-6 w-96 h-[500px]"
         )}>
-          <Card className="h-full flex flex-col shadow-2xl border-primary/20 bg-background/95 backdrop-blur-sm">
+          <Card className="h-full flex flex-col shadow-card hover-lift border-primary/20 glass-effect animate-scale-in">
             <CardHeader className="pb-3 border-b">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-lg">
@@ -331,14 +331,14 @@ export function FloatingAssistant({ className }: FloatingAssistantProps) {
                           <div key={conv.id} className="space-y-2">
                             {/* User Question */}
                             <div className="flex justify-end">
-                              <div className="bg-primary text-primary-foreground rounded-lg px-3 py-2 max-w-[85%] text-sm">
+                              <div className="bg-gradient-primary text-primary-foreground rounded-lg px-3 py-2 max-w-[85%] text-sm">
                                 {conv.question}
                               </div>
                             </div>
                             
                             {/* Bot Response */}
-                            <div className="flex justify-start">
-                              <div className="bg-muted rounded-lg px-3 py-2 max-w-[85%] text-sm">
+                <div className="flex justify-start">
+                              <div className="bg-gradient-to-r from-muted via-muted/90 to-muted rounded-lg px-3 py-2 max-w-[85%] text-sm">
                                 {conv.response}
                                 
                                 {/* Feedback Buttons */}
@@ -349,7 +349,7 @@ export function FloatingAssistant({ className }: FloatingAssistantProps) {
                                       size="sm"
                                       variant="ghost"
                                       onClick={() => handleFeedback(conv.id, true)}
-                                      className="h-5 w-5 p-0"
+                                      className="h-5 w-5 p-0 hover-scale"
                                     >
                                       <ThumbsUp className="h-3 w-3" />
                                     </Button>
@@ -357,7 +357,7 @@ export function FloatingAssistant({ className }: FloatingAssistantProps) {
                                       size="sm"
                                       variant="ghost"
                                       onClick={() => handleFeedback(conv.id, false)}
-                                      className="h-5 w-5 p-0"
+                                      className="h-5 w-5 p-0 hover-scale"
                                     >
                                       <ThumbsDown className="h-3 w-3" />
                                     </Button>

@@ -321,13 +321,13 @@ export function AISuggestions({
   ];
 
   return (
-    <Card className={cn("border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5", className)}>
+    <Card className={cn("border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 hover-lift transition-all duration-300", className)}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Sparkles className="h-5 w-5 text-primary" />
+            <Sparkles className="h-5 w-5 text-primary animate-pulse" />
             AI Smart Suggestions
-            <Badge variant="outline" className="border-primary/20 text-xs">
+            <Badge variant="outline" className="border-primary/20 text-xs animate-bounce-light">
               Beta
             </Badge>
           </CardTitle>
@@ -356,7 +356,7 @@ export function AISuggestions({
                 size="sm"
                 onClick={button.action}
                 disabled={loading}
-                className="flex items-center gap-2 text-xs h-10 min-h-[44px]"
+                className="flex items-center gap-2 text-xs h-10 min-h-[44px] hover-scale transition-all duration-200"
                 aria-label={`Generate ${button.label.toLowerCase()}`}
               >
                 <Icon className="h-3 w-3" />
