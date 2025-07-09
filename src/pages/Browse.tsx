@@ -14,12 +14,25 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { MatchCard } from '@/components/common/match-card';
+import { OptimizedImage } from '@/components/ui/optimized-image';
+import { usePagination } from '@/hooks/use-pagination';
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis
+} from '@/components/ui/pagination';
 import { 
   Search, 
   Filter, 
   Users,
   Sparkles,
-  Shield
+  Shield,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { BROWSE_SPORTS_OPTIONS, BROWSE_EXPERIENCE_LEVELS } from '@/constants';
@@ -60,6 +73,20 @@ export default function Browse() {
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [matchScores, setMatchScores] = useState<Map<string, MatchScore>>(new Map());
+  
+  // Pagination hook
+  const {
+    paginatedData: paginatedProfiles,
+    currentPage,
+    totalPages,
+    hasNextPage,
+    hasPreviousPage,
+    goToPage,
+    goToNextPage,
+    goToPreviousPage,
+    resetPagination,
+    totalItems
+  } = usePagination({ data: filteredProfiles, itemsPerPage: 12 });
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,6 +107,7 @@ export default function Browse() {
 
   useEffect(() => {
     applyFilters();
+    resetPagination(); // Reset to page 1 when filters change
   }, [profiles, searchQuery, selectedSport, selectedExperience, currentUserProfile]);
 
   const fetchCurrentUserProfile = async () => {
@@ -480,10 +508,15 @@ export default function Browse() {
           </Card>
         )}
 
-        {/* Results Count */}
+        {/* Results Count & Pagination Info */}
         <div className="mb-6 flex items-center justify-between">
           <p className="text-muted-foreground">
-            {filteredProfiles.length} workout partners found
+            {totalItems} workout partners found
+            {totalPages > 1 && (
+              <span className="ml-2">
+                (Page {currentPage} of {totalPages})
+              </span>
+            )}
           </p>
           {currentUserProfile && (
             <Badge variant="outline" className="gap-2">
@@ -536,19 +569,179 @@ export default function Browse() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProfiles.map((profile) => {
-              const matchData = matchScores.get(profile.id);
-              return (
-                <MatchCard
-                  key={profile.id}
-                  profile={profile}
-                  matchScore={matchData}
-                  onConnect={handleConnect}
-                />
-              );
-            })}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {paginatedProfiles.map((profile) => {
+                const matchData = matchScores.get(profile.id);
+                return (
+                  <Card 
+                    key={profile.id} 
+                    className="hover:shadow-lg transition-all duration-200 hover:scale-[1.02] cursor-pointer"
+                    onClick={() => handleConnect(profile.user_id)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Connect with ${profile.full_name}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleConnect(profile.user_id);
+                      }
+                    }}
+                  >
+                    <CardContent className="p-6">
+                      <div className="h-16 w-16 mx-auto mb-3 rounded-full overflow-hidden">
+                        <OptimizedImage
+                          src={profile.profile_picture_url}
+                          alt={`${profile.full_name || 'User'} profile picture`}
+                          width={64}
+                          height={64}
+                          fallback="/placeholder.svg"
+                          className="rounded-full"
+                        />
+                      </div>
+
+                      <div className="text-center space-y-3">
+                        <div>
+                          <h3 className="font-semibold text-lg mb-1 truncate">{profile.full_name}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {formatLocation(profile)}
+                          </p>
+                        </div>
+
+                        {/* Match Score Badge */}
+                        {matchData && (
+                          <div className="flex justify-center">
+                            <Badge 
+                              variant={matchData.score >= 70 ? "default" : matchData.score >= 50 ? "secondary" : "outline"}
+                              className="gap-1"
+                            >
+                              <Sparkles className="h-3 w-3" />
+                              {matchData.score}% match
+                            </Badge>
+                          </div>
+                        )}
+
+                        {/* Sports and Tags */}
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap gap-1 justify-center">
+                            {profile.sports.slice(0, 2).map((sport, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {sport}
+                              </Badge>
+                            ))}
+                          </div>
+                          
+                          {matchData && matchData.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 justify-center">
+                              {matchData.tags.slice(0, 2).map((tag, index) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Bio */}
+                        {profile.bio && (
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {profile.bio}
+                          </p>
+                        )}
+
+                        {/* Experience Level and Availability */}
+                        <div className="text-xs text-muted-foreground space-y-1">
+                          <p className="capitalize">{profile.experience_level} level</p>
+                          <p>{getAvailabilityText(profile.availability)}</p>
+                        </div>
+
+                        {/* Connect Button */}
+                        <Button 
+                          className="w-full mt-4 min-h-[44px]"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleConnect(profile.user_id);
+                          }}
+                          size="sm"
+                        >
+                          Connect
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => goToPreviousPage()}
+                        className={!hasPreviousPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        aria-disabled={!hasPreviousPage}
+                      />
+                    </PaginationItem>
+                    
+                    {/* Page Numbers */}
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNumber;
+                      if (totalPages <= 5) {
+                        pageNumber = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNumber = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNumber = totalPages - 4 + i;
+                      } else {
+                        pageNumber = currentPage - 2 + i;
+                      }
+
+                      return (
+                        <PaginationItem key={pageNumber}>
+                          <PaginationLink
+                            onClick={() => goToPage(pageNumber)}
+                            isActive={currentPage === pageNumber}
+                            className="cursor-pointer"
+                            aria-label={`Go to page ${pageNumber}`}
+                          >
+                            {pageNumber}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    })}
+
+                    {totalPages > 5 && currentPage < totalPages - 2 && (
+                      <>
+                        <PaginationItem>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                        <PaginationItem>
+                          <PaginationLink
+                            onClick={() => goToPage(totalPages)}
+                            className="cursor-pointer"
+                            aria-label={`Go to page ${totalPages}`}
+                          >
+                            {totalPages}
+                          </PaginationLink>
+                        </PaginationItem>
+                      </>
+                    )}
+
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => goToNextPage()}
+                        className={!hasNextPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        aria-disabled={!hasNextPage}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </>
         )}
 
         {/* Safety Notice */}

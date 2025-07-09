@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useRealtimeOptimization } from '@/hooks/use-realtime-optimization';
+import { useMobileDetection } from '@/hooks/use-mobile-detection';
+import { MobileNav } from '@/components/ui/mobile-nav';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,6 +18,7 @@ import {
   Clock
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
+import { cn } from '@/lib/utils';
 
 interface ConversationWithProfile {
   id: string;
@@ -48,6 +52,18 @@ export default function Messages() {
   const [filteredConversations, setFilteredConversations] = useState<ConversationWithProfile[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  
+  const { isMobile } = useMobileDetection();
+  const totalUnreadCount = conversations.reduce((total, conv) => total + conv.unread_count, 0);
+
+  // Optimized realtime subscription
+  useRealtimeOptimization({
+    userId: user?.id,
+    onUpdate: () => {
+      fetchConversations();
+    },
+    enabled: !!user
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -56,7 +72,6 @@ export default function Messages() {
     }
     if (user) {
       fetchConversations();
-      subscribeToConversations();
     }
   }, [user, authLoading]);
 
@@ -214,9 +229,12 @@ export default function Messages() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
-      <Navigation />
+      {!isMobile && <Navigation />}
       
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className={cn(
+        "container mx-auto px-4 max-w-4xl",
+        isMobile ? "pt-4 pb-20" : "py-8"
+      )}>
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Messages</h1>
@@ -330,6 +348,8 @@ export default function Messages() {
           </div>
         )}
       </div>
+      
+      {isMobile && <MobileNav unreadCount={totalUnreadCount} />}
     </div>
   );
 }

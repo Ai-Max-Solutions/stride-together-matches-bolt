@@ -22,6 +22,10 @@ import {
   Clock
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
+import { SmartSuggestions } from '@/components/chat/SmartSuggestions';
+import { useMobileDetection } from '@/hooks/use-mobile-detection';
+import { MobileNav } from '@/components/ui/mobile-nav';
+import { cn } from '@/lib/utils';
 
 interface Message {
   id: string;
@@ -66,6 +70,9 @@ export default function Chat() {
   const [sending, setSending] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showSmartSuggestions, setShowSmartSuggestions] = useState(false);
+  
+  const { isMobile } = useMobileDetection();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -286,9 +293,12 @@ export default function Chat() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
-      <Navigation />
+      {!isMobile && <Navigation />}
       
-      <div className="container mx-auto px-4 py-4 max-w-4xl">
+      <div className={cn(
+        "container mx-auto px-4 max-w-4xl",
+        isMobile ? "pt-4 pb-20" : "py-4"
+      )}>
         {/* Chat Header */}
         <Card className="mb-4">
           <CardHeader className="pb-4">
@@ -328,6 +338,14 @@ export default function Chat() {
                 <Button variant="outline" size="sm" onClick={requestMeetup}>
                   <Calendar className="h-4 w-4 mr-2" />
                   Plan Meetup
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowSmartSuggestions(!showSmartSuggestions)}
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  AI Assist
                 </Button>
                 <Button variant="ghost" size="sm">
                   <MoreVertical className="h-4 w-4" />
@@ -445,6 +463,18 @@ export default function Chat() {
           </div>
         </Card>
 
+        {/* Smart AI Suggestions */}
+        {showSmartSuggestions && currentUserProfile && otherUserProfile && (
+          <div className="mt-4">
+            <SmartSuggestions
+              currentUser={currentUserProfile}
+              otherUser={otherUserProfile}
+              conversationHistory={messages}
+              onSendMessage={sendMessage}
+            />
+          </div>
+        )}
+
         {/* Safety Notice */}
         <Alert className="mt-4">
           <Shield className="h-4 w-4" />
@@ -454,6 +484,8 @@ export default function Chat() {
           </AlertDescription>
         </Alert>
       </div>
+      
+      {isMobile && <MobileNav />}
     </div>
   );
 }
