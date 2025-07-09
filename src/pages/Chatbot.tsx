@@ -18,12 +18,16 @@ interface Conversation {
 }
 
 const FAQ_SUGGESTIONS = [
-  "How do I create a good profile?",
-  "How does the matching system work?",
-  "What safety features does the app have?",
-  "How do I start a conversation with someone?",
-  "What should I know before meeting someone?",
-  "How do I report inappropriate behavior?"
+  "How do I find people who run at my pace?",
+  "Is my exact location shared with other users?", 
+  "How do I chat with someone safely?",
+  "Can I block or report someone?",
+  "How do I change my fitness goals?",
+  "What's a good warm-up before a 5K?",
+  "How many buddies can I match with?",
+  "How do I stay safe meeting someone new?",
+  "Why didn't I get any matches?",
+  "Where can I give feedback about the app?"
 ];
 
 export default function Chatbot() {
