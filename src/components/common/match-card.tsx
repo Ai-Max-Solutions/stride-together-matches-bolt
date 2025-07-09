@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, MapPin, Clock, Star } from "lucide-react";
 import { SportsBadges } from "./sports-badges";
+import { BlockReportDialog } from "@/components/chat/BlockReportDialog";
 
 interface Profile {
   id: string;
@@ -122,14 +123,21 @@ export function MatchCard({ profile, matchScore, onConnect, className }: MatchCa
               </div>
             )}
             
-            <Button 
-              onClick={() => onConnect(profile.user_id)}
-              className="w-full"
-              size="sm"
-            >
-              <MessageCircle className="h-4 w-4 mr-2" />
-              Connect
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => onConnect(profile.user_id)}
+                className="flex-1"
+                size="sm"
+              >
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Connect
+              </Button>
+              <BlockReportDialog 
+                otherUserId={profile.user_id}
+                otherUserName={profile.full_name || 'User'}
+                onBlock={() => {}}
+              />
+            </div>
           </div>
         </div>
       </CardContent>

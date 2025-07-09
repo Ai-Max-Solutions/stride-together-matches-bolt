@@ -27,7 +27,9 @@ import {
   Camera,
   Settings as SettingsIcon,
   Save,
-  AlertTriangle
+  AlertTriangle,
+  Ban,
+  X
 } from 'lucide-react';
 
 const DAYS_OF_WEEK = [
@@ -50,6 +52,17 @@ interface SettingsData {
   ai_suggestions_enabled: boolean;
   account_paused: boolean;
   hide_from_matches: boolean;
+}
+
+interface BlockedUser {
+  id: string;
+  blocked_id: string;
+  reason: string;
+  created_at: string;
+  profiles: {
+    full_name: string;
+    profile_picture_url?: string;
+  };
 }
 
 export default function Settings() {
@@ -87,6 +100,7 @@ export default function Settings() {
   });
 
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
 
   useEffect(() => {
     if (!user) {
@@ -94,6 +108,7 @@ export default function Settings() {
       return;
     }
     fetchProfile();
+    fetchBlockedUsers();
     setNewEmail(user.email || '');
   }, [user]);
 
@@ -120,6 +135,74 @@ export default function Settings() {
       }
     } catch (err: any) {
       setError('Failed to load profile data');
+    }
+  };
+
+  const fetchBlockedUsers = async () => {
+    try {
+      // First get the blocked user IDs
+      const { data: blocks, error: blocksError } = await supabase
+        .from('user_blocks')
+        .select('id, blocked_id, reason, created_at')
+        .eq('blocker_id', user?.id)
+        .order('created_at', { ascending: false });
+
+      if (blocksError) throw blocksError;
+
+      if (!blocks || blocks.length === 0) {
+        setBlockedUsers([]);
+        return;
+      }
+
+      // Then get the profile data for each blocked user
+      const blockedUserIds = blocks.map(block => block.blocked_id);
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, profile_picture_url')
+        .in('user_id', blockedUserIds);
+
+      if (profilesError) throw profilesError;
+
+      // Combine the data
+      const blockedUsersWithProfiles = blocks.map(block => {
+        const profile = profiles?.find(p => p.user_id === block.blocked_id);
+        return {
+          ...block,
+          profiles: {
+            full_name: profile?.full_name || 'Unknown User',
+            profile_picture_url: profile?.profile_picture_url
+          }
+        };
+      });
+
+      setBlockedUsers(blockedUsersWithProfiles as BlockedUser[]);
+    } catch (err: any) {
+      console.error('Failed to load blocked users:', err);
+    }
+  };
+
+  const unblockUser = async (blockId: string) => {
+    try {
+      const { error } = await supabase
+        .from('user_blocks')
+        .delete()
+        .eq('id', blockId)
+        .eq('blocker_id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "User unblocked",
+        description: "This user can now contact you again.",
+      });
+      
+      await fetchBlockedUsers();
+    } catch (err: any) {
+      toast({
+        title: "Failed to unblock user",
+        description: err.message,
+        variant: "destructive"
+      });
     }
   };
 
@@ -611,6 +694,62 @@ export default function Settings() {
               >
                 Update Password
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Blocked Users */}
+          <Card className="bg-card border shadow-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Ban className="h-5 w-5" />
+                Blocked Users
+              </CardTitle>
+              <CardDescription>
+                Manage users you've blocked. Unblock them to allow communication again.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {blockedUsers.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Ban className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No blocked users</p>
+                  <p className="text-sm">Users you block will appear here</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {blockedUsers.map((block) => (
+                    <div key={block.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={block.profiles?.profile_picture_url} />
+                          <AvatarFallback>
+                            {block.profiles?.full_name?.charAt(0) || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{block.profiles?.full_name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Blocked: {new Date(block.created_at).toLocaleDateString()}
+                          </p>
+                          {block.reason && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Reason: {block.reason}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => unblockUser(block.id)}
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Unblock
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
