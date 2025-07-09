@@ -84,13 +84,13 @@ const Landing = () => {
           <div className="mb-12 relative">
             <div className="relative overflow-hidden rounded-2xl shadow-2xl">
               <img 
-                src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop&crop=center"
-                alt="People running together outdoors" 
+                src="/lovable-uploads/db69c82c-bdbc-416a-941e-609ebe91f0c6.png"
+                alt="Two women running together outdoors" 
                 className="w-full h-64 md:h-80 object-cover"
               />
             <div 
               className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-              style={{ backgroundImage: 'url(/lovable-uploads/5c3d2b7b-4d6d-46ba-8599-c2c76c3470c9.png)' }}
+              style={{ backgroundImage: 'url(/lovable-uploads/db69c82c-bdbc-416a-941e-609ebe91f0c6.png)' }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-primary/60 to-accent/60"></div>
             </div>
