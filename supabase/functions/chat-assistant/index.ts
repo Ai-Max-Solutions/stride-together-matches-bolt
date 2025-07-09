@@ -64,6 +64,28 @@ Keep suggestions natural, encouraging, and focused on fitness activities.`;
         userPrompt = `The user received this message: "${message}". Suggest 2-3 brief, friendly response options.`;
         break;
 
+      case 'conversation_starter':
+        systemPrompt = `You are a conversation assistant for a fitness buddy app. Generate personalized conversation starters based on user profiles.
+Focus on shared interests, compatible experience levels, and local activities. Be friendly, specific, and actionable.
+User 1: ${userProfile?.full_name} - Sports: ${userProfile?.sports?.join(', ')} - Level: ${userProfile?.experience_level} - Location: ${userProfile?.city}, ${userProfile?.region}
+User 2: ${otherUserProfile?.full_name} - Sports: ${otherUserProfile?.sports?.join(', ')} - Level: ${otherUserProfile?.experience_level} - Location: ${otherUserProfile?.city}, ${otherUserProfile?.region}`;
+        
+        userPrompt = `Generate 3 personalized conversation starters for these two fitness buddies to help them connect.`;
+        break;
+
+      case 'ice_breaker':
+        const sharedSports = userProfile?.sports?.filter(sport => 
+          otherUserProfile?.sports?.includes(sport)
+        ) || [];
+        
+        systemPrompt = `You are creating ice breaker suggestions for a fitness app. Create friendly, specific conversation starters.
+${sharedSports.length > 0 ? `Shared sports: ${sharedSports.join(', ')}` : 'No shared sports'}
+Both users' experience levels: ${userProfile?.experience_level} and ${otherUserProfile?.experience_level}
+Location context: ${userProfile?.city === otherUserProfile?.city ? 'Same city' : 'Different cities'}`;
+        
+        userPrompt = `Create 2-3 ice breaker messages that help these fitness buddies start a conversation.`;
+        break;
+
       default:
         throw new Error('Invalid request type');
     }
