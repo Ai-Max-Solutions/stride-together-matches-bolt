@@ -209,7 +209,7 @@ const Landing = () => {
               icon: "🏋️‍♀️", 
               color: "primary", 
               count: "200+ lifters",
-              image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop"
+              image: "/lovable-uploads/7d3ee052-7f26-40d8-be1d-b115bd9fb0cb.png"
             }
           ].map((category, index) => (
             <Card key={index} className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden">
