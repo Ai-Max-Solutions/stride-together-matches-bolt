@@ -18,7 +18,7 @@ export const LandingCTA = () => {
               Create My Free Profile
             </Button>
           </Link>
-          <Button variant="outline" size="xl" className="border-white text-white hover:bg-white/10">
+          <Button variant="outline" size="xl" className="border-white text-foreground bg-white/90 hover:bg-white hover:text-primary">
             Learn More
           </Button>
         </div>
