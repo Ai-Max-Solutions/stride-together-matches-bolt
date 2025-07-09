@@ -8,7 +8,8 @@ import {
   User,
   Menu,
   X,
-  Settings
+  Settings,
+  Bot
 } from "lucide-react";
 import { useState } from "react";
 
@@ -59,6 +60,11 @@ const Navigation = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
+            <Link to="/chatbot">
+              <Button variant="ghost" size="icon" title="AI Assistant">
+                <Bot className="h-4 w-4" />
+              </Button>
+            </Link>
             <Link to="/settings">
               <Button variant="ghost" size="icon">
                 <Settings className="h-4 w-4" />
@@ -110,6 +116,18 @@ const Navigation = () => {
               })}
             </nav>
             <div className="flex flex-col space-y-2 mt-4 pt-4 border-t">
+              <Link to="/chatbot" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" size="sm" className="w-full justify-start">
+                  <Bot className="h-4 w-4 mr-2" />
+                  AI Assistant
+                </Button>
+              </Link>
+              <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" size="sm" className="w-full justify-start">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </Button>
+              </Link>
               <Button variant="outline" size="sm">
                 Sign In
               </Button>

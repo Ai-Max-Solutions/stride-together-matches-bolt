@@ -14,6 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
+      chatbot_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          question: string
+          response: string
+          session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          question: string
+          response: string
+          session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          question?: string
+          response?: string
+          session_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      chatbot_feedback: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          is_helpful: boolean
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          is_helpful: boolean
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_helpful?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chatbot_feedback_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chatbot_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chatbot_usage: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          questions_used: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          questions_used?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          questions_used?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
