@@ -1,337 +1,638 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Search, 
   Filter, 
   MapPin, 
+  Clock, 
+  Target, 
+  Star, 
   Zap,
-  SlidersHorizontal,
-  Heart,
-  X
-} from "lucide-react";
-import ProfileCard from "@/components/ProfileCard";
-import Navigation from "@/components/Navigation";
-import AIMatchingCard from "@/components/AIMatchingCard";
+  MessageCircle,
+  Calendar,
+  Activity,
+  Users,
+  Sparkles,
+  Shield
+} from 'lucide-react';
+import Navigation from '@/components/Navigation';
 
-// Mock data for development
-const mockAIRecommendations = [
-  {
-    profile: {
-      id: "ai-1",
-      name: "Sarah Johnson",
-      sport: "Running",
-      pace: "8:30/mi",
-      location: "Downtown, 2.3 mi",
-      matchPercentage: 94
-    },
-    reasons: [
-      { type: 'pace' as const, description: "Similar 8:30 pace for long runs", score: 0.95 },
-      { type: 'location' as const, description: "Lives 2.3 miles away", score: 0.85 },
-      { type: 'goals' as const, description: "Both training for marathons", score: 0.9 },
-      { type: 'availability' as const, description: "Free mornings and weekends", score: 0.8 }
-    ],
-    confidenceScore: 0.94
-  },
-  {
-    profile: {
-      id: "ai-2",
-      name: "Emma Rodriguez",
-      sport: "Running",
-      pace: "9:15/mi",
-      location: "Midtown, 3.1 mi",
-      matchPercentage: 92
-    },
-    reasons: [
-      { type: 'pace' as const, description: "Compatible pace for training", score: 0.88 },
-      { type: 'location' as const, description: "Close proximity", score: 0.75 },
-      { type: 'goals' as const, description: "Focused on consistency like you", score: 0.95 },
-      { type: 'availability' as const, description: "Flexible morning schedule", score: 0.9 }
-    ],
-    confidenceScore: 0.92
-  }
+interface Profile {
+  id: string;
+  user_id: string;
+  full_name: string;
+  bio: string;
+  profile_picture_url?: string;
+  sports: string[];
+  experience_level: string;
+  pace_metrics: Record<string, any>;
+  fitness_goals: string[];
+  city: string;
+  region: string;
+  location_visible: boolean;
+  availability: Record<string, string[]>;
+  age_range_min: number;
+  age_range_max: number;
+  created_at: string;
+}
+
+interface MatchScore {
+  score: number;
+  reasons: string[];
+  tags: string[];
+}
+
+const SPORTS_OPTIONS = [
+  'all', 'running', 'cycling', 'gym', 'swimming', 'tennis', 'basketball',
+  'soccer', 'volleyball', 'hiking', 'yoga', 'crossfit', 'boxing'
 ];
 
-const mockProfiles = [
-  {
-    id: "1",
-    name: "Sarah Johnson",
-    age: 28,
-    location: "Downtown, 2.3 mi",
-    sport: "Running",
-    pace: "8:30/mi",
-    distance: "5-10K",
-    goals: ["Marathon Training", "Weight Loss", "Endurance"],
-    availability: ["Morning", "Weekend"],
-    rating: 4.8,
-    completedWorkouts: 45,
-    avatar: "SJ",
-    matchPercentage: 94
-  },
-  {
-    id: "2",
-    name: "Mike Chen",
-    age: 32,
-    location: "Uptown, 1.8 mi",
-    sport: "Cycling",
-    pace: "18 mph avg",
-    distance: "20-50K",
-    goals: ["Century Ride", "Speed Training"],
-    availability: ["Evening", "Weekend"],
-    rating: 4.9,
-    completedWorkouts: 67,
-    avatar: "MC",
-    matchPercentage: 87
-  },
-  {
-    id: "3",
-    name: "Emma Rodriguez",
-    age: 25,
-    location: "Midtown, 3.1 mi",
-    sport: "Running",
-    pace: "9:15/mi",
-    distance: "3-8K",
-    goals: ["5K PR", "Consistency", "Fun Runs"],
-    availability: ["Morning", "Lunch", "Weekend"],
-    rating: 4.7,
-    completedWorkouts: 32,
-    avatar: "ER",
-    matchPercentage: 92
-  },
-  {
-    id: "4",
-    name: "Alex Thompson",
-    age: 29,
-    location: "West Side, 4.2 mi",
-    sport: "Swimming",
-    pace: "1:45/100m",
-    distance: "1500-3000m",
-    goals: ["Triathlon Prep", "Technique", "Open Water"],
-    availability: ["Evening", "Weekend"],
-    rating: 4.6,
-    completedWorkouts: 28,
-    avatar: "AT",
-    matchPercentage: 78
-  }
-];
+const EXPERIENCE_LEVELS = ['all', 'beginner', 'intermediate', 'advanced'];
 
-const Browse = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSport, setSelectedSport] = useState<string | null>(null);
+export default function Browse() {
+  const { user, loading: authLoading } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>([]);
+  const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [matchScores, setMatchScores] = useState<Map<string, MatchScore>>(new Map());
+
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSport, setSelectedSport] = useState('all');
+  const [selectedExperience, setSelectedExperience] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
-  const [likedProfiles, setLikedProfiles] = useState<Set<string>>(new Set());
 
-  const sports = ["Running", "Cycling", "Swimming", "Gym"];
-  
-  const filteredProfiles = mockProfiles.filter(profile => {
-    const matchesSearch = profile.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         profile.sport.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         profile.goals.some(goal => goal.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesSport = !selectedSport || profile.sport === selectedSport;
-    
-    return matchesSearch && matchesSport;
-  });
-
-  const handleLike = (profileId: string) => {
-    const newLiked = new Set(likedProfiles);
-    if (newLiked.has(profileId)) {
-      newLiked.delete(profileId);
-    } else {
-      newLiked.add(profileId);
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth');
+      return;
     }
-    setLikedProfiles(newLiked);
+    if (user) {
+      fetchCurrentUserProfile();
+      fetchProfiles();
+    }
+  }, [user, authLoading]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [profiles, searchQuery, selectedSport, selectedExperience, currentUserProfile]);
+
+  const fetchCurrentUserProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user?.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (data) {
+        setCurrentUserProfile({
+          ...data,
+          pace_metrics: (data.pace_metrics as Record<string, any>) || {},
+          availability: (data.availability as Record<string, string[]>) || {}
+        });
+      }
+    } catch (err: any) {
+      console.error('Error fetching current user profile:', err);
+    }
   };
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
+  const fetchProfiles = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .neq('user_id', user?.id) // Exclude current user
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
       
-      {/* Page Header */}
-      <div className="border-b bg-background/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold">Browse Partners</h1>
-              <Badge className="bg-primary/10 text-primary border-primary/20">
-                <Zap className="w-3 h-3 mr-1" />
-                {filteredProfiles.length} matches
-              </Badge>
+      const typedProfiles = (data || []).map(profile => ({
+        ...profile,
+        pace_metrics: (profile.pace_metrics as Record<string, any>) || {},
+        availability: (profile.availability as Record<string, string[]>) || {}
+      }));
+      
+      setProfiles(typedProfiles);
+    } catch (err: any) {
+      toast({
+        title: "Error loading profiles",
+        description: err.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calculateMatchScore = (profile: Profile): MatchScore => {
+    if (!currentUserProfile) return { score: 0, reasons: [], tags: [] };
+
+    let score = 0;
+    const reasons: string[] = [];
+    const tags: string[] = [];
+
+    // Sport compatibility (40 points)
+    const commonSports = profile.sports.filter(sport => 
+      currentUserProfile.sports.includes(sport)
+    );
+    if (commonSports.length > 0) {
+      score += 40;
+      reasons.push(`Both enjoy ${commonSports.join(', ')}`);
+      tags.push(`${commonSports[0]} buddy`);
+    }
+
+    // Experience level match (25 points)
+    if (profile.experience_level === currentUserProfile.experience_level) {
+      score += 25;
+      reasons.push(`Same ${profile.experience_level} level`);
+      tags.push(`${profile.experience_level} level`);
+    } else if (
+      (profile.experience_level === 'intermediate' && currentUserProfile.experience_level === 'beginner') ||
+      (profile.experience_level === 'beginner' && currentUserProfile.experience_level === 'intermediate')
+    ) {
+      score += 15;
+      reasons.push('Compatible skill levels');
+    }
+
+    // Location proximity (20 points)
+    if (profile.city === currentUserProfile.city && profile.location_visible) {
+      score += 20;
+      reasons.push('Same city');
+      tags.push('nearby');
+    } else if (profile.region === currentUserProfile.region && profile.location_visible) {
+      score += 10;
+      reasons.push('Same region');
+    }
+
+    // Fitness goals alignment (15 points)
+    const commonGoals = profile.fitness_goals.filter(goal =>
+      currentUserProfile.fitness_goals.includes(goal)
+    );
+    if (commonGoals.length > 0) {
+      score += 15;
+      reasons.push(`Shared goals: ${commonGoals.join(', ')}`);
+    }
+
+    // Availability overlap (bonus points)
+    const hasOverlap = Object.keys(profile.availability).some(day =>
+      profile.availability[day]?.some(time =>
+        currentUserProfile.availability[day]?.includes(time)
+      )
+    );
+    if (hasOverlap) {
+      score += 10;
+      reasons.push('Compatible schedules');
+      tags.push('good timing');
+    }
+
+    // Recent activity bonus
+    const daysSinceJoined = Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24));
+    if (daysSinceJoined <= 7) {
+      tags.push('new member');
+    }
+
+    // Top match tag
+    if (score >= 70) {
+      tags.unshift('top match');
+    } else if (score >= 50) {
+      tags.unshift('good match');
+    }
+
+    return { score, reasons, tags };
+  };
+
+  const applyFilters = () => {
+    let filtered = [...profiles];
+
+    // Calculate match scores for all profiles
+    const scores = new Map<string, MatchScore>();
+    filtered.forEach(profile => {
+      scores.set(profile.id, calculateMatchScore(profile));
+    });
+    setMatchScores(scores);
+
+    // Apply search filter
+    if (searchQuery) {
+      filtered = filtered.filter(profile =>
+        profile.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        profile.bio?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        profile.city?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply sport filter
+    if (selectedSport !== 'all') {
+      filtered = filtered.filter(profile =>
+        profile.sports.includes(selectedSport)
+      );
+    }
+
+    // Apply experience filter
+    if (selectedExperience !== 'all') {
+      filtered = filtered.filter(profile =>
+        profile.experience_level === selectedExperience
+      );
+    }
+
+    // Sort by match score (highest first)
+    filtered.sort((a, b) => {
+      const scoreA = scores.get(a.id)?.score || 0;
+      const scoreB = scores.get(b.id)?.score || 0;
+      return scoreB - scoreA;
+    });
+
+    setFilteredProfiles(filtered);
+  };
+
+  const handleConnect = async (profileId: string) => {
+    toast({
+      title: "Coming soon!",
+      description: "Chat functionality will be available soon.",
+    });
+  };
+
+  const formatLocation = (profile: Profile) => {
+    if (!profile.location_visible) return 'Location private';
+    if (profile.city && profile.region) {
+      return `${profile.city}, ${profile.region}`;
+    }
+    return profile.city || profile.region || 'Location not set';
+  };
+
+  const getAvailabilityText = (availability: Record<string, string[]>) => {
+    const activeDays = Object.keys(availability).filter(day => 
+      availability[day] && availability[day].length > 0
+    );
+    if (activeDays.length === 0) return 'Schedule not set';
+    return `Available ${activeDays.length} days/week`;
+  };
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Finding your perfect workout partners...</p>
             </div>
-            <Button variant="outline" size="sm">
-              <Heart className="w-4 h-4 mr-2" />
-              Liked ({likedProfiles.size})
-            </Button>
           </div>
         </div>
       </div>
+    );
+  }
 
-      <div className="container mx-auto px-4 py-6">
-        <div className="max-w-6xl mx-auto">
-          {/* Search and Filter Bar */}
-          <div className="flex flex-col md:flex-row gap-4 mb-8">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Search by name, sport, or goals..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            <div className="flex space-x-2">
-              <Button
-                variant={showFilters ? "secondary" : "outline"}
-                onClick={() => setShowFilters(!showFilters)}
-                size="sm"
-              >
-                <SlidersHorizontal className="w-4 h-4 mr-2" />
-                Filters
-              </Button>
-              <Button variant="outline" size="sm">
-                <MapPin className="w-4 h-4 mr-2" />
-                Near Me
-              </Button>
-            </div>
-          </div>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
+      <Navigation />
+      
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Discover Your Perfect Workout Partners</h1>
+          <p className="text-muted-foreground">
+            Find compatible training buddies based on your fitness level, goals, and location
+          </p>
+        </div>
 
-          {/* Sport Filter Pills */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            <Button
-              variant={selectedSport === null ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedSport(null)}
-            >
-              All Sports
-            </Button>
-            {sports.map((sport) => (
-              <Button
-                key={sport}
-                variant={selectedSport === sport ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedSport(selectedSport === sport ? null : sport)}
-                className="relative"
-              >
-                {sport}
-                {selectedSport === sport && (
-                  <X className="w-3 h-3 ml-2" />
-                )}
-              </Button>
-            ))}
-          </div>
-
-          {/* Advanced Filters (Collapsible) */}
-          {showFilters && (
-            <Card className="mb-6">
-              <CardContent className="p-6">
-                <h3 className="font-semibold mb-4">Advanced Filters</h3>
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Distance Range</label>
-                    <div className="space-y-2">
-                      {["Under 2 miles", "2-5 miles", "5-10 miles", "10+ miles"].map((range) => (
-                        <label key={range} className="flex items-center space-x-2">
-                          <input type="checkbox" className="rounded" />
-                          <span className="text-sm">{range}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Availability</label>
-                    <div className="space-y-2">
-                      {["Morning", "Lunch", "Evening", "Weekend"].map((time) => (
-                        <label key={time} className="flex items-center space-x-2">
-                          <input type="checkbox" className="rounded" />
-                          <span className="text-sm">{time}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Experience Level</label>
-                    <div className="space-y-2">
-                      {["Beginner", "Intermediate", "Advanced", "Elite"].map((level) => (
-                        <label key={level} className="flex items-center space-x-2">
-                          <input type="checkbox" className="rounded" />
-                          <span className="text-sm">{level}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
+        {/* Search and Filters */}
+        <Card className="mb-8">
+          <CardContent className="p-6">
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Search */}
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder="Search by name, bio, or location..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
-                
-                <div className="flex justify-end space-x-2 mt-6">
-                  <Button variant="outline" size="sm">Clear All</Button>
-                  <Button size="sm">Apply Filters</Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* AI Recommendations */}
-          <AIMatchingCard recommendations={mockAIRecommendations} />
-
-          {/* Results */}
-          {filteredProfiles.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-24 h-24 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
-                <Search className="w-12 h-12 text-muted-foreground" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">No matches found</h3>
-              <p className="text-muted-foreground mb-6">Try adjusting your search or filters to find more partners.</p>
+
+              {/* Quick Filters */}
+              <div className="flex gap-3">
+                <Select value={selectedSport} onValueChange={setSelectedSport}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SPORTS_OPTIONS.map(sport => (
+                      <SelectItem key={sport} value={sport}>
+                        {sport === 'all' ? 'All Sports' : sport.charAt(0).toUpperCase() + sport.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={selectedExperience} onValueChange={setSelectedExperience}>
+                  <SelectTrigger className="w-36">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EXPERIENCE_LEVELS.map(level => (
+                      <SelectItem key={level} value={level}>
+                        {level === 'all' ? 'All Levels' : level.charAt(0).toUpperCase() + level.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="px-3"
+                >
+                  <Filter className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {showFilters && (
+              <div className="mt-4 pt-4 border-t">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label>Distance Range</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Any distance" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5km">Within 5km</SelectItem>
+                        <SelectItem value="10km">Within 10km</SelectItem>
+                        <SelectItem value="25km">Within 25km</SelectItem>
+                        <SelectItem value="any">Any distance</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Availability</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Any time" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="morning">Morning</SelectItem>
+                        <SelectItem value="afternoon">Afternoon</SelectItem>
+                        <SelectItem value="evening">Evening</SelectItem>
+                        <SelectItem value="weekend">Weekends</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Recently Active</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Any time" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="today">Active today</SelectItem>
+                        <SelectItem value="week">This week</SelectItem>
+                        <SelectItem value="month">This month</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* AI Recommendations Section */}
+        {currentUserProfile && filteredProfiles.length > 0 && (
+          <Card className="mb-8 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold">AI-Powered Top Matches</h3>
+                <Badge variant="outline" className="border-primary/20">
+                  Personalized for you
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-4">
+                {filteredProfiles.slice(0, 2).map((profile) => {
+                  const matchData = matchScores.get(profile.id);
+                  if (!matchData || matchData.score < 50) return null;
+                  
+                  return (
+                    <Card key={profile.id} className="border-primary/10">
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <Avatar className="h-12 w-12">
+                            <AvatarImage src={profile.profile_picture_url} />
+                            <AvatarFallback>
+                              {profile.full_name?.charAt(0) || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1">
+                              <h4 className="font-medium truncate">{profile.full_name}</h4>
+                              <Badge className="bg-primary text-primary-foreground">
+                                {matchData.score}% match
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              {formatLocation(profile)}
+                            </p>
+                            <div className="flex flex-wrap gap-1 mb-2">
+                              {matchData.tags.slice(0, 2).map((tag, index) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {matchData.reasons.slice(0, 1).join(' • ')}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Results Count */}
+        <div className="mb-6 flex items-center justify-between">
+          <p className="text-muted-foreground">
+            {filteredProfiles.length} workout partners found
+          </p>
+          {currentUserProfile && (
+            <Badge variant="outline" className="gap-2">
+              <Sparkles className="h-3 w-3" />
+              AI-Powered Matching
+            </Badge>
+          )}
+        </div>
+
+        {/* Results */}
+        {filteredProfiles.length === 0 ? (
+          <Card className="text-center py-12">
+            <CardContent>
+              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No matches found</h3>
+              <p className="text-muted-foreground mb-4">
+                Try adjusting your filters or check back later for new members
+              </p>
               <Button variant="outline" onClick={() => {
-                setSearchQuery("");
-                setSelectedSport(null);
+                setSearchQuery('');
+                setSelectedSport('all');
+                setSelectedExperience('all');
               }}>
                 Clear Filters
               </Button>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProfiles.map((profile) => (
-                <div key={profile.id} className="relative">
-                  <ProfileCard profile={profile} showMatchPercentage />
-                  
-                  {/* Like Button Overlay */}
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className={`absolute top-4 right-4 shadow-lg ${
-                      likedProfiles.has(profile.id) 
-                        ? 'bg-red-500 text-white border-red-500 hover:bg-red-600' 
-                        : 'bg-white hover:bg-red-50'
-                    }`}
-                    onClick={() => handleLike(profile.id)}
-                  >
-                    <Heart 
-                      className={`w-4 h-4 ${
-                        likedProfiles.has(profile.id) ? 'fill-current' : ''
-                      }`} 
-                    />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProfiles.map((profile) => {
+              const matchData = matchScores.get(profile.id);
+              return (
+                <Card key={profile.id} className="group hover:shadow-lg transition-all duration-300">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-start gap-4">
+                      <Avatar className="h-16 w-16">
+                        <AvatarImage src={profile.profile_picture_url} />
+                        <AvatarFallback>
+                          {profile.full_name?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-semibold truncate">{profile.full_name}</h3>
+                          {matchData && matchData.score >= 70 && (
+                            <Star className="h-4 w-4 text-warning fill-warning" />
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center text-sm text-muted-foreground mb-2">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          {formatLocation(profile)}
+                        </div>
 
-          {/* Load More */}
-          {filteredProfiles.length > 0 && (
-            <div className="text-center mt-12">
-              <Button variant="outline" size="lg">
-                Load More Partners
-              </Button>
-            </div>
-          )}
-        </div>
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {getAvailabilityText(profile.availability)}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Match Tags */}
+                    {matchData && matchData.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-3">
+                        {matchData.tags.slice(0, 3).map((tag, index) => (
+                          <Badge 
+                            key={index} 
+                            variant={tag === 'top match' ? 'default' : 'secondary'}
+                            className="text-xs"
+                          >
+                            {tag === 'top match' && <Zap className="h-3 w-3 mr-1" />}
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </CardHeader>
+
+                  <CardContent className="pt-0">
+                    {/* Sports */}
+                    <div className="mb-4">
+                      <div className="flex flex-wrap gap-1">
+                        {profile.sports.slice(0, 3).map((sport, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {sport}
+                          </Badge>
+                        ))}
+                        {profile.sports.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{profile.sports.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Experience Level */}
+                    <div className="flex items-center mb-4 text-sm">
+                      <Target className="h-3 w-3 mr-2 text-muted-foreground" />
+                      <span className="capitalize">{profile.experience_level} level</span>
+                    </div>
+
+                    {/* Bio */}
+                    {profile.bio && (
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                        {profile.bio}
+                      </p>
+                    )}
+
+                    {/* AI Match Explanation */}
+                    {matchData && matchData.score > 0 && (
+                      <div className="mb-4 p-3 bg-primary/5 rounded-lg border border-primary/10">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Sparkles className="h-4 w-4 text-primary" />
+                          <span className="text-sm font-medium text-primary">
+                            {matchData.score}% Match
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {matchData.reasons.slice(0, 2).join(' • ')}
+                        </p>
+                      </div>
+                    )}
+
+                    <Separator className="mb-4" />
+
+                    {/* Connect Button */}
+                    <Button 
+                      className="w-full group-hover:scale-105 transition-transform"
+                      onClick={() => handleConnect(profile.id)}
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Connect
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Safety Notice */}
+        <Alert className="mt-8">
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Safety First:</strong> Always meet in public places, share your plans with someone you trust, 
+            and trust your instincts. Report any inappropriate behavior using our in-app reporting feature.
+          </AlertDescription>
+        </Alert>
       </div>
     </div>
   );
-};
-
-export default Browse;
+}
