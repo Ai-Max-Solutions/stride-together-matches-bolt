@@ -33,12 +33,16 @@ const Landing = () => {
               <Button variant="ghost" className="hidden md:inline-flex">
                 How it Works
               </Button>
-              <Button variant="outline">
-                Sign In
-              </Button>
-              <Button variant="hero" size="lg">
-                Get Started
-              </Button>
+              <Link to="/auth">
+                <Button variant="outline">
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/auth">
+                <Button variant="hero" size="lg">
+                  Get Started
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -64,7 +68,7 @@ const Landing = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Link to="/browse">
+            <Link to="/auth">
               <Button variant="hero" size="xl" className="group">
                 Start Matching
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -218,9 +222,11 @@ const Landing = () => {
             Join hundreds of athletes already training together and achieving their goals.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="secondary" size="xl" className="bg-white text-primary hover:bg-white/90">
-              Create Free Profile
-            </Button>
+            <Link to="/auth">
+              <Button variant="secondary" size="xl" className="bg-white text-primary hover:bg-white/90">
+                Create Free Profile
+              </Button>
+            </Link>
             <Button variant="outline" size="xl" className="border-white text-white hover:bg-white/10">
               Learn More
             </Button>
