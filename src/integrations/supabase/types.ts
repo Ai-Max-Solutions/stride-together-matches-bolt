@@ -14,7 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          age_range_max: number | null
+          age_range_min: number | null
+          availability: Json | null
+          bio: string | null
+          city: string | null
+          created_at: string
+          email: string | null
+          experience_level: string | null
+          fitness_goals: string[] | null
+          full_name: string | null
+          gender_preference: string | null
+          id: string
+          location_visible: boolean | null
+          pace_metrics: Json | null
+          profile_picture_url: string | null
+          region: string | null
+          sports: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          age_range_max?: number | null
+          age_range_min?: number | null
+          availability?: Json | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          experience_level?: string | null
+          fitness_goals?: string[] | null
+          full_name?: string | null
+          gender_preference?: string | null
+          id?: string
+          location_visible?: boolean | null
+          pace_metrics?: Json | null
+          profile_picture_url?: string | null
+          region?: string | null
+          sports?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          age_range_max?: number | null
+          age_range_min?: number | null
+          availability?: Json | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          experience_level?: string | null
+          fitness_goals?: string[] | null
+          full_name?: string | null
+          gender_preference?: string | null
+          id?: string
+          location_visible?: boolean | null
+          pace_metrics?: Json | null
+          profile_picture_url?: string | null
+          region?: string | null
+          sports?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
