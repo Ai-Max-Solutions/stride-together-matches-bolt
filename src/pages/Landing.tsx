@@ -90,7 +90,7 @@ const Landing = () => {
               />
             <div 
               className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-              style={{ backgroundImage: 'url(/lovable-uploads/206ba749-41f5-40d8-afe1-154d2b60b0d4.png)' }}
+              style={{ backgroundImage: 'url(/lovable-uploads/5c3d2b7b-4d6d-46ba-8599-c2c76c3470c9.png)' }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-primary/60 to-accent/60"></div>
             </div>
