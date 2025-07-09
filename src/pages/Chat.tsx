@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { SmartSuggestions } from '@/components/chat/SmartSuggestions';
+import { BlockReportDialog } from '@/components/chat/BlockReportDialog';
 import { useMobileDetection } from '@/hooks/use-mobile-detection';
 import { MobileNav } from '@/components/ui/mobile-nav';
 import { cn } from '@/lib/utils';
@@ -347,9 +348,11 @@ export default function Chat() {
                   <Sparkles className="h-4 w-4 mr-2" />
                   AI Assist
                 </Button>
-                <Button variant="ghost" size="sm">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
+                <BlockReportDialog 
+                  otherUserId={otherUserProfile?.user_id || ''}
+                  otherUserName={otherUserProfile?.full_name || 'User'}
+                  onBlock={() => navigate('/messages')}
+                />
               </div>
             </div>
           </CardHeader>

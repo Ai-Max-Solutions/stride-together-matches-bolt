@@ -38,6 +38,33 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback: {
+        Row: {
+          created_at: string
+          feedback_type: string
+          id: string
+          message: string
+          page_context: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback_type?: string
+          id?: string
+          message: string
+          page_context?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback_type?: string
+          id?: string
+          message?: string
+          page_context?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       meetup_requests: {
         Row: {
           activity_type: string
@@ -125,6 +152,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      page_analytics: {
+        Row: {
+          id: string
+          page_path: string
+          session_id: string | null
+          user_id: string | null
+          visited_at: string
+        }
+        Insert: {
+          id?: string
+          page_path: string
+          session_id?: string | null
+          user_id?: string | null
+          visited_at?: string
+        }
+        Update: {
+          id?: string
+          page_path?: string
+          session_id?: string | null
+          user_id?: string | null
+          visited_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

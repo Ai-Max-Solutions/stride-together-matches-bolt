@@ -7,6 +7,8 @@ import { Suspense, lazy } from "react";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { AccessibilitySkipNav } from "@/components/ui/accessibility-skip-nav";
+import { BetaBadge } from "@/components/common/BetaBadge";
+import { useAnalytics } from "@/hooks/use-analytics";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import ProfileSetup from "./pages/ProfileSetup";
@@ -26,29 +28,39 @@ const PageFallback = () => (
   </div>
 );
 
+const AppContent = () => {
+  useAnalytics(); // Track page visits
+  return (
+    <>
+      <BetaBadge />
+      <AccessibilitySkipNav />
+      <Toaster />
+      <Sonner />
+      <Suspense fallback={<PageFallback />}>
+        <main id="main-content" tabIndex={-1}>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/profile/setup" element={<ProfileSetup />} />
+            <Route path="/browse" element={<Browse />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/chat/:conversationId" element={<Chat />} />
+            <Route path="/settings" element={<Settings />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+      </Suspense>
+    </>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <AccessibilitySkipNav />
-        <Toaster />
-        <Sonner />
         <BrowserRouter>
-          <Suspense fallback={<PageFallback />}>
-            <main id="main-content" tabIndex={-1}>
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/profile/setup" element={<ProfileSetup />} />
-                <Route path="/browse" element={<Browse />} />
-                <Route path="/messages" element={<Messages />} />
-                <Route path="/chat/:conversationId" element={<Chat />} />
-                <Route path="/settings" element={<Settings />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-          </Suspense>
+          <AppContent />
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>

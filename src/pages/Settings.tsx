@@ -266,11 +266,21 @@ export default function Settings() {
   };
 
   const submitFeedback = async () => {
-    if (!feedback.message.trim()) return;
+    if (!feedback.message.trim() || !user) return;
 
+    setLoading(true);
     try {
-      // Here we could send feedback to an edge function or external service
-      // For now, we'll just show a success message
+      const { error } = await supabase
+        .from('feedback')
+        .insert({
+          user_id: user.id,
+          feedback_type: feedback.type,
+          message: feedback.message.trim(),
+          page_context: 'settings'
+        });
+
+      if (error) throw error;
+
       toast({
         title: "Feedback sent!",
         description: "Thank you for your feedback. We'll review it soon.",
@@ -279,9 +289,11 @@ export default function Settings() {
     } catch (err: any) {
       toast({
         title: "Failed to send feedback",
-        description: "Please try again later.",
+        description: err.message,
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
