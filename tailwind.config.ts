@@ -166,20 +166,25 @@ export default {
 	},
 	plugins: [
 		require("tailwindcss-animate"),
-		function({ addUtilities }) {
+		function({ addUtilities }: any) {
 			addUtilities({
-				// Interactive elements
-				'.story-link': {
-					'@apply': 'relative inline-block after:content-[""] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left'
-				},
 				'.hover-scale': {
-					'@apply': 'transition-transform duration-200 hover:scale-105'
+					'transition': 'transform 0.2s ease',
+					'&:hover': {
+						'transform': 'scale(1.05)'
+					}
 				},
 				'.hover-lift': {
-					'@apply': 'transition-all duration-300 hover:shadow-card hover:-translate-y-1'
+					'transition': 'all 0.3s ease',
+					'&:hover': {
+						'transform': 'translateY(-4px)',
+						'box-shadow': 'var(--shadow-card)'
+					}
 				},
 				'.glass-effect': {
-					'@apply': 'bg-background/80 backdrop-blur-sm border border-border/50'
+					'background': 'hsl(var(--background) / 0.8)',
+					'backdrop-filter': 'blur(8px)',
+					'border': '1px solid hsl(var(--border) / 0.5)'
 				}
 			});
 		}
