@@ -64,7 +64,11 @@ export const LandingSportsCategories = () => {
               <div className="text-2xl mb-2">{category.icon}</div>
               <p className="text-sm text-muted-foreground mb-3">{category.count}</p>
               <Link to="/auth">
-                <Button variant={category.color as "running" | "cycling" | "fitness" | "default"} size="sm" className="w-full">
+                <Button 
+                  variant={category.sport === "Gym Training" ? "default" : category.color as "running" | "cycling" | "fitness" | "default"} 
+                  size="sm" 
+                  className={`w-full ${category.sport === "Gym Training" ? "bg-black text-white hover:bg-gray-800" : ""}`}
+                >
                   Find Partners
                 </Button>
               </Link>
