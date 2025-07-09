@@ -44,19 +44,9 @@ export function useAdvancedAI() {
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
         body: {
           type: 'smart_workout_suggestion',
-          currentUser,
-          otherUser,
-          conversationHistory,
-          context: {
-            shared_sports: currentUser.sports.filter((sport: string) => 
-              otherUser.sports.includes(sport)
-            ),
-            location_compatibility: currentUser.city === otherUser.city,
-            experience_levels: {
-              current: currentUser.experience_level,
-              other: otherUser.experience_level
-            }
-          }
+          userProfile: currentUser,
+          otherUserProfile: otherUser,
+          conversationHistory
         }
       });
 
@@ -94,14 +84,9 @@ export function useAdvancedAI() {
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
         body: {
           type: 'optimal_meeting_times',
-          currentUser,
-          otherUser,
-          sharedAvailability,
-          context: {
-            current_time: new Date().toISOString(),
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            weekend_preference: true // Could be user preference
-          }
+          userProfile: currentUser,
+          otherUserProfile: otherUser,
+          sharedAvailability
         }
       });
 
@@ -127,26 +112,14 @@ export function useAdvancedAI() {
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
         body: {
           type: 'contextual_icebreaker',
-          currentUser,
-          otherUser,
-          conversationHistory,
-          context: {
-            shared_interests: {
-              sports: currentUser.sports.filter((sport: string) => 
-                otherUser.sports.includes(sport)
-              ),
-              goals: currentUser.fitness_goals?.filter((goal: string) => 
-                otherUser.fitness_goals?.includes(goal)
-              ) || [],
-              location: currentUser.city === otherUser.city
-            },
-            conversation_stage: conversationHistory.length === 0 ? 'first_message' : 'ongoing'
-          }
+          userProfile: currentUser,
+          otherUserProfile: otherUser,
+          conversationHistory
         }
       });
 
       if (error) throw error;
-      return data?.suggestions || [];
+      return data?.suggestion || [];
     } catch (err: any) {
       setError(err.message);
       return [];
@@ -172,22 +145,14 @@ export function useAdvancedAI() {
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
         body: {
           type: 'safety_recommendations',
-          currentUser,
-          otherUser,
-          conversationHistory,
-          context: {
-            location: currentUser.city,
-            time_of_day: new Date().getHours(),
-            is_first_meetup: conversationHistory.length < 10,
-            activities: currentUser.sports.filter((sport: string) => 
-              otherUser.sports.includes(sport)
-            )
-          }
+          userProfile: currentUser,
+          otherUserProfile: otherUser,
+          conversationHistory
         }
       });
 
       if (error) throw error;
-      return data?.recommendations || null;
+      return data?.suggestion || null;
     } catch (err: any) {
       setError(err.message);
       return null;

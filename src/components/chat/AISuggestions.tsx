@@ -1,184 +1,414 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, MessageSquare, Lightbulb } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { useToast } from '@/hooks/use-toast';
+import { useAdvancedAI } from '@/hooks/use-advanced-ai';
+import { 
+  Sparkles, 
+  Calendar, 
+  Shield,
+  Dumbbell,
+  MessageSquare,
+  RotateCcw,
+  ChevronDown,
+  ChevronUp,
+  Bot
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AISuggestionsProps {
-  userProfile: any;
-  otherUserProfile: any;
-  onSuggestionSelect: (suggestion: string) => void;
-  conversationId?: string;
+  currentUser: any;
+  otherUser: any;
+  conversationHistory?: any[];
+  onSendMessage: (message: string, type?: 'text' | 'ai_suggestion') => void;
+  className?: string;
 }
 
-interface Suggestion {
-  text: string;
-  type: 'starter' | 'ice_breaker' | 'activity';
-  icon: any;
-}
-
-export function AISuggestions({ 
-  userProfile, 
-  otherUserProfile, 
-  onSuggestionSelect,
-  conversationId 
+export function AISuggestions({
+  currentUser,
+  otherUser,
+  conversationHistory = [],
+  onSendMessage,
+  className
 }: AISuggestionsProps) {
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [activeType, setActiveType] = useState<'starter' | 'ice_breaker' | 'activity'>('starter');
+  const { toast } = useToast();
+  const {
+    generateSmartWorkoutSuggestion,
+    generateOptimalMeetingTimes,
+    generateContextualIcebreaker,
+    generateSafetyRecommendations,
+    loading
+  } = useAdvancedAI();
 
-  const generateSuggestions = async (type: 'conversation_starter' | 'ice_breaker' | 'workout_suggestion') => {
-    setLoading(true);
+  const [activeTab, setActiveTab] = useState<'workout' | 'timing' | 'icebreaker' | 'safety' | null>(null);
+  const [suggestions, setSuggestions] = useState<any>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
+  const handleGenerateWorkout = async () => {
+    setActiveTab('workout');
+    setIsCollapsed(false);
+    
     try {
-      const { data, error } = await supabase.functions.invoke('chat-assistant', {
-        body: {
-          type,
-          userProfile,
-          otherUserProfile,
-          conversationId
-        }
+      const suggestion = await generateSmartWorkoutSuggestion({
+        currentUser,
+        otherUser,
+        conversationHistory
       });
 
-      if (error) throw error;
-
-      // Parse the AI response into suggestions
-      const response = data.response;
-      const suggestionLines = response.split('\n').filter((line: string) => 
-        line.trim() && (line.includes('1.') || line.includes('2.') || line.includes('3.') || line.includes('-'))
-      );
-
-      const newSuggestions: Suggestion[] = suggestionLines.map((line: string) => ({
-        text: line.replace(/^\d+\.\s*|-\s*/, '').trim(),
-        type: type === 'conversation_starter' ? 'starter' : 
-              type === 'ice_breaker' ? 'ice_breaker' : 'activity',
-        icon: type === 'conversation_starter' ? MessageSquare :
-              type === 'ice_breaker' ? Lightbulb : Sparkles
-      }));
-
-      setSuggestions(newSuggestions);
+      if (suggestion) {
+        setSuggestions(suggestion);
+      } else {
+        toast({
+          title: "No suggestions available",
+          description: "Try again in a moment.",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
-      console.error('Failed to generate suggestions:', error);
-    } finally {
-      setLoading(false);
+      toast({
+        title: "Failed to generate suggestion",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
     }
   };
 
-  const handleTypeChange = async (type: 'starter' | 'ice_breaker' | 'activity') => {
-    setActiveType(type);
-    const aiType = type === 'starter' ? 'conversation_starter' :
-                   type === 'ice_breaker' ? 'ice_breaker' : 'workout_suggestion';
-    await generateSuggestions(aiType);
-  };
-
-  const getSharedInterests = () => {
-    const sharedSports = userProfile?.sports?.filter((sport: string) => 
-      otherUserProfile?.sports?.includes(sport)
-    ) || [];
+  const handleGenerateTiming = async () => {
+    setActiveTab('timing');
+    setIsCollapsed(false);
     
-    return {
-      sports: sharedSports,
-      sameCity: userProfile?.city === otherUserProfile?.city,
-      similarLevel: userProfile?.experience_level === otherUserProfile?.experience_level
-    };
+    try {
+      const suggestion = await generateOptimalMeetingTimes({
+        currentUser,
+        otherUser
+      });
+
+      if (suggestion) {
+        setSuggestions(suggestion);
+      } else {
+        toast({
+          title: "No timing suggestions available",
+          description: "Try again in a moment.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Failed to generate timing",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const shared = getSharedInterests();
+  const handleGenerateIcebreaker = async () => {
+    setActiveTab('icebreaker');
+    setIsCollapsed(false);
+    
+    try {
+      const suggestions = await generateContextualIcebreaker({
+        currentUser,
+        otherUser,
+        conversationHistory
+      });
 
-  return (
-    <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="h-4 w-4 text-primary" />
-          <span className="font-medium text-sm">AI Conversation Suggestions</span>
+      if (suggestions && suggestions.length > 0) {
+        setSuggestions(suggestions);
+      } else {
+        toast({
+          title: "No conversation starters available",
+          description: "Try again in a moment.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Failed to generate icebreakers",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleGenerateSafety = async () => {
+    setActiveTab('safety');
+    setIsCollapsed(false);
+    
+    try {
+      const recommendations = await generateSafetyRecommendations({
+        currentUser,
+        otherUser,
+        conversationHistory
+      });
+
+      if (recommendations) {
+        setSuggestions(recommendations);
+      } else {
+        toast({
+          title: "No safety tips available",
+          description: "Try again in a moment.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Failed to generate safety tips",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleRegenerate = () => {
+    if (activeTab === 'workout') handleGenerateWorkout();
+    else if (activeTab === 'timing') handleGenerateTiming();
+    else if (activeTab === 'icebreaker') handleGenerateIcebreaker();
+    else if (activeTab === 'safety') handleGenerateSafety();
+  };
+
+  const renderSuggestionContent = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center py-6">
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mr-3"></div>
+          <span className="text-sm text-muted-foreground">AI is thinking...</span>
         </div>
+      );
+    }
 
-        {/* Quick Context */}
-        <div className="flex flex-wrap gap-1 mb-3">
-          {shared.sports.length > 0 && (
-            <Badge variant="secondary" className="text-xs">
-              Shared: {shared.sports.slice(0, 2).join(', ')}
-            </Badge>
-          )}
-          {shared.sameCity && (
-            <Badge variant="secondary" className="text-xs">
-              Same city
-            </Badge>
-          )}
-          {shared.similarLevel && (
-            <Badge variant="secondary" className="text-xs">
-              Similar level
-            </Badge>
-          )}
-        </div>
+    if (!suggestions) return null;
 
-        {/* Type Selector */}
-        <div className="flex gap-2 mb-3">
-          <Button
-            variant={activeType === 'starter' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => handleTypeChange('starter')}
-            className="text-xs"
-          >
-            <MessageSquare className="h-3 w-3 mr-1" />
-            Starters
-          </Button>
-          <Button
-            variant={activeType === 'ice_breaker' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => handleTypeChange('ice_breaker')}
-            className="text-xs"
-          >
-            <Lightbulb className="h-3 w-3 mr-1" />
-            Ice Breakers
-          </Button>
-          <Button
-            variant={activeType === 'activity' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => handleTypeChange('activity')}
-            className="text-xs"
-          >
-            <Sparkles className="h-3 w-3 mr-1" />
-            Activities
-          </Button>
-        </div>
-
-        {/* Suggestions */}
-        {loading ? (
-          <div className="flex items-center justify-center py-4">
-            <LoadingSpinner size="sm" />
-          </div>
-        ) : suggestions.length > 0 ? (
-          <div className="space-y-2">
-            {suggestions.slice(0, 3).map((suggestion, index) => (
-              <Button
-                key={index}
-                variant="ghost"
-                size="sm"
-                onClick={() => onSuggestionSelect(suggestion.text)}
-                className="w-full text-left text-xs h-auto p-2 justify-start"
-              >
-                <suggestion.icon className="h-3 w-3 mr-2 flex-shrink-0" />
-                <span className="line-clamp-2">{suggestion.text}</span>
-              </Button>
-            ))}
-          </div>
-        ) : suggestions.length === 0 && !loading ? (
-          <div className="text-center py-2">
-            <p className="text-xs text-muted-foreground mb-2">
-              Get AI-powered conversation suggestions
-            </p>
-            <Button
-              variant="outline"
+    switch (activeTab) {
+      case 'workout':
+        const workoutMessage = suggestions.details || 
+          `🏋️ Let's ${suggestions.activity || 'work out'} together! Duration: ${suggestions.duration || '45 mins'}`;
+        return (
+          <div className="space-y-3">
+            <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-3 rounded-lg border border-primary/20">
+              <div className="flex items-start gap-2 mb-2">
+                <Bot className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                <p className="text-sm">{workoutMessage}</p>
+              </div>
+              {!isExpanded && workoutMessage.length > 100 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsExpanded(true)}
+                  className="text-xs h-auto p-1"
+                >
+                  Show More <ChevronDown className="h-3 w-3 ml-1" />
+                </Button>
+              )}
+              {isExpanded && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsExpanded(false)}
+                  className="text-xs h-auto p-1"
+                >
+                  Show Less <ChevronUp className="h-3 w-3 ml-1" />
+                </Button>
+              )}
+            </div>
+            <Button 
+              onClick={() => onSendMessage(workoutMessage, 'ai_suggestion')}
+              className="w-full"
               size="sm"
-              onClick={() => handleTypeChange('starter')}
-              className="text-xs"
             >
-              Generate Suggestions
+              Send Workout Idea
             </Button>
           </div>
-        ) : null}
+        );
+
+      case 'timing':
+        const timingMessage = suggestions.ai_analysis || "Let's find the perfect time to meet up!";
+        return (
+          <div className="space-y-3">
+            <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-3 rounded-lg border border-primary/20">
+              <div className="flex items-start gap-2">
+                <Bot className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                <p className="text-sm">{timingMessage}</p>
+              </div>
+            </div>
+            <Button 
+              onClick={() => onSendMessage(`📅 ${timingMessage}`, 'ai_suggestion')}
+              className="w-full"
+              size="sm"
+            >
+              Share Timing Suggestion
+            </Button>
+          </div>
+        );
+
+      case 'icebreaker':
+        return (
+          <div className="space-y-3">
+            {suggestions.slice(0, 2).map((suggestion: string, index: number) => (
+              <div key={index} className="space-y-2">
+                <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-3 rounded-lg border border-primary/20">
+                  <div className="flex items-start gap-2">
+                    <Bot className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <p className="text-sm">{suggestion}</p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => onSendMessage(suggestion, 'text')}
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                >
+                  Send This Message
+                </Button>
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'safety':
+        const safetyMessage = suggestions.ai_details || 
+          suggestions.general_safety?.[0] || 
+          "Let's meet in a public place for our first workout!";
+        return (
+          <div className="space-y-3">
+            <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-3 rounded-lg border border-primary/20">
+              <div className="flex items-start gap-2">
+                <Bot className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                <p className="text-sm">{safetyMessage}</p>
+              </div>
+            </div>
+            <Button 
+              onClick={() => onSendMessage(`🛡️ Safety first! ${safetyMessage}`, 'ai_suggestion')}
+              className="w-full"
+              size="sm"
+            >
+              Share Safety Tip
+            </Button>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  const suggestionButtons = [
+    {
+      id: 'workout' as const,
+      label: 'Workout Ideas',
+      icon: Dumbbell,
+      action: handleGenerateWorkout
+    },
+    {
+      id: 'timing' as const,
+      label: 'Meeting Times',
+      icon: Calendar,
+      action: handleGenerateTiming
+    },
+    {
+      id: 'icebreaker' as const,
+      label: 'Conversation',
+      icon: MessageSquare,
+      action: handleGenerateIcebreaker
+    },
+    {
+      id: 'safety' as const,
+      label: 'Safety Tips',
+      icon: Shield,
+      action: handleGenerateSafety
+    }
+  ];
+
+  return (
+    <Card className={cn("border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5", className)}>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Sparkles className="h-5 w-5 text-primary" />
+            AI Smart Suggestions
+            <Badge variant="outline" className="border-primary/20 text-xs">
+              Beta
+            </Badge>
+          </CardTitle>
+          {!isCollapsed && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsCollapsed(true)}
+              className="h-auto p-1"
+            >
+              <ChevronUp className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+      
+      <CardContent className="space-y-4">
+        {/* Suggestion Buttons */}
+        <div className="grid grid-cols-2 gap-2">
+          {suggestionButtons.map((button) => {
+            const Icon = button.icon;
+            return (
+              <Button
+                key={button.id}
+                variant={activeTab === button.id ? "default" : "outline"}
+                size="sm"
+                onClick={button.action}
+                disabled={loading}
+                className="flex items-center gap-2 text-xs h-10 min-h-[44px]"
+                aria-label={`Generate ${button.label.toLowerCase()}`}
+              >
+                <Icon className="h-3 w-3" />
+                {button.label}
+              </Button>
+            );
+          })}
+        </div>
+
+        {/* Content */}
+        {!isCollapsed && (
+          <>
+            {activeTab && (
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  {suggestionButtons.find(b => b.id === activeTab)?.label}
+                </h4>
+                {suggestions && !loading && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRegenerate}
+                    className="h-auto p-1"
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+            )}
+            
+            {renderSuggestionContent()}
+            
+            {!activeTab && !loading && (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground">
+                  Tap a button above to get AI suggestions!
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+        {isCollapsed && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsCollapsed(false)}
+            className="w-full"
+          >
+            Show AI Suggestions <ChevronDown className="h-4 w-4 ml-2" />
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

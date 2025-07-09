@@ -26,7 +26,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
-import { SmartSuggestions } from '@/components/chat/SmartSuggestions';
+import { AISuggestions } from '@/components/chat/AISuggestions';
 import { BlockReportDialog } from '@/components/chat/BlockReportDialog';
 import { ReportUserDialog } from '@/components/chat/ReportUserDialog';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
@@ -727,7 +727,7 @@ export default function Chat() {
         {/* Smart AI Suggestions */}
         {showSmartSuggestions && currentUserProfile && otherUserProfile && (
           <div className="mt-4">
-            <SmartSuggestions
+            <AISuggestions
               currentUser={currentUserProfile}
               otherUser={otherUserProfile}
               conversationHistory={messages}

@@ -37,6 +37,51 @@ serve(async (req) => {
         userPrompt = `Please check this message for safety: "${message}"`;
         break;
 
+      // New suggestion types for useAdvancedAI hook
+      case 'smart_workout_suggestion':
+        systemPrompt = `You are a helpful fitness assistant. Generate a concise workout suggestion (max 2 lines) based on user profiles.
+User 1: ${userProfile?.full_name} - Sports: ${userProfile?.sports?.join(', ')} - Level: ${userProfile?.experience_level}
+User 2: ${otherUserProfile?.full_name} - Sports: ${otherUserProfile?.sports?.join(', ')} - Level: ${otherUserProfile?.experience_level}
+Location: ${userProfile?.city}, ${userProfile?.region}
+
+Return a JSON response with: {"activity": string, "duration": string, "details": string}
+Keep details under 2 sentences for chat use.`;
+        
+        userPrompt = `Suggest a specific workout for these two fitness buddies.`;
+        break;
+
+      case 'optimal_meeting_times':
+        systemPrompt = `You are a scheduling assistant. Analyze user availability and suggest optimal meeting times.
+Return a JSON response with: {"recommended_times": [{"day": string, "time": string, "confidence": number, "reason": string}], "ai_analysis": string}
+Keep ai_analysis under 2 sentences for chat use.`;
+        
+        userPrompt = `Based on the shared availability data, suggest the best meeting times for these fitness buddies.`;
+        break;
+
+      case 'contextual_icebreaker':
+        const sharedSports = userProfile?.sports?.filter(sport => 
+          otherUserProfile?.sports?.includes(sport)
+        ) || [];
+        
+        systemPrompt = `You are creating ice breaker suggestions for a fitness app. Create 2-3 short, specific conversation starters (max 1 sentence each).
+${sharedSports.length > 0 ? `Shared sports: ${sharedSports.join(', ')}` : 'No shared sports'}
+Both users' experience levels: ${userProfile?.experience_level} and ${otherUserProfile?.experience_level}
+Location context: ${userProfile?.city === otherUserProfile?.city ? 'Same city' : 'Different cities'}
+
+Return a JSON array of strings: ["message1", "message2", "message3"]`;
+        
+        userPrompt = `Create ice breaker messages that help these fitness buddies start a conversation.`;
+        break;
+
+      case 'safety_recommendations':
+        systemPrompt = `You are a safety assistant for a fitness app. Provide concise safety tips for meetups.
+Return a JSON response with: {"location_tips": ["tip1", "tip2"], "timing_recommendations": ["tip1", "tip2"], "general_safety": ["tip1"], "ai_details": string}
+Keep each tip under 10 words and ai_details under 2 sentences.`;
+        
+        userPrompt = `Provide safety recommendations for ${userProfile?.full_name} and ${otherUserProfile?.full_name} meeting for fitness activities.`;
+        break;
+
+      // Legacy cases for backward compatibility
       case 'workout_suggestion':
         systemPrompt = `You are a helpful fitness assistant for a workout buddy app. Generate practical workout suggestions based on user profiles.
 User 1: ${userProfile?.full_name} - Sports: ${userProfile?.sports?.join(', ')} - Level: ${userProfile?.experience_level}
@@ -74,12 +119,12 @@ User 2: ${otherUserProfile?.full_name} - Sports: ${otherUserProfile?.sports?.joi
         break;
 
       case 'ice_breaker':
-        const sharedSports = userProfile?.sports?.filter(sport => 
+        const legacySharedSports = userProfile?.sports?.filter(sport => 
           otherUserProfile?.sports?.includes(sport)
         ) || [];
         
         systemPrompt = `You are creating ice breaker suggestions for a fitness app. Create friendly, specific conversation starters.
-${sharedSports.length > 0 ? `Shared sports: ${sharedSports.join(', ')}` : 'No shared sports'}
+${legacySharedSports.length > 0 ? `Shared sports: ${legacySharedSports.join(', ')}` : 'No shared sports'}
 Both users' experience levels: ${userProfile?.experience_level} and ${otherUserProfile?.experience_level}
 Location context: ${userProfile?.city === otherUserProfile?.city ? 'Same city' : 'Different cities'}`;
         
@@ -116,7 +161,7 @@ Location context: ${userProfile?.city === otherUserProfile?.city ? 'Same city' :
 
     const aiResponse = data.choices[0].message.content;
 
-    // For safety checks, try to parse JSON response
+    // Handle different response formats based on type
     if (type === 'safety_check') {
       try {
         const safetyResult = JSON.parse(aiResponse);
@@ -129,6 +174,27 @@ Location context: ${userProfile?.city === otherUserProfile?.city ? 'Same city' :
           safe: true,
           reason: 'Could not parse safety check',
           action: 'none'
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // For structured suggestion types, try to parse JSON
+    if (['smart_workout_suggestion', 'optimal_meeting_times', 'contextual_icebreaker', 'safety_recommendations'].includes(type)) {
+      try {
+        const structuredResponse = JSON.parse(aiResponse);
+        return new Response(JSON.stringify({ 
+          suggestion: structuredResponse,
+          type 
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch {
+        // Fallback to text response if JSON parsing fails
+        return new Response(JSON.stringify({ 
+          suggestion: aiResponse,
+          type 
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
