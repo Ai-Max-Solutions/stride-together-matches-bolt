@@ -4,7 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, MapPin, Clock, Star } from "lucide-react";
 import { SportsBadges } from "./sports-badges";
+import { TrustBadges } from "./TrustBadges";
 import { BlockReportDialog } from "@/components/chat/BlockReportDialog";
+import { cn } from '@/lib/utils';
 
 interface Profile {
   id: string;
@@ -68,11 +70,14 @@ export function MatchCard({ profile, matchScore, onConnect, className }: MatchCa
           
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between mb-2">
-              <div>
+              <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-lg truncate">{profile.full_name}</h3>
-                <div className="flex items-center text-sm text-muted-foreground mt-1">
-                  <MapPin className="h-3 w-3 mr-1" />
-                  {formatLocation(profile)}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center text-sm text-muted-foreground mt-1">
+                    <MapPin className="h-3 w-3 mr-1" />
+                    {formatLocation(profile)}
+                  </div>
+                  <TrustBadges profile={profile} size="sm" className="mt-1" />
                 </div>
               </div>
               {matchScore && (

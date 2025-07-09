@@ -30,6 +30,7 @@ import { SmartSuggestions } from '@/components/chat/SmartSuggestions';
 import { BlockReportDialog } from '@/components/chat/BlockReportDialog';
 import { ReportUserDialog } from '@/components/chat/ReportUserDialog';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
+import { SafetyTipsSheet } from '@/components/chat/SafetyTipsSheet';
 import { useMobileDetection } from '@/hooks/use-mobile-detection';
 import { MobileNav } from '@/components/ui/mobile-nav';
 import { cn } from '@/lib/utils';
@@ -83,6 +84,7 @@ export default function Chat() {
   const [isTyping, setIsTyping] = useState(false);
   const [otherUserTyping, setOtherUserTyping] = useState(false);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [showSafetyTips, setShowSafetyTips] = useState(false);
   
   const { isMobile } = useMobileDetection();
 
@@ -300,6 +302,11 @@ export default function Chat() {
   };
 
   const requestMeetup = async () => {
+    // Show safety tips first
+    setShowSafetyTips(true);
+  };
+
+  const handleSafetyAccepted = async () => {
     try {
       const { data } = await supabase.functions.invoke('chat-assistant', {
         body: {
@@ -444,15 +451,18 @@ export default function Chat() {
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold">{otherUserProfile?.full_name}</h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowReportDialog(true)}
-                    className="p-1 h-6 w-6 rounded-full text-muted-foreground hover:text-destructive"
-                    title="Report user"
-                  >
-                    <Flag className="h-3 w-3" />
-                  </Button>
+                  {/* Always visible Report button on mobile */}
+                  {isMobile && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowReportDialog(true)}
+                      className="p-1 h-6 w-6 rounded-full text-muted-foreground hover:text-destructive"
+                      title="Report user"
+                    >
+                      <Flag className="h-3 w-3" />
+                    </Button>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <MapPin className="h-3 w-3" />
@@ -488,6 +498,16 @@ export default function Chat() {
                     >
                       <Sparkles className="h-4 w-4 mr-2" />
                       AI Assist
+                    </Button>
+                    {/* Desktop Report button */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowReportDialog(true)}
+                      className="p-2 rounded-full text-muted-foreground hover:text-destructive"
+                      title="Report user"
+                    >
+                      <Flag className="h-4 w-4" />
                     </Button>
                   </>
                 )}
@@ -607,6 +627,13 @@ export default function Chat() {
                         }`}>
                           <Clock className="h-3 w-3" />
                           {formatTime(message.created_at)}
+                          {/* Read receipt for own messages */}
+                          {isOwn && message.read_at && (
+                            <div className="flex items-center gap-1 ml-2">
+                              <div className="w-1.5 h-1.5 bg-primary-foreground/50 rounded-full"></div>
+                              <span className="text-[10px]">Read</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -720,6 +747,14 @@ export default function Chat() {
           </AlertDescription>
         </Alert>
       </div>
+      
+      {/* Safety Tips Sheet */}
+      <SafetyTipsSheet
+        isOpen={showSafetyTips}
+        onClose={() => setShowSafetyTips(false)}
+        onAccept={handleSafetyAccepted}
+        meetupType="workout"
+      />
       
       {/* Report Dialog */}
       <ReportUserDialog
