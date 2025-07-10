@@ -672,39 +672,62 @@ export default function Browse() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Flash Events</h3>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-4">
+                {/* Create Flash Event Button */}
                 <Button
-                  variant={flashEventTab === 'runs' ? 'default' : 'outline'}
+                  onClick={() => {
+                    if (flashEventTab === 'yoga') {
+                      setShowYogaModal(true);
+                    } else if (flashEventTab === 'workouts') {
+                      setShowFlashWorkoutModal(true);
+                    } else if (flashEventTab === 'rides') {
+                      setShowFlashRideModal(true);
+                    } else {
+                      setShowFlashRunModal(true);
+                    }
+                  }}
+                  className="bg-gradient-primary hover:shadow-premium text-primary-foreground shadow-md hover:scale-105 transition-all"
                   size="sm"
-                  onClick={() => setFlashEventTab('runs')}
-                  className="flex items-center gap-2"
                 >
-                  🏃 Flash Runs
+                  <span className="mr-2">+</span>
+                  Create Flash Event
                 </Button>
-                <Button
-                  variant={flashEventTab === 'rides' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setFlashEventTab('rides')}
-                  className="flex items-center gap-2"
-                >
-                  🚴 Flash Rides
-                </Button>
-                <Button
-                  variant={flashEventTab === 'workouts' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setFlashEventTab('workouts')}
-                  className="flex items-center gap-2"
-                >
-                  💪 Flash Workouts
-                </Button>
-                <Button
-                  variant={flashEventTab === 'yoga' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setFlashEventTab('yoga')}
-                  className="flex items-center gap-2"
-                >
-                  🧘 Flash Yoga
-                </Button>
+                
+                {/* Tab Buttons */}
+                <div className="flex gap-2">
+                  <Button
+                    variant={flashEventTab === 'runs' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFlashEventTab('runs')}
+                    className="flex items-center gap-2"
+                  >
+                    🏃 Flash Runs
+                  </Button>
+                  <Button
+                    variant={flashEventTab === 'rides' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFlashEventTab('rides')}
+                    className="flex items-center gap-2"
+                  >
+                    🚴 Flash Rides
+                  </Button>
+                  <Button
+                    variant={flashEventTab === 'workouts' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFlashEventTab('workouts')}
+                    className="flex items-center gap-2"
+                  >
+                    💪 Flash Workouts
+                  </Button>
+                  <Button
+                    variant={flashEventTab === 'yoga' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFlashEventTab('yoga')}
+                    className="flex items-center gap-2"
+                  >
+                    🧘 Flash Yoga
+                  </Button>
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -914,21 +937,6 @@ export default function Browse() {
         </Alert>
       </div>
 
-      {/* Smart FAB - Shows based on user's primary sport */}
-      <FlashRunFAB 
-        sportType={shouldShowYogaFAB ? 'yoga' : shouldShowWorkoutFAB ? 'workout' : shouldShowCyclingFAB ? 'cycling' : 'running'}
-        onClick={() => {
-          if (shouldShowYogaFAB) {
-            setShowYogaModal(true);
-          } else if (shouldShowWorkoutFAB) {
-            setShowFlashWorkoutModal(true);
-          } else if (shouldShowCyclingFAB) {
-            setShowFlashRideModal(true);
-          } else {
-            setShowFlashRunModal(true);
-          }
-        }} 
-      />
 
       {/* Flash Run Modal */}
       <FlashRunModal
