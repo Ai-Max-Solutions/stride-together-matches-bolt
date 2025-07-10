@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { MatchCard } from '@/components/common/match-card';
+import MatchCard from '@/components/common/match-card';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { usePagination } from '@/hooks/use-pagination';
 import { useFlashRuns } from '@/hooks/use-flash-runs';
@@ -65,9 +65,11 @@ interface Profile {
   age_range_min: number;
   age_range_max: number;
   created_at: string;
-  is_mentor_available?: boolean;
+  is_mentor_available: boolean | null;
   years_experience?: number;
-  mentor_specialties?: string[];
+  mentor_specialties: string[] | null;
+  trust_score?: number;
+  last_active_at?: string;
 }
 
 interface MatchScore {

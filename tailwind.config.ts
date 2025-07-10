@@ -79,7 +79,11 @@ export default {
 			boxShadow: {
 				'primary': 'var(--shadow-primary)',
 				'accent': 'var(--shadow-accent)',
-				'card': 'var(--shadow-card)'
+				'card': 'var(--shadow-card)',
+				'card-hover': '0 8px 25px -3px hsla(210, 22%, 15%, 0.12), 0 4px 6px -2px hsla(210, 22%, 15%, 0.05)',
+				'premium': '0 6px 20px -6px hsla(210, 22%, 15%, 0.15)',
+				'avatar': '0 2px 8px hsla(210, 22%, 15%, 0.08)',
+				'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.15)'
 			},
 			transitionTimingFunction: {
 				'smooth': 'var(--transition-smooth)',

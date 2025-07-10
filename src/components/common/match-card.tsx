@@ -1,38 +1,35 @@
-import { useState } from 'react';
+import React, { useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, MapPin, Clock, Star, Zap, GraduationCap } from "lucide-react";
-import { SportsBadges } from "./sports-badges";
-import { TrustBadges } from "./TrustBadges";
+import { MessageCircle, MapPin, Clock, Star, Zap, Trophy, Heart } from "lucide-react";
 import { BlockReportDialog } from "@/components/chat/BlockReportDialog";
-import { MatchToast } from "./MatchToast";
+import { MatchToast } from "@/components/common/MatchToast";
+import { ConfettiEffect } from "@/components/common/ConfettiEffect";
 import { useUserPresence } from "@/hooks/use-user-presence";
 import { useAchievements } from "@/hooks/use-achievements";
 import { useChallenges } from "@/hooks/use-challenges";
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
+// Profile interface matching the Browse page structure
 interface Profile {
   id: string;
   user_id: string;
-  full_name: string;
-  bio: string;
-  profile_picture_url?: string;
-  sports: string[];
-  experience_level: string;
-  pace_metrics: Record<string, any>;
-  fitness_goals: string[];
-  city: string;
-  region: string;
-  location_visible: boolean;
-  availability: Record<string, string[]>;
-  age_range_min: number;
-  age_range_max: number;
-  created_at: string;
-  is_mentor_available?: boolean;
-  years_experience?: number;
-  mentor_specialties?: string[];
+  full_name: string | null;
+  bio: string | null;
+  city: string | null;
+  region: string | null;
+  sports: string[] | null;
+  experience_level: string | null;
+  fitness_goals: string[] | null;
+  mentor_specialties: string[] | null;
+  is_mentor_available: boolean | null;
+  years_experience: number | null;
+  availability: Record<string, string[]> | null;
+  trust_score: number | null;
+  profile_picture_url: string | null;
+  last_active_at: string | null;
 }
 
 interface MatchScore {
@@ -43,254 +40,278 @@ interface MatchScore {
 
 interface MatchCardProps {
   profile: Profile;
-  matchScore?: MatchScore;
+  matchScore: MatchScore;
   onConnect: (profileId: string) => void;
   className?: string;
   currentUserId?: string;
 }
 
-export function MatchCard({ profile, matchScore, onConnect, className, currentUserId }: MatchCardProps) {
+const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }: MatchCardProps) => {
   const [showMatchToast, setShowMatchToast] = useState(false);
-  const [connecting, setConnecting] = useState(false);
-  const [hasConnected, setHasConnected] = useState(false);
-  const { isOnline, statusText, statusColor } = useUserPresence(profile.user_id);
-  const { checkAchievements } = useAchievements();
-  const { updateProgress, challenges } = useChallenges();
-  const formatLocation = (profile: Profile) => {
-    if (!profile.location_visible) return 'Location private';
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [isBlockReportOpen, setIsBlockReportOpen] = useState(false);
+  
+  const isOnline = useUserPresence(profile.user_id);
+  const { awardAchievement } = useAchievements();
+  const { updateProgress } = useChallenges();
+
+  // Format location for display
+  const formatLocation = (profile: Profile): string => {
     if (profile.city && profile.region) {
       return `${profile.city}, ${profile.region}`;
     }
-    return profile.city || profile.region || 'Location not set';
+    return profile.city || profile.region || "Location not specified";
   };
 
-  const getAvailabilityText = (availability: Record<string, string[]>) => {
-    const activeDays = Object.keys(availability).filter(day => 
-      availability[day] && availability[day].length > 0
-    );
-    if (activeDays.length === 0) return 'Schedule not set';
-    return `Available ${activeDays.length} days/week`;
-  };
-
-  const generateMentorBlurb = (profile: Profile, currentUserGoals?: string[]) => {
-    const name = profile.full_name?.split(' ')[0] || 'They';
-    const specialties = profile.mentor_specialties || [];
-    
-    // Match specialties with current user's goals
-    const relevantSpecialty = specialties.find(specialty => {
-      if (currentUserGoals?.includes('first_marathon') && specialty === 'pacing_strategies') return true;
-      if (currentUserGoals?.includes('weight_loss') && specialty === 'nutrition_planning') return true;
-      if (currentUserGoals?.includes('strength') && specialty === 'strength_training') return true;
-      return false;
-    }) || specialties[0];
-
-    if (relevantSpecialty) {
-      const specialtyMap: Record<string, string> = {
-        'pacing_strategies': 'pacing strategies',
-        'injury_prevention': 'staying injury-free',
-        'nutrition_planning': 'race-day nutrition',
-        'race_preparation': 'race preparation',
-        'strength_training': 'strength training',
-        'form_technique': 'proper form',
-        'mental_preparation': 'mental preparation',
-        'recovery_methods': 'recovery techniques',
-        'goal_setting': 'goal setting'
-      };
-      return `Ask ${name} about ${specialtyMap[relevantSpecialty] || relevantSpecialty.replace('_', ' ')}!`;
+  // Get availability summary
+  const getAvailabilityText = (availability: Record<string, string[]>): string => {
+    if (!availability || Object.keys(availability).length === 0) {
+      return "Availability not set";
     }
     
-    return `Ask ${name} about their experience!`;
-  };
-
-  const handleConnect = async () => {
-    setConnecting(true);
-    setHasConnected(true);
+    const days = Object.keys(availability).filter(day => 
+      availability[day] && availability[day].length > 0
+    );
     
-    // Add a small delay for button animation
-    setTimeout(async () => {
-      // Simulate checking if it's a mutual match (for demo purposes)
-      const isMatch = Math.random() > 0.7; // 30% chance of mutual match
-      
-      setShowMatchToast(true);
-      onConnect(profile.user_id);
-      setConnecting(false);
-
-      // Update gamification progress
-      try {
-        // Check for achievements based on connections
-        await checkAchievements({ connectionsCount: 1 });
-        
-        // Update challenge progress for connection-based challenges
-        const connectionChallenges = challenges.filter(c => 
-          c.title.toLowerCase().includes('connect') || 
-          c.title.toLowerCase().includes('buddy')
-        );
-        
-        for (const challenge of connectionChallenges) {
-          await updateProgress(challenge.id, 1);
-        }
-      } catch (error) {
-        console.error('Error updating gamification progress:', error);
-      }
-    }, 600);
+    if (days.length === 0) return "No availability set";
+    if (days.length === 7) return "Available daily";
+    if (days.length >= 5) return "Available most days";
+    
+    return `Available ${days.length} days/week`;
   };
+
+  // Generate mentor blurb
+  const generateMentorBlurb = (profile: Profile, currentUserGoals?: string[]): string => {
+    if (!profile.is_mentor_available || !profile.mentor_specialties) return "";
+    
+    const specialties = profile.mentor_specialties.slice(0, 2);
+    return `Mentor for ${specialties.join(" & ")}`;
+  };
+
+  const handleConnect = useCallback(async () => {
+    try {
+      await onConnect(profile.id);
+      
+      // Trigger success animations
+      setShowConfetti(true);
+      setShowMatchToast(true);
+      
+      // Update gamification
+      await awardAchievement("first_connection");
+      
+      // Auto-hide confetti after animation
+      setTimeout(() => setShowConfetti(false), 3000);
+      
+    } catch (error) {
+      console.error("Error connecting:", error);
+    }
+  }, [profile.id, onConnect, awardAchievement, updateProgress]);
 
   const handleStartChat = () => {
-    setShowMatchToast(false);
-    // Navigate to chat would happen in onConnect
+    console.log("Starting chat with:", profile.user_id);
   };
 
   const handleDismissToast = () => {
     setShowMatchToast(false);
   };
 
+  // Determine if this is a premium match (90%+ match score)
+  const isPremiumMatch = matchScore.score >= 90;
+  const isHighMatch = matchScore.score >= 75;
+
+  // Generate dynamic badges based on match score and profile
+  const generateMatchBadges = () => {
+    const badges = [];
+    
+    // Match percentage badge
+    badges.push({
+      label: `${matchScore.score}% match`,
+      variant: isPremiumMatch ? "premium" : isHighMatch ? "success" : "secondary",
+      icon: isPremiumMatch ? Trophy : Star
+    });
+
+    // Activity compatibility
+    if (profile.sports && profile.sports.length > 0) {
+      badges.push({
+        label: profile.sports[0],
+        variant: "fitness",
+        icon: Zap
+      });
+    }
+
+    // Mentor status
+    if (profile.is_mentor_available) {
+      badges.push({
+        label: "Mentor",
+        variant: "accent",
+        icon: Heart
+      });
+    }
+
+    return badges.slice(0, 3); // Limit to 3 badges for clean design
+  };
+
+  const badges = generateMatchBadges();
+
   return (
-    <Card className={cn("hover-lift transition-all duration-300 group", className)}>
-      <CardContent className="p-6">
-        <div className="flex items-start gap-4">
-          <div className={cn("relative status-indicator", statusColor)}>
-            <Avatar className="h-16 w-16 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
-              <AvatarImage src={profile.profile_picture_url} className="object-cover" />
-              <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
-                {profile.full_name?.charAt(0) || 'U'}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg truncate">{profile.full_name}</h3>
-                <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    {formatLocation(profile)}
-                  </div>
-                  <div className={cn(
-                    "text-xs font-medium animate-fade-in",
-                    isOnline ? "text-green-600" : "text-muted-foreground"
-                  )}>
-                    {statusText}
-                  </div>
-                </div>
-                  <TrustBadges profile={profile} size="sm" className="mt-1" />
-                </div>
+    <>
+      <Card 
+        className={cn(
+          // Base card styling with premium elevation
+          "group relative overflow-hidden transition-all duration-300 ease-out",
+          "bg-card border-0 shadow-card hover:shadow-card-hover",
+          "hover:scale-[1.02] hover:-translate-y-1",
+          // Premium match gradient accent strip
+          isPremiumMatch && "border-l-4 border-l-gradient-primary",
+          // Glass effect on hover
+          "hover:backdrop-blur-sm",
+          className
+        )}
+        style={{
+          willChange: "transform"
+        }}
+      >
+        {/* Premium match gradient overlay */}
+        {isPremiumMatch && (
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+        )}
+
+        <CardContent className="p-6 space-y-4">
+          {/* Header: Avatar + Name + Status */}
+          <div className="flex items-start gap-4">
+            <div className="relative">
+              <Avatar className="h-12 w-12 ring-2 ring-background shadow-avatar transition-transform group-hover:scale-105">
+                <AvatarImage 
+                  src={profile.profile_picture_url || undefined} 
+                  alt={profile.full_name || "User"} 
+                />
+                <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
+                  {profile.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              {/* Online status indicator */}
+              {isOnline && (
+                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-success rounded-full border-2 border-background animate-pulse" />
+              )}
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-lg text-card-foreground leading-tight">
+                {profile.full_name || "Anonymous User"}
+              </h3>
+              
+              <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                <MapPin className="h-3 w-3" />
+                <span className="truncate">{formatLocation(profile)}</span>
               </div>
-              {matchScore && (
-                <div className="flex flex-col items-end animate-fade-in">
-                  <Badge className="bg-gradient-primary text-primary-foreground mb-1 shadow-primary animate-pulse-glow">
-                    {matchScore.score}% match
-                  </Badge>
-                  {matchScore.score >= 70 && (
-                    <div className="flex items-center text-amber-500 animate-bounce-light">
-                      <Star className="h-3 w-3 mr-1 fill-current" />
-                      <span className="text-xs font-medium">Top Match</span>
-                    </div>
+
+              {/* Experience level */}
+              {profile.experience_level && (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                  <Star className="h-3 w-3" />
+                  <span className="capitalize">{profile.experience_level}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Quick action button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleStartChat}
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <MessageCircle className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Bio snippet */}
+          {profile.bio && (
+            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+              {profile.bio}
+            </p>
+          )}
+
+          {/* Match badges with modern pill design */}
+          <div className="flex flex-wrap gap-2">
+            {badges.map((badge, index) => {
+              const IconComponent = badge.icon;
+              return (
+                <Badge
+                  key={index}
+                  variant={badge.variant as any}
+                  className={cn(
+                    "px-3 py-1 text-xs font-medium rounded-full",
+                    "flex items-center gap-1.5 transition-all",
+                    "hover:scale-105 hover:shadow-sm",
+                    badge.variant === "premium" && "bg-gradient-primary text-primary-foreground shadow-premium",
+                    badge.variant === "success" && "bg-success/10 text-success border-success/20",
+                    badge.variant === "fitness" && "bg-accent/10 text-accent border-accent/20",
+                    badge.variant === "accent" && "bg-secondary text-secondary-foreground"
                   )}
-                </div>
-              )}
-            </div>
-            
-            {profile.bio && (
-              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                {profile.bio}
-              </p>
-            )}
-            
-            <div className="space-y-2 mb-4">
-              <div className="flex items-center gap-2 flex-wrap">
-                <SportsBadges selectedSports={profile.sports} variant="display" />
-                {profile.is_mentor_available && (
-                  <Badge variant="secondary" className="bg-gradient-to-r from-purple-500/10 to-indigo-500/10 text-purple-700 border-purple-200">
-                    <GraduationCap className="h-3 w-3 mr-1" />
-                    Mentor
-                  </Badge>
-                )}
-              </div>
-              
-              {profile.is_mentor_available && (
-                <p className="text-xs text-purple-600 font-medium italic">
-                  {generateMentorBlurb(profile, currentUserId ? [] : [])}
-                </p>
-              )}
-              
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span className="capitalize">{profile.experience_level} level</span>
-                {profile.is_mentor_available && profile.years_experience && (
-                  <span>{profile.years_experience} years experience</span>
-                )}
-                <div className="flex items-center">
-                  <Clock className="h-3 w-3 mr-1" />
-                  {getAvailabilityText(profile.availability)}
-                </div>
-              </div>
-            </div>
-            
-            {matchScore && matchScore.reasons.length > 0 && (
-              <div className="mb-4">
-                <div className="flex flex-wrap gap-1 mb-2">
-                  {matchScore.tags.slice(0, 3).map((tag, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {matchScore.reasons.slice(0, 2).join(' • ')}
-                </p>
-              </div>
-            )}
-            
-            <div className="flex gap-2">
-              <Button 
-                onClick={handleConnect}
-                disabled={connecting || hasConnected}
-                className={cn(
-                  "flex-1 button-bounce transition-all duration-300",
-                  hasConnected && "success-flash",
-                  connecting && "animate-pulse"
-                )}
-                size="sm"
-                variant="hero"
-              >
-                {connecting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                    Connecting...
-                  </>
-                ) : hasConnected ? (
-                  <>
-                    <Zap className="h-4 w-4 mr-2" />
-                    Sent!
-                  </>
-                ) : (
-                  <>
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Connect
-                  </>
-                )}
-              </Button>
-              <BlockReportDialog 
-                otherUserId={profile.user_id}
-                otherUserName={profile.full_name || 'User'}
-                onBlock={() => {}}
-              />
-            </div>
-            
-            <MatchToast
-              isVisible={showMatchToast}
-              otherUser={{
-                name: profile.full_name || 'User',
-                avatar: profile.profile_picture_url
-              }}
-              isMatch={Math.random() > 0.7} // This would come from actual match logic
-              onStartChat={handleStartChat}
-              onDismiss={handleDismissToast}
-            />
+                >
+                  <IconComponent className="h-3 w-3" />
+                  {badge.label}
+                </Badge>
+              );
+            })}
           </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          {/* Mentor specialties */}
+          {profile.is_mentor_available && profile.mentor_specialties && (
+            <div className="text-sm">
+              <span className="text-muted-foreground">Mentoring: </span>
+              <span className="text-card-foreground font-medium">
+                {generateMentorBlurb(profile)}
+              </span>
+            </div>
+          )}
+
+          {/* Availability */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            <span>{getAvailabilityText(profile.availability || {})}</span>
+          </div>
+
+          {/* Action button */}
+          <Button 
+            onClick={handleConnect}
+            className={cn(
+              "w-full mt-4 transition-all duration-200",
+              "hover:scale-[1.02] active:scale-[0.98]",
+              isPremiumMatch 
+                ? "bg-gradient-primary hover:shadow-premium text-primary-foreground" 
+                : "bg-primary hover:bg-primary/90"
+            )}
+          >
+            Connect
+          </Button>
+        </CardContent>
+
+        {/* Confetti effect for premium matches */}
+        {showConfetti && <ConfettiEffect isActive={showConfetti} />}
+      </Card>
+
+      {/* Match success toast */}
+      <MatchToast
+        isVisible={showMatchToast}
+        otherUser={{
+          name: profile.full_name || "User",
+          avatar: profile.profile_picture_url || undefined
+        }}
+        isMatch={matchScore.score >= 90}
+        onDismiss={handleDismissToast}
+        onStartChat={handleStartChat}
+      />
+
+      {/* Block/Report dialog */}
+      <BlockReportDialog
+        otherUserId={profile.user_id}
+        otherUserName={profile.full_name || "User"}
+        onBlock={() => console.log("User blocked")}
+      />
+    </>
   );
-}
+};
+
+export default MatchCard;
