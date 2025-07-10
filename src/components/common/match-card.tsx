@@ -318,12 +318,6 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
         onStartChat={handleStartChat}
       />
 
-      {/* Block/Report dialog */}
-      <BlockReportDialog
-        otherUserId={profile.user_id}
-        otherUserName={profile.full_name || "User"}
-        onBlock={() => console.log("User blocked")}
-      />
     </>
   );
 };
