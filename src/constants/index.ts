@@ -12,7 +12,13 @@ export const EXPERIENCE_LEVELS = [
 
 export const FITNESS_GOALS = [
   'weight_loss', 'muscle_gain', 'endurance', 'strength', 'flexibility',
-  'general_fitness', 'competition_prep', 'stress_relief'
+  'general_fitness', 'competition_prep', 'stress_relief', 'first_marathon'
+];
+
+export const MENTOR_SPECIALTIES = [
+  'pacing_strategies', 'injury_prevention', 'nutrition_planning', 
+  'race_preparation', 'strength_training', 'form_technique',
+  'mental_preparation', 'recovery_methods', 'goal_setting'
 ];
 
 export const DAYS_OF_WEEK = [

@@ -59,7 +59,10 @@ export const useProfileWizard = () => {
           age_range_min: data.age_range_min || 18,
           age_range_max: data.age_range_max || 65,
           gender_preference: data.gender_preference || 'any',
-          profile_picture_url: data.profile_picture_url || undefined
+          profile_picture_url: data.profile_picture_url || undefined,
+          is_mentor_available: data.is_mentor_available ?? false,
+          years_experience: data.years_experience || 0,
+          mentor_specialties: data.mentor_specialties || []
         });
       } else {
         // Load draft if no profile exists
@@ -132,7 +135,10 @@ export const useProfileWizard = () => {
         age_range_min: profileData.age_range_min,
         age_range_max: profileData.age_range_max,
         gender_preference: profileData.gender_preference,
-        profile_picture_url: profileData.profile_picture_url
+        profile_picture_url: profileData.profile_picture_url,
+        is_mentor_available: profileData.is_mentor_available,
+        years_experience: profileData.years_experience,
+        mentor_specialties: profileData.mentor_specialties
       };
 
       let error;

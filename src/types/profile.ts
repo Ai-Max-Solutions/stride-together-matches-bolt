@@ -37,6 +37,9 @@ export interface ProfileData {
   age_range_max: number;
   gender_preference: string;
   profile_picture_url?: string;
+  is_mentor_available: boolean;
+  years_experience: number;
+  mentor_specialties: string[];
 }
 
 export interface ProfileStep {

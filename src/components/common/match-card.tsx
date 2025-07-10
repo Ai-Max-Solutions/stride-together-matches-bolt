@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, MapPin, Clock, Star, Zap } from "lucide-react";
+import { MessageCircle, MapPin, Clock, Star, Zap, GraduationCap } from "lucide-react";
 import { SportsBadges } from "./sports-badges";
 import { TrustBadges } from "./TrustBadges";
 import { BlockReportDialog } from "@/components/chat/BlockReportDialog";
@@ -30,6 +30,9 @@ interface Profile {
   age_range_min: number;
   age_range_max: number;
   created_at: string;
+  is_mentor_available?: boolean;
+  years_experience?: number;
+  mentor_specialties?: string[];
 }
 
 interface MatchScore {
@@ -67,6 +70,36 @@ export function MatchCard({ profile, matchScore, onConnect, className, currentUs
     );
     if (activeDays.length === 0) return 'Schedule not set';
     return `Available ${activeDays.length} days/week`;
+  };
+
+  const generateMentorBlurb = (profile: Profile, currentUserGoals?: string[]) => {
+    const name = profile.full_name?.split(' ')[0] || 'They';
+    const specialties = profile.mentor_specialties || [];
+    
+    // Match specialties with current user's goals
+    const relevantSpecialty = specialties.find(specialty => {
+      if (currentUserGoals?.includes('first_marathon') && specialty === 'pacing_strategies') return true;
+      if (currentUserGoals?.includes('weight_loss') && specialty === 'nutrition_planning') return true;
+      if (currentUserGoals?.includes('strength') && specialty === 'strength_training') return true;
+      return false;
+    }) || specialties[0];
+
+    if (relevantSpecialty) {
+      const specialtyMap: Record<string, string> = {
+        'pacing_strategies': 'pacing strategies',
+        'injury_prevention': 'staying injury-free',
+        'nutrition_planning': 'race-day nutrition',
+        'race_preparation': 'race preparation',
+        'strength_training': 'strength training',
+        'form_technique': 'proper form',
+        'mental_preparation': 'mental preparation',
+        'recovery_methods': 'recovery techniques',
+        'goal_setting': 'goal setting'
+      };
+      return `Ask ${name} about ${specialtyMap[relevantSpecialty] || relevantSpecialty.replace('_', ' ')}!`;
+    }
+    
+    return `Ask ${name} about their experience!`;
   };
 
   const handleConnect = async () => {
@@ -166,10 +199,27 @@ export function MatchCard({ profile, matchScore, onConnect, className, currentUs
             )}
             
             <div className="space-y-2 mb-4">
-              <SportsBadges selectedSports={profile.sports} variant="display" />
+              <div className="flex items-center gap-2 flex-wrap">
+                <SportsBadges selectedSports={profile.sports} variant="display" />
+                {profile.is_mentor_available && (
+                  <Badge variant="secondary" className="bg-gradient-to-r from-purple-500/10 to-indigo-500/10 text-purple-700 border-purple-200">
+                    <GraduationCap className="h-3 w-3 mr-1" />
+                    Mentor
+                  </Badge>
+                )}
+              </div>
+              
+              {profile.is_mentor_available && (
+                <p className="text-xs text-purple-600 font-medium italic">
+                  {generateMentorBlurb(profile, currentUserId ? [] : [])}
+                </p>
+              )}
               
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <span className="capitalize">{profile.experience_level} level</span>
+                {profile.is_mentor_available && profile.years_experience && (
+                  <span>{profile.years_experience} years experience</span>
+                )}
                 <div className="flex items-center">
                   <Clock className="h-3 w-3 mr-1" />
                   {getAvailabilityText(profile.availability)}

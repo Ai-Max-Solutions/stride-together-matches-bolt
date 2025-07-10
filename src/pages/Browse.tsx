@@ -65,6 +65,9 @@ interface Profile {
   age_range_min: number;
   age_range_max: number;
   created_at: string;
+  is_mentor_available?: boolean;
+  years_experience?: number;
+  mentor_specialties?: string[];
 }
 
 interface MatchScore {
@@ -255,6 +258,38 @@ export default function Browse() {
       score += 10;
       reasons.push('Compatible schedules');
       tags.push('good timing');
+    }
+
+    // Mentor boost for beginners and first marathoners
+    if (profile.is_mentor_available && profile.years_experience && profile.years_experience >= 3) {
+      // Boost for first-time marathoners
+      if (currentUserProfile.fitness_goals.includes('first_marathon')) {
+        score += 30;
+        reasons.push('Experienced mentor for marathon training');
+        tags.push('marathon mentor');
+      }
+      
+      // Boost for beginners
+      if (currentUserProfile.experience_level === 'beginner') {
+        score += 20;
+        reasons.push('Experienced mentor available');
+        tags.push('mentor available');
+      }
+      
+      // Specialty matching
+      const relevantSpecialties = profile.mentor_specialties?.filter(specialty =>
+        currentUserProfile.fitness_goals.some(goal => {
+          if (goal === 'first_marathon' && specialty === 'pacing_strategies') return true;
+          if (goal === 'weight_loss' && specialty === 'nutrition_planning') return true;
+          if (goal === 'strength' && specialty === 'strength_training') return true;
+          return false;
+        })
+      ) || [];
+      
+      if (relevantSpecialties.length > 0) {
+        score += 25;
+        reasons.push(`Expert in ${relevantSpecialties.join(', ').replace(/_/g, ' ')}`);
+      }
     }
 
     // Recent activity bonus

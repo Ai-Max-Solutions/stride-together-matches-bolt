@@ -23,5 +23,8 @@ export const DEFAULT_PROFILE_DATA: ProfileData = {
   availability: {},
   age_range_min: 18,
   age_range_max: 65,
-  gender_preference: 'any'
+  gender_preference: 'any',
+  is_mentor_available: false,
+  years_experience: 0,
+  mentor_specialties: []
 };
