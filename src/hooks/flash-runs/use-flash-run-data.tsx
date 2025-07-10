@@ -15,6 +15,8 @@ export function useFlashRunData(sportType?: string) {
 
   const fetchFlashRuns = async () => {
     try {
+      setLoading(true);
+      
       let query = supabase
         .from('flash_runs')
         .select(`
@@ -38,7 +40,10 @@ export function useFlashRunData(sportType?: string) {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Flash runs query error:', error);
+        throw error;
+      }
 
       const processedRuns = data?.map(run => ({
         ...run,
