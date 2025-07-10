@@ -43,7 +43,7 @@ const Navigation = () => {
 
   const navItems = [
     { label: "Browse", path: "/browse", icon: Search },
-    { label: "Clubs", path: "/clubs", icon: Heart },
+    { label: "Events", path: "/clubs", icon: Heart },
     { label: "Brands", path: "/branded-challenges", icon: Award },
     { label: "Messages", path: "/messages", icon: MessageCircle },
     { label: "Progress", path: "/progress", icon: Trophy },
