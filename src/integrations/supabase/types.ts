@@ -632,6 +632,7 @@ export type Database = {
           pace_metrics: Json | null
           profile_picture_url: string | null
           region: string | null
+          selfie_verified: boolean | null
           sports: string[] | null
           total_points: number | null
           training_goals: string[] | null
@@ -661,6 +662,7 @@ export type Database = {
           pace_metrics?: Json | null
           profile_picture_url?: string | null
           region?: string | null
+          selfie_verified?: boolean | null
           sports?: string[] | null
           total_points?: number | null
           training_goals?: string[] | null
@@ -690,6 +692,7 @@ export type Database = {
           pace_metrics?: Json | null
           profile_picture_url?: string | null
           region?: string | null
+          selfie_verified?: boolean | null
           sports?: string[] | null
           total_points?: number | null
           training_goals?: string[] | null

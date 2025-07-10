@@ -31,6 +31,7 @@ import {
   Ban,
   X
 } from 'lucide-react';
+import { SelfieVerificationCard } from '@/components/settings/SelfieVerificationCard';
 
 const DAYS_OF_WEEK = [
   'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'
@@ -46,6 +47,7 @@ interface ProfileData {
   location_visible: boolean;
   availability: Record<string, string[]>;
   profile_picture_url?: string;
+  selfie_verified?: boolean;
 }
 
 interface SettingsData {
@@ -130,7 +132,8 @@ export default function Settings() {
           region: data.region || '',
           location_visible: data.location_visible ?? true,
           availability: (data.availability as Record<string, string[]>) || {},
-          profile_picture_url: data.profile_picture_url || undefined
+          profile_picture_url: data.profile_picture_url || undefined,
+          selfie_verified: data.selfie_verified || false
         });
       }
     } catch (err: any) {
@@ -509,6 +512,14 @@ export default function Settings() {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Selfie Verification */}
+          <SelfieVerificationCard 
+            isVerified={profileData.selfie_verified || false}
+            onVerificationComplete={(verified) => {
+              setProfileData(prev => ({ ...prev, selfie_verified: verified }));
+            }}
+          />
 
           {/* Privacy Settings */}
           <Card className="bg-card border shadow-card">

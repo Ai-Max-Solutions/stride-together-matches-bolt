@@ -1,5 +1,4 @@
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CheckCircle, Shield, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -9,6 +8,7 @@ interface TrustBadgesProps {
     email?: string;
     sports?: string[];
     full_name?: string;
+    selfie_verified?: boolean;
   };
   className?: string;
   size?: 'sm' | 'md';
@@ -18,18 +18,26 @@ export function TrustBadges({ profile, className, size = 'md' }: TrustBadgesProp
   const getBadges = () => {
     const badges = [];
     
-    // Verified email badge
-    if (profile.email) {
+    // Selfie verified badge (highest priority)
+    if (profile.selfie_verified) {
+      badges.push({
+        icon: Shield,
+        label: 'Verified Profile',
+        color: 'text-blue-600',
+        bg: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800'
+      });
+    } else if (profile.email) {
+      // Email verified badge (fallback if no selfie verification)
       badges.push({
         icon: CheckCircle,
-        label: 'Verified',
+        label: 'Email Verified',
         color: 'text-green-600',
         bg: 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800'
       });
     }
     
     // Community member badge (based on creation date)
-    if (profile.created_at) {
+    if (profile.created_at && !profile.selfie_verified) {
       const createdAt = new Date(profile.created_at);
       const monthsAgo = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24 * 30);
       
