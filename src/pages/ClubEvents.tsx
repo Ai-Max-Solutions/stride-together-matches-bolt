@@ -104,11 +104,12 @@ export default function ClubEvents() {
                   )}
                 </CardDescription>
               </div>
-              {/* Temporarily show for all users for testing */}
-              <CreateEventDialog 
-                onCreateEvent={createEvent}
-                loading={actionLoading}
-              />
+              {isClubOrganiser && (
+                <CreateEventDialog 
+                  onCreateEvent={createEvent}
+                  loading={actionLoading}
+                />
+              )}
             </div>
           </CardHeader>
           <CardContent className="space-y-4">

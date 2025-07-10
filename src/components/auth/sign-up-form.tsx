@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { Mail, Lock, User, Chrome } from 'lucide-react';
+import { Mail, Lock, User, Chrome, Building } from 'lucide-react';
 import { useAuthForm } from '@/hooks/use-auth-form';
 
 interface SignUpFormProps {
@@ -91,6 +91,58 @@ export function SignUpForm({ onSwitchToSignIn }: SignUpFormProps) {
               />
             </div>
           </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <input
+                id="isOrganization"
+                type="checkbox"
+                checked={formData.isOrganization}
+                onChange={(e) => updateField('isOrganization', e.target.checked)}
+                disabled={loading}
+                className="rounded border-input"
+              />
+              <Label htmlFor="isOrganization" className="text-sm font-medium">
+                I represent a club or charity organization
+              </Label>
+            </div>
+          </div>
+
+          {formData.isOrganization && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="organizationName">Organization Name</Label>
+                <div className="relative">
+                  <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    id="organizationName"
+                    placeholder="Enter organization name"
+                    type="text"
+                    value={formData.organizationName}
+                    onChange={(e) => updateField('organizationName', e.target.value)}
+                    className="pl-10"
+                    disabled={loading}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="organizationType">Organization Type</Label>
+                <select
+                  id="organizationType"
+                  value={formData.organizationType}
+                  onChange={(e) => updateField('organizationType', e.target.value)}
+                  disabled={loading}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  required
+                >
+                  <option value="club">Sports Club</option>
+                  <option value="charity">Charity Organization</option>
+                </select>
+              </div>
+            </>
+          )}
 
           <Button
             type="submit"

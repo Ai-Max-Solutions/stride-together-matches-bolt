@@ -7,13 +7,19 @@ interface AuthFormData {
   email: string;
   password: string;
   fullName: string;
+  isOrganization: boolean;
+  organizationName: string;
+  organizationType: 'club' | 'charity';
 }
 
 export function useAuthForm() {
   const [formData, setFormData] = useState<AuthFormData>({
     email: '',
     password: '',
-    fullName: ''
+    fullName: '',
+    isOrganization: false,
+    organizationName: '',
+    organizationType: 'club'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -22,7 +28,7 @@ export function useAuthForm() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const updateField = (field: keyof AuthFormData, value: string) => {
+  const updateField = (field: keyof AuthFormData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (error) setError(''); // Clear error when user starts typing
   };
@@ -34,6 +40,10 @@ export function useAuthForm() {
     }
     if (isSignUp && !formData.fullName.trim()) {
       setError('Full name is required');
+      return false;
+    }
+    if (isSignUp && formData.isOrganization && !formData.organizationName.trim()) {
+      setError('Organization name is required');
       return false;
     }
     if (formData.password.length < 6) {
@@ -51,13 +61,23 @@ export function useAuthForm() {
 
     try {
       if (isSignUp) {
-        const { error } = await signUp(formData.email, formData.password, formData.fullName);
+        const { error } = await signUp(
+          formData.email, 
+          formData.password, 
+          formData.fullName,
+          formData.isOrganization ? {
+            organizationName: formData.organizationName,
+            organizationType: formData.organizationType
+          } : undefined
+        );
         if (error) {
           setError(error.message);
         } else {
           toast({
             title: "Account created successfully!",
-            description: "Please check your email to verify your account.",
+            description: formData.isOrganization 
+              ? "Your organization account has been created. Please check your email to verify your account."
+              : "Please check your email to verify your account.",
           });
           navigate('/profile/setup');
         }

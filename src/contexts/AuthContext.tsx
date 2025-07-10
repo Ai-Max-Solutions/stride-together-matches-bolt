@@ -6,7 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName?: string, organizationData?: { organizationName: string; organizationType: string }) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
@@ -43,15 +43,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName?: string) => {
+  const signUp = async (email: string, password: string, fullName?: string, organizationData?: { organizationName: string; organizationType: string }) => {
     const redirectUrl = `${window.location.origin}/profile/setup`;
+    
+    const metadata: any = {};
+    if (fullName) metadata.full_name = fullName;
+    if (organizationData) {
+      metadata.organization_name = organizationData.organizationName;
+      metadata.organization_type = organizationData.organizationType;
+      metadata.is_organization = true;
+    }
     
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: fullName ? { full_name: fullName } : undefined
+        data: metadata
       }
     });
     return { error };
