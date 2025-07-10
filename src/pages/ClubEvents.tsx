@@ -10,6 +10,7 @@ import { useUserRoles } from '@/hooks/use-user-roles';
 import { ClubEventCard } from '@/components/club-events/ClubEventCard';
 import { CharityMilesCard } from '@/components/club-events/CharityMilesCard';
 import { DistanceLogDialog } from '@/components/club-events/DistanceLogDialog';
+import Navigation from '@/components/Navigation';
 import type { ClubEvent } from '@/types/club-events';
 
 export default function ClubEvents() {
@@ -69,8 +70,10 @@ export default function ClubEvents() {
   const recentEventsCount = events.filter(e => e.is_joined).length;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <>
+      <Navigation />
+      <div className="min-h-screen bg-background">
+        <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2 mb-2">
@@ -186,7 +189,8 @@ export default function ClubEvents() {
           onLogDistance={handleLogDistance}
           loading={actionLoading}
         />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
