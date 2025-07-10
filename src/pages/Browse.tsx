@@ -42,8 +42,10 @@ import {
   ChevronRight,
   Bot,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  MapPin
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import Navigation from '@/components/Navigation';
 import { AISuggestions } from '@/components/chat/AISuggestions';
 import { BROWSE_SPORTS_OPTIONS, BROWSE_EXPERIENCE_LEVELS } from '@/constants';
@@ -572,51 +574,87 @@ export default function Browse() {
 
         {/* AI Recommendations Section */}
         {currentUserProfile && filteredProfiles.length > 0 && (
-          <Card className="mb-8 border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
-            <CardHeader>
+          <Card className="mb-8 border-primary/30 bg-gradient-to-br from-primary/10 via-background to-accent/8 shadow-lg backdrop-blur-sm">
+            <CardHeader className="pb-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">AI-Powered Top Matches</h3>
-                <Badge variant="outline" className="border-primary/20">
+                <Sparkles className="h-5 w-5 text-primary animate-pulse" />
+                <h3 className="text-xl font-semibold text-foreground">AI-Powered Top Matches</h3>
+                <Badge variant="outline" className="border-primary/30 bg-primary/5 text-primary">
                   Personalized for you
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-4">
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-6">
                 {filteredProfiles.slice(0, 2).map((profile) => {
                   const matchData = matchScores.get(profile.id);
                   if (!matchData || matchData.score < 50) return null;
                   
                   return (
-                    <Card key={profile.id} className="border-primary/10">
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage src={profile.profile_picture_url} />
-                            <AvatarFallback>
-                              {profile.full_name?.charAt(0) || 'U'}
-                            </AvatarFallback>
-                          </Avatar>
+                    <Card 
+                      key={profile.id} 
+                      className={cn(
+                        "relative overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl",
+                        "bg-card/95 backdrop-blur-sm border border-border/50",
+                        "shadow-md hover:shadow-primary/20"
+                      )}
+                    >
+                      {/* Gradient accent strip for high matches */}
+                      {matchData.score >= 90 && (
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-accent to-primary animate-pulse" />
+                      )}
+                      
+                      <CardContent className="p-5 bg-gradient-to-br from-background/90 to-muted/30">
+                        <div className="flex items-start gap-4">
+                          <div className="relative">
+                            <Avatar className="h-14 w-14 shadow-lg ring-2 ring-primary/20">
+                              <AvatarImage src={profile.profile_picture_url} className="object-cover" />
+                              <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 font-semibold text-foreground">
+                                {profile.full_name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            {/* Online indicator for high trust score */}
+                            {profile.trust_score && profile.trust_score > 80 && (
+                              <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-success rounded-full border-2 border-background" />
+                            )}
+                          </div>
+                          
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-1">
-                              <h4 className="font-medium truncate">{profile.full_name}</h4>
-                              <Badge className="bg-primary text-primary-foreground">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold text-lg text-foreground truncate">
+                                {profile.full_name}
+                              </h4>
+                              <Badge 
+                                className={cn(
+                                  "text-xs font-bold shadow-sm",
+                                  matchData.score >= 90 
+                                    ? "bg-gradient-to-r from-primary to-accent text-primary-foreground animate-pulse" 
+                                    : "bg-primary text-primary-foreground"
+                                )}
+                              >
                                 {matchData.score}% match
                               </Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground mb-2">
+                            
+                            <p className="text-sm text-muted-foreground mb-3 flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
                               {formatLocation(profile)}
                             </p>
-                            <div className="flex flex-wrap gap-1 mb-2">
-                              {matchData.tags.slice(0, 2).map((tag, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
+                            
+                            <div className="flex flex-wrap gap-2 mb-3">
+                              {matchData.tags.slice(0, 3).map((tag, index) => (
+                                <Badge 
+                                  key={index} 
+                                  variant="secondary" 
+                                  className="text-xs bg-accent/20 text-accent-foreground border-accent/30 hover:bg-accent/30 transition-colors"
+                                >
                                   {tag}
                                 </Badge>
                               ))}
                             </div>
-                            <p className="text-xs text-muted-foreground">
-                              {matchData.reasons.slice(0, 1).join(' • ')}
+                            
+                            <p className="text-xs text-muted-foreground leading-relaxed">
+                              {matchData.reasons.slice(0, 2).join(' • ')}
                             </p>
                           </div>
                         </div>
@@ -850,9 +888,9 @@ export default function Browse() {
         )}
 
         {/* Safety Notice */}
-        <Alert className="mt-8">
-          <Shield className="h-4 w-4" />
-          <AlertDescription>
+        <Alert className="mt-8 border-primary/20 bg-gradient-to-r from-primary/5 to-background">
+          <Shield className="h-4 w-4 text-primary" />
+          <AlertDescription className="text-foreground">
             <strong>Safety First:</strong> Always meet in public places, share your plans with someone you trust, 
             and trust your instincts. Report any inappropriate behavior using our in-app reporting feature.
           </AlertDescription>
