@@ -104,8 +104,14 @@ export function useFlashRuns(sportType?: string) {
     try {
       const startTime = new Date(data.start_time);
       // Calculate expiration time based on sport type
-      const hoursToAdd = data.sport_type === 'cycling' ? 2 : 1; // 2 hours for cycling, 1 for running
-      const expiresAt = new Date(startTime.getTime() + hoursToAdd * 60 * 60 * 1000);
+      let expiresAt = new Date(startTime);
+      if (data.sport_type === 'cycling') {
+        expiresAt.setHours(expiresAt.getHours() + 2); // 2 hours for cycling
+      } else if (data.sport_type === 'workout') {
+        expiresAt.setMinutes(expiresAt.getMinutes() + 90); // 90 minutes for workouts
+      } else {
+        expiresAt.setHours(expiresAt.getHours() + 1); // 1 hour for running
+      }
 
       const { data: flashRun, error } = await supabase
         .from('flash_runs')
@@ -120,6 +126,7 @@ export function useFlashRuns(sportType?: string) {
           meeting_coordinates: data.meeting_coordinates,
           sport_type: data.sport_type,
           route_type: data.route_type || null,
+          max_participants: data.sport_type === 'workout' ? 6 : 8, // Default 6 for workouts, 8 for others
           expires_at: expiresAt.toISOString()
         })
         .select()
@@ -127,12 +134,24 @@ export function useFlashRuns(sportType?: string) {
 
       if (error) throw error;
 
-      const eventType = data.sport_type === 'cycling' ? 'Flash Ride' : 'Flash Run';
-      const eventEmoji = data.sport_type === 'cycling' ? '🚴' : '⚡';
+      // Custom success message based on sport type
+      let eventType = 'Flash Run';
+      let eventEmoji = '⚡';
+      let description = `Your ${data.distance} run is live and ready for participants!`;
+      
+      if (data.sport_type === 'cycling') {
+        eventType = 'Flash Ride';
+        eventEmoji = '🚴';
+        description = `Your ${data.distance} ride is live and ready for participants!`;
+      } else if (data.sport_type === 'workout') {
+        eventType = 'Flash Workout';
+        eventEmoji = '💪';
+        description = `Your ${data.distance} workout is live and ready for participants!`;
+      }
       
       toast({
         title: `${eventEmoji} ${eventType} Created!`,
-        description: `Your ${data.distance} ${data.sport_type === 'cycling' ? 'ride' : 'run'} is live and ready for participants!`,
+        description,
       });
 
       return flashRun;
@@ -161,13 +180,25 @@ export function useFlashRuns(sportType?: string) {
 
       if (error) throw error;
 
-      // Find the flash event to determine sport type
+      // Find the flash event to determine sport type and create custom message
       const flashEvent = flashRuns.find(run => run.id === flashRunId);
-      const isCycling = flashEvent?.sport_type === 'cycling';
-      const message = isCycling ? "🚴 See you on the saddle!" : "See you at the Flash Run!";
+      let title = "🎉 You're in!";
+      let message = "See you at the Flash Run!";
+      
+      if (flashEvent?.sport_type === 'workout') {
+        title = "💪 Let's crush it!";
+        message = "Ready to sweat? Your workout starts soon!";
+        
+        // Add workout-specific vibration if supported
+        if ('vibrate' in navigator) {
+          navigator.vibrate([100, 50, 100]);
+        }
+      } else if (flashEvent?.sport_type === 'cycling') {
+        message = "🚴 See you on the saddle!";
+      }
       
       toast({
-        title: "🎉 You're in!",
+        title,
         description: message,
       });
 

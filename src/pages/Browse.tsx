@@ -21,6 +21,7 @@ import { FlashRunsList } from '@/components/flash-runs/FlashRunsList';
 import { FlashRunFAB } from '@/components/flash-runs/FlashRunFAB';
 import { FlashRunModal } from '@/components/flash-runs/FlashRunModal';
 import { FlashRideModal } from '@/components/flash-runs/FlashRideModal';
+import { FlashWorkoutModal } from '@/components/flash-runs/FlashWorkoutModal';
 import { 
   Pagination,
   PaginationContent,
@@ -109,14 +110,18 @@ export default function Browse() {
   // Flash Events states
   const [showFlashRunModal, setShowFlashRunModal] = useState(false);
   const [showFlashRideModal, setShowFlashRideModal] = useState(false);
-  const [flashEventTab, setFlashEventTab] = useState<'runs' | 'rides'>('runs');
+  const [showFlashWorkoutModal, setShowFlashWorkoutModal] = useState(false);
+  const [flashEventTab, setFlashEventTab] = useState<'runs' | 'rides' | 'workouts'>('runs');
   
-  // Get Flash Runs and Rides separately
+  // Get Flash Runs, Rides, and Workouts separately
   const { flashRuns: flashRunsData, loading: flashRunsLoading, createFlashRun, joinFlashRun: joinFlashRunAction, leaveFlashRun: leaveFlashRunAction } = useFlashRuns('running');
   const { flashRuns: flashRidesData, loading: flashRidesLoading, createFlashRun: createFlashRide, joinFlashRun: joinFlashRideAction, leaveFlashRun: leaveFlashRideAction } = useFlashRuns('cycling');
+  const { flashRuns: flashWorkoutsData, loading: flashWorkoutsLoading, createFlashRun: createFlashWorkout, joinFlashRun: joinFlashWorkoutAction, leaveFlashRun: leaveFlashWorkoutAction } = useFlashRuns('workout');
   
   // Determine user's primary sport for smart FAB
   const userPrimarySport = currentUserProfile?.sports?.[0] || 'running';
+  const workoutSports = ['gym', 'crossfit', 'boxing', 'strength', 'hiit'];
+  const shouldShowWorkoutFAB = workoutSports.some(sport => userPrimarySport.toLowerCase().includes(sport.toLowerCase()));
   const shouldShowCyclingFAB = userPrimarySport === 'cycling';
   const shouldShowBothSports = currentUserProfile?.sports?.includes('running') && currentUserProfile?.sports?.includes('cycling');
 
@@ -604,6 +609,14 @@ export default function Browse() {
                 >
                   🚴 Flash Rides
                 </Button>
+                <Button
+                  variant={flashEventTab === 'workouts' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFlashEventTab('workouts')}
+                  className="flex items-center gap-2"
+                >
+                  💪 Flash Workouts
+                </Button>
               </div>
             </div>
           </CardHeader>
@@ -622,6 +635,14 @@ export default function Browse() {
                 loading={flashRidesLoading}
                 onJoin={joinFlashRideAction}
                 onLeave={leaveFlashRideAction}
+              />
+            )}
+            {flashEventTab === 'workouts' && (
+              <FlashRunsList
+                flashRuns={flashWorkoutsData}
+                loading={flashWorkoutsLoading}
+                onJoin={joinFlashWorkoutAction}
+                onLeave={leaveFlashWorkoutAction}
               />
             )}
           </CardContent>
@@ -782,9 +803,11 @@ export default function Browse() {
 
       {/* Smart FAB - Shows based on user's primary sport */}
       <FlashRunFAB 
-        sportType={userPrimarySport}
+        sportType={shouldShowWorkoutFAB ? 'workout' : shouldShowCyclingFAB ? 'cycling' : 'running'}
         onClick={() => {
-          if (shouldShowCyclingFAB) {
+          if (shouldShowWorkoutFAB) {
+            setShowFlashWorkoutModal(true);
+          } else if (shouldShowCyclingFAB) {
             setShowFlashRideModal(true);
           } else {
             setShowFlashRunModal(true);
@@ -810,6 +833,19 @@ export default function Browse() {
         open={showFlashRideModal}
         onOpenChange={setShowFlashRideModal}
         onCreateFlashRide={createFlashRide}
+      />
+
+      {/* Flash Workout Modal */}
+      <FlashWorkoutModal
+        isOpen={showFlashWorkoutModal}
+        onClose={() => setShowFlashWorkoutModal(false)}
+        onSubmit={async (data) => {
+          const result = await createFlashWorkout({
+            ...data,
+            sport_type: 'workout'
+          });
+          return !!result;
+        }}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import { Zap } from 'lucide-react';
+import { Zap, Dumbbell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useMobileDetection } from '@/hooks/use-mobile-detection';
 
@@ -11,7 +11,15 @@ export function FlashRunFAB({ onClick, sportType = 'running' }: FlashRunFABProps
   const { isMobile } = useMobileDetection();
   
   const isCycling = sportType === 'cycling';
-  const label = isCycling ? 'Create Flash Ride' : 'Create Flash Run';
+  const isWorkout = sportType === 'workout';
+  
+  const getLabel = () => {
+    if (isWorkout) return 'Create Flash Workout';
+    if (isCycling) return 'Create Flash Ride';
+    return 'Create Flash Run';
+  };
+  
+  const label = getLabel();
 
   return (
     <Button
@@ -21,7 +29,9 @@ export function FlashRunFAB({ onClick, sportType = 'running' }: FlashRunFABProps
       aria-label={label}
       title={label}
     >
-      {isCycling ? (
+      {isWorkout ? (
+        <Dumbbell className="h-6 w-6 group-hover:scale-110 transition-transform duration-200" />
+      ) : isCycling ? (
         <span className="text-xl group-hover:scale-110 transition-transform duration-200">🚴</span>
       ) : (
         <Zap className="h-6 w-6 group-hover:scale-110 transition-transform duration-200" />

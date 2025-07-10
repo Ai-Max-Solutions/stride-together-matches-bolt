@@ -30,7 +30,16 @@ export function FlashRunCard({ flashRun, onJoin, onLeave }: FlashRunCardProps) {
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
   };
 
-  const getPaceIcon = (pace: string) => {
+  const getPaceIcon = (pace: string, sportType?: string) => {
+    if (sportType === 'workout') {
+      switch (pace.toLowerCase()) {
+        case 'easy': return '🟢';
+        case 'moderate': return '🟡';
+        case 'hard': return '🔴';
+        default: return '💪';
+      }
+    }
+    
     switch (pace.toLowerCase()) {
       case 'easy': return '🚶';
       case 'moderate': return '🏃';
@@ -50,6 +59,14 @@ export function FlashRunCard({ flashRun, onJoin, onLeave }: FlashRunCardProps) {
         if (success) {
           setShowConfetti(true);
           setTimeout(() => setShowConfetti(false), 1200);
+          
+          // Add workout-specific celebration
+          if (flashRun.sport_type === 'workout') {
+            // Try to vibrate if supported
+            if ('vibrate' in navigator) {
+              navigator.vibrate([100, 50, 100]);
+            }
+          }
         }
       }
     } finally {
@@ -89,10 +106,10 @@ export function FlashRunCard({ flashRun, onJoin, onLeave }: FlashRunCardProps) {
             <div className="flex flex-wrap gap-2 mb-3">
               <Badge variant="secondary" className="text-xs">
                 <Activity className="w-3 h-3 mr-1" />
-                {flashRun.distance}
+                {flashRun.sport_type === 'workout' ? `~${flashRun.distance}` : flashRun.distance}
               </Badge>
               <Badge variant="outline" className="text-xs">
-                {getPaceIcon(flashRun.pace)} {flashRun.pace} pace
+                {getPaceIcon(flashRun.pace, flashRun.sport_type)} {flashRun.sport_type === 'workout' ? flashRun.pace : `${flashRun.pace} pace`}
               </Badge>
               <Badge variant="outline" className="text-xs">
                 <Clock className="w-3 h-3 mr-1" />
