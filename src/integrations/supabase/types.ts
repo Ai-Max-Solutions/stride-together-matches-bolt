@@ -217,6 +217,83 @@ export type Database = {
         }
         Relationships: []
       }
+      flash_run_participants: {
+        Row: {
+          flash_run_id: string
+          id: string
+          joined_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          flash_run_id: string
+          id?: string
+          joined_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          flash_run_id?: string
+          id?: string
+          joined_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flash_run_participants_flash_run_id_fkey"
+            columns: ["flash_run_id"]
+            isOneToOne: false
+            referencedRelation: "flash_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flash_runs: {
+        Row: {
+          created_at: string
+          creator_id: string
+          distance: string
+          expires_at: string
+          id: string
+          max_participants: number
+          meeting_coordinates: Json | null
+          meeting_spot: string
+          pace: string
+          start_time: string
+          status: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          distance: string
+          expires_at: string
+          id?: string
+          max_participants?: number
+          meeting_coordinates?: Json | null
+          meeting_spot: string
+          pace: string
+          start_time?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          distance?: string
+          expires_at?: string
+          id?: string
+          max_participants?: number
+          meeting_coordinates?: Json | null
+          meeting_spot?: string
+          pace?: string
+          start_time?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
       meetup_requests: {
         Row: {
           activity_type: string
@@ -545,6 +622,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      expire_old_flash_runs: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_or_create_conversation: {
         Args: { user1_id: string; user2_id: string }
         Returns: string

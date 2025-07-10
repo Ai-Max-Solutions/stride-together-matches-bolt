@@ -16,6 +16,10 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { MatchCard } from '@/components/common/match-card';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { usePagination } from '@/hooks/use-pagination';
+import { useFlashRuns } from '@/hooks/use-flash-runs';
+import { FlashRunsList } from '@/components/flash-runs/FlashRunsList';
+import { FlashRunFAB } from '@/components/flash-runs/FlashRunFAB';
+import { FlashRunModal } from '@/components/flash-runs/FlashRunModal';
 import { 
   Pagination,
   PaginationContent,
@@ -100,6 +104,10 @@ export default function Browse() {
   
   // AI Assistant states
   const [showAIAssistant, setShowAIAssistant] = useState(false);
+  
+  // Flash Run states
+  const [showFlashRunModal, setShowFlashRunModal] = useState(false);
+  const { flashRuns, loading: flashRunsLoading, createFlashRun, joinFlashRun, leaveFlashRun } = useFlashRuns();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -563,6 +571,16 @@ export default function Browse() {
           </Card>
         )}
 
+        {/* Flash Runs Section */}
+        <div className="mb-8">
+          <FlashRunsList
+            flashRuns={flashRuns}
+            loading={flashRunsLoading}
+            onJoin={joinFlashRun}
+            onLeave={leaveFlashRun}
+          />
+        </div>
+
         {/* Results Count & Pagination Info */}
         <div className="mb-6 flex items-center justify-between">
           <p className="text-muted-foreground">
@@ -715,6 +733,19 @@ export default function Browse() {
           </AlertDescription>
         </Alert>
       </div>
+
+      {/* Flash Run FAB */}
+      <FlashRunFAB onClick={() => setShowFlashRunModal(true)} />
+
+      {/* Flash Run Modal */}
+      <FlashRunModal
+        isOpen={showFlashRunModal}
+        onClose={() => setShowFlashRunModal(false)}
+        onSubmit={async (data) => {
+          const result = await createFlashRun(data);
+          return !!result;
+        }}
+      />
     </div>
   );
 }

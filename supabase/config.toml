@@ -1,1 +1,4 @@
 project_id = "xlvklqpscboxkylcxmbb"
+
+[functions.expire-flash-runs]
+verify_jwt = false
