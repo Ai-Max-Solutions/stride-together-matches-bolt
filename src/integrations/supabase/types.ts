@@ -83,6 +83,39 @@ export type Database = {
         }
         Relationships: []
       }
+      charity_miles: {
+        Row: {
+          cause_description: string | null
+          created_at: string
+          distance: number
+          event_date: string
+          event_id: string
+          id: string
+          organization_name: string
+          user_id: string
+        }
+        Insert: {
+          cause_description?: string | null
+          created_at?: string
+          distance: number
+          event_date: string
+          event_id: string
+          id?: string
+          organization_name: string
+          user_id: string
+        }
+        Update: {
+          cause_description?: string | null
+          created_at?: string
+          distance?: number
+          event_date?: string
+          event_id?: string
+          id?: string
+          organization_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       chatbot_conversations: {
         Row: {
           created_at: string
@@ -163,6 +196,93 @@ export type Database = {
           id?: string
           questions_used?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      club_event_participants: {
+        Row: {
+          attendance_status: string
+          distance_logged: number | null
+          distance_verified: boolean | null
+          event_id: string
+          id: string
+          joined_at: string
+          logged_at: string | null
+          user_id: string
+        }
+        Insert: {
+          attendance_status?: string
+          distance_logged?: number | null
+          distance_verified?: boolean | null
+          event_id: string
+          id?: string
+          joined_at?: string
+          logged_at?: string | null
+          user_id: string
+        }
+        Update: {
+          attendance_status?: string
+          distance_logged?: number | null
+          distance_verified?: boolean | null
+          event_id?: string
+          id?: string
+          joined_at?: string
+          logged_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      club_events: {
+        Row: {
+          cause_description: string | null
+          created_at: string
+          description: string | null
+          distance: string
+          event_date: string
+          event_status: string
+          id: string
+          max_participants: number | null
+          meeting_coordinates: Json | null
+          meeting_point: string
+          organiser_id: string
+          organization_id: string
+          registration_deadline: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cause_description?: string | null
+          created_at?: string
+          description?: string | null
+          distance: string
+          event_date: string
+          event_status?: string
+          id?: string
+          max_participants?: number | null
+          meeting_coordinates?: Json | null
+          meeting_point: string
+          organiser_id: string
+          organization_id: string
+          registration_deadline?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cause_description?: string | null
+          created_at?: string
+          description?: string | null
+          distance?: string
+          event_date?: string
+          event_status?: string
+          id?: string
+          max_participants?: number | null
+          meeting_coordinates?: Json | null
+          meeting_point?: string
+          organiser_id?: string
+          organization_id?: string
+          registration_deadline?: string | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -390,6 +510,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      organizations: {
+        Row: {
+          contact_email: string | null
+          created_at: string
+          description: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          organization_type: string
+          updated_at: string
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
+          website_url: string | null
+        }
+        Insert: {
+          contact_email?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          organization_type?: string
+          updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          contact_email?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          organization_type?: string
+          updated_at?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
       }
       page_analytics: {
         Row: {
@@ -626,6 +791,30 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -639,6 +828,17 @@ export type Database = {
         Args: { user1_id: string; user2_id: string }
         Returns: string
       }
+      get_user_roles: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"][]
+      }
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       achievement_type:
@@ -650,6 +850,7 @@ export type Database = {
         | "meetup_master"
         | "goal_achiever"
         | "community_builder"
+      app_role: "user" | "club_organiser" | "admin"
       challenge_status: "active" | "completed" | "expired"
       challenge_type: "weekly" | "monthly" | "seasonal"
     }
@@ -789,6 +990,7 @@ export const Constants = {
         "goal_achiever",
         "community_builder",
       ],
+      app_role: ["user", "club_organiser", "admin"],
       challenge_status: ["active", "completed", "expired"],
       challenge_type: ["weekly", "monthly", "seasonal"],
     },
