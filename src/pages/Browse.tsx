@@ -51,25 +51,25 @@ import { BROWSE_SPORTS_OPTIONS, BROWSE_EXPERIENCE_LEVELS } from '@/constants';
 interface Profile {
   id: string;
   user_id: string;
-  full_name: string;
-  bio: string;
-  profile_picture_url?: string;
-  sports: string[];
-  experience_level: string;
+  full_name: string | null;
+  bio: string | null;
+  profile_picture_url: string | null;
+  sports: string[] | null;
+  experience_level: string | null;
   pace_metrics: Record<string, any>;
-  fitness_goals: string[];
-  city: string;
-  region: string;
-  location_visible: boolean;
-  availability: Record<string, string[]>;
-  age_range_min: number;
-  age_range_max: number;
+  fitness_goals: string[] | null;
+  city: string | null;
+  region: string | null;
+  location_visible: boolean | null;
+  availability: Record<string, string[]> | null;
+  age_range_min: number | null;
+  age_range_max: number | null;
   created_at: string;
   is_mentor_available: boolean | null;
-  years_experience?: number;
+  years_experience: number | null;
   mentor_specialties: string[] | null;
-  trust_score?: number;
-  last_active_at?: string;
+  trust_score: number | null;
+  last_active_at: string | null;
 }
 
 interface MatchScore {
