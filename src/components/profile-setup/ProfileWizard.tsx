@@ -58,21 +58,21 @@ export default function ProfileWizard() {
         );
       case 2:
         return (
-          <FitnessDetailsStep 
+          <LocationStep 
             data={profileData} 
             onChange={updateProfileData} 
           />
         );
       case 3:
         return (
-          <LocationStep 
+          <AvailabilityStep 
             data={profileData} 
             onChange={updateProfileData} 
           />
         );
       case 4:
         return (
-          <AvailabilityStep 
+          <FitnessDetailsStep 
             data={profileData} 
             onChange={updateProfileData} 
           />

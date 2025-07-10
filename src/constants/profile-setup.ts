@@ -3,9 +3,9 @@ import { ProfileStep, ProfileData } from '@/types/profile';
 export const PROFILE_SETUP_STEPS: ProfileStep[] = [
   { id: 'basic', title: 'Basic Info', description: 'Tell us about yourself' },
   { id: 'sports', title: 'Sports & Goals', description: 'Your activities and experience' },
-  { id: 'fitness', title: 'Fitness Details', description: 'Help us find your perfect workout buddy' },
   { id: 'location', title: 'Location & Preferences', description: 'Where and with whom you want to train' },
   { id: 'availability', title: 'Availability', description: 'When are you free to workout?' },
+  { id: 'fitness', title: 'Fitness Details', description: 'Help us find your perfect workout buddy' },
   { id: 'review', title: 'Review', description: 'Confirm your profile details' }
 ];
 
