@@ -21,12 +21,12 @@ export function useFlashRunData(sportType?: string) {
         .from('flash_runs')
         .select(`
           *,
-          creator:profiles!flash_runs_creator_id_fkey(full_name, profile_picture_url),
+          creator:profiles(full_name, profile_picture_url),
           participants:flash_run_participants(
             id,
             user_id,
             status,
-            user:profiles!flash_run_participants_user_id_fkey(full_name, profile_picture_url)
+            user:profiles(full_name, profile_picture_url)
           )
         `)
         .eq('status', 'active')
