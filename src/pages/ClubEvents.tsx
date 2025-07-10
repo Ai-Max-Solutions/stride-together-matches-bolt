@@ -10,11 +10,12 @@ import { useUserRoles } from '@/hooks/use-user-roles';
 import { ClubEventCard } from '@/components/club-events/ClubEventCard';
 import { CharityMilesCard } from '@/components/club-events/CharityMilesCard';
 import { DistanceLogDialog } from '@/components/club-events/DistanceLogDialog';
+import { CreateEventDialog } from '@/components/club-events/CreateEventDialog';
 import Navigation from '@/components/Navigation';
 import type { ClubEvent } from '@/types/club-events';
 
 export default function ClubEvents() {
-  const { events, loading: eventsLoading, joinEvent, leaveEvent } = useClubEvents();
+  const { events, loading: eventsLoading, joinEvent, leaveEvent, createEvent } = useClubEvents();
   const { totalMiles, logDistance, loading: milesLoading } = useCharityMiles();
   const { isClubOrganiser } = useUserRoles();
   
@@ -96,13 +97,18 @@ export default function ClubEvents() {
                 <CardTitle className="text-lg">Upcoming Events</CardTitle>
                 <CardDescription>
                   Find verified club and charity events near you
+                  {!isClubOrganiser && (
+                    <span className="block mt-1 text-xs text-muted-foreground">
+                      Want to create events? Contact support to become a club organiser
+                    </span>
+                  )}
                 </CardDescription>
               </div>
               {isClubOrganiser && (
-                <Button size="sm" className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Create Event
-                </Button>
+                <CreateEventDialog 
+                  onCreateEvent={createEvent}
+                  loading={actionLoading}
+                />
               )}
             </div>
           </CardHeader>
