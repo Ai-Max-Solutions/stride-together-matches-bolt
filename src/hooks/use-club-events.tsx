@@ -16,7 +16,7 @@ export const useClubEvents = () => {
         .from('club_events')
         .select(`
           *,
-          organizations!organization_id (
+          organizations:organization_id (
             id,
             name,
             logo_url,
