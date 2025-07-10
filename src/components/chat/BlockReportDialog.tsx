@@ -112,11 +112,10 @@ export const BlockReportDialog = ({ otherUserId, otherUserName, onBlock }: Block
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button 
-            variant="destructive" 
             size="sm"
-            className="bg-red-700 hover:bg-red-800 text-white border-red-600"
+            className="h-7 px-3 text-xs bg-red-700 hover:bg-red-800 text-white border-red-600 shadow-md hover:shadow-lg transition-shadow"
           >
-            <MoreVertical className="h-4 w-4 mr-2" />
+            <MoreVertical className="h-3 w-3 mr-1" />
             Block/Report
           </Button>
         </DropdownMenuTrigger>
