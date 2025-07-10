@@ -800,20 +800,37 @@ export default function Browse() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {paginatedProfiles.map((profile) => {
-                const matchData = matchScores.get(profile.id);
-                return (
-                  <MatchCard
-                    key={profile.id}
-                    profile={profile}
-                    matchScore={matchData}
-                    onConnect={handleConnect}
-                    currentUserId={user?.id}
-                    className="animate-fade-in"
-                  />
-                );
-              })}
+            <div className="space-y-8">
+              {/* Section Header */}
+              <div className="text-center pb-4">
+                <h2 className="text-2xl font-bold text-foreground mb-2">
+                  Workout Partners Found
+                </h2>
+                <p className="text-muted-foreground">
+                  Connect with amazing fitness enthusiasts in your area
+                </p>
+              </div>
+              
+              {/* Enhanced Grid with Better Styling */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {paginatedProfiles.map((profile) => {
+                  const matchData = matchScores.get(profile.id);
+                  return (
+                    <div
+                      key={profile.id}
+                      className="transform transition-all duration-300 hover:scale-[1.02] animate-fade-in"
+                    >
+                      <MatchCard
+                        profile={profile}
+                        matchScore={matchData}
+                        onConnect={handleConnect}
+                        currentUserId={user?.id}
+                        className="shadow-lg hover:shadow-xl border-border/50 bg-card/95 backdrop-blur-sm"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Pagination Controls */}
