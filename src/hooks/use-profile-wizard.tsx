@@ -118,6 +118,11 @@ export const useProfileWizard = () => {
         .eq('user_id', user.id)
         .maybeSingle();
 
+      // Validate required fields before submission
+      if (!profileData.experience_level || !['beginner', 'intermediate', 'advanced'].includes(profileData.experience_level)) {
+        throw new Error('Please select a valid experience level');
+      }
+
       // Prepare data for database with proper JSON conversion
       const dbData = {
         email: user.email,
