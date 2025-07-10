@@ -2,32 +2,194 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.3';
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const SYSTEM_PROMPT = `You are Stride Together's friendly, encouraging running buddy and community coach.
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const supabaseUrl = Deno.env.get('SUPABASE_URL');
+const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-Your job is to help logged-in users:
-- Understand how to use Stride Together (profiles, matching, chat, privacy settings).
-- Share basic, motivational workout advice (running, cycling, or gym basics).
-- Remind them about safety best practices for meeting new workout partners.
+if (!openAIApiKey || !supabaseUrl || !supabaseKey) {
+  console.error('Missing required environment variables');
+}
 
-You do NOT give any medical, nutritional, or legal advice.  
-If a question is too personal, too medical, or out of scope, politely respond:
-*"I'm not sure about that — please check with a qualified professional for more specific advice!"*
+const supabase = createClient(supabaseUrl!, supabaseKey!);
 
-Always be positive, short, and on-brand:
-- Use friendly, encouraging language.
-- Keep answers under 3–4 short sentences if possible.
-- Suggest relevant in-app actions when helpful, e.g., "Try checking your Matches page for more buddies."
+// Check daily usage limit (8 questions per day)
+async function checkDailyUsage(userId: string): Promise<{ canUse: boolean; questionsUsed: number }> {
+  const today = new Date().toISOString().split('T')[0];
+  
+  const { data, error } = await supabase
+    .from('chatbot_usage')
+    .select('questions_used')
+    .eq('user_id', userId)
+    .eq('date', today)
+    .single();
 
-Never mention OpenAI or that you are an AI model — always answer in a human, friendly tone.`;
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error checking usage:', error);
+    return { canUse: true, questionsUsed: 0 };
+  }
+
+  const questionsUsed = data?.questions_used || 0;
+  return { canUse: questionsUsed < 8, questionsUsed };
+}
+
+// Update daily usage
+async function updateDailyUsage(userId: string) {
+  const today = new Date().toISOString().split('T')[0];
+  
+  const { error } = await supabase
+    .from('chatbot_usage')
+    .upsert({
+      user_id: userId,
+      date: today,
+      questions_used: 1
+    }, {
+      onConflict: 'user_id,date',
+      ignoreDuplicates: false
+    });
+
+  if (error) {
+    console.error('Error updating usage:', error);
+  }
+}
+
+// Get user profile data for personalization
+async function getUserProfile(userId: string) {
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select(`
+      sports,
+      experience_level,
+      fitness_goals,
+      training_goals,
+      availability,
+      city,
+      region,
+      age_range_min,
+      age_range_max,
+      fitness_details,
+      full_name
+    `)
+    .eq('user_id', userId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching profile:', error);
+    return null;
+  }
+
+  return profile;
+}
+
+// Get potential match compatibility for meetup suggestions
+async function getMatchCompatibility(userId: string, question: string) {
+  // Check if question is about meeting someone or timing
+  const isMeetupQuestion = question.toLowerCase().includes('meet') || 
+                          question.toLowerCase().includes('time') ||
+                          question.toLowerCase().includes('available') ||
+                          question.toLowerCase().includes('schedule') ||
+                          question.toLowerCase().includes('partner') ||
+                          question.toLowerCase().includes('buddy');
+
+  if (!isMeetupQuestion) return null;
+
+  // Get user's availability and sports
+  const { data: userProfile } = await supabase
+    .from('profiles')
+    .select('availability, sports, city, region')
+    .eq('user_id', userId)
+    .single();
+
+  if (!userProfile) return null;
+
+  // Find potential matches in same area with overlapping sports
+  const { data: potentialMatches } = await supabase
+    .from('profiles')
+    .select('sports, availability, city, region, full_name')
+    .neq('user_id', userId)
+    .eq('city', userProfile.city)
+    .limit(5);
+
+  return {
+    userAvailability: userProfile.availability,
+    userSports: userProfile.sports,
+    potentialMatches: potentialMatches || []
+  };
+}
+
+function createPersonalizedPrompt(profile: any, question: string, matchData: any = null) {
+  let prompt = `You are Stride AI, a highly intelligent and personalized fitness assistant. You're helping ${profile?.full_name || 'a user'}.
+
+USER PROFILE:
+- Sports: ${profile?.sports?.join(', ') || 'Not specified'}
+- Experience Level: ${profile?.experience_level || 'Not specified'}
+- Fitness Goals: ${profile?.fitness_goals?.join(', ') || 'Not specified'}
+- Training Goals: ${profile?.training_goals?.join(', ') || 'Not specified'}
+- Location: ${profile?.city || 'Not specified'}${profile?.region ? `, ${profile.region}` : ''}
+- Age Range: ${profile?.age_range_min || 18}-${profile?.age_range_max || 65}
+
+`;
+
+  // Add workout-specific intelligence
+  if (question.toLowerCase().includes('workout') || question.toLowerCase().includes('exercise') || question.toLowerCase().includes('training')) {
+    if (profile?.sports && profile.sports.length > 1) {
+      prompt += `WORKOUT INTELLIGENCE: The user practices multiple sports (${profile.sports.join(', ')}). Ask which specific sport they want workout ideas for, then provide highly targeted exercises, training routines, and progressions for that sport based on their ${profile?.experience_level || 'current'} level.\n\n`;
+    } else if (profile?.sports && profile.sports.length === 1) {
+      prompt += `WORKOUT INTELLIGENCE: Focus exclusively on ${profile.sports[0]} specific workouts. Provide detailed training routines, technique tips, and progression plans tailored to their ${profile?.experience_level || 'current'} level. Include sport-specific warm-ups, main exercises, and recovery.\n\n`;
+    } else {
+      prompt += `WORKOUT INTELLIGENCE: User hasn't specified sports yet. Ask what sport they're interested in, then provide comprehensive workout plans.\n\n`;
+    }
+  }
+
+  // Add meetup/timing intelligence
+  if (matchData) {
+    prompt += `MEETUP INTELLIGENCE:
+The user is asking about meeting times or finding workout partners. 
+
+User's Availability: ${JSON.stringify(matchData.userAvailability)}
+User's Sports: ${matchData.userSports?.join(', ') || 'None specified'}
+
+COMPATIBILITY ANALYSIS from users in ${profile?.city}:
+`;
+    
+    const compatibleMatches = matchData.potentialMatches.filter((match: any) => {
+      const commonSports = profile?.sports?.filter((sport: string) => 
+        match.sports?.includes(sport)
+      ) || [];
+      return commonSports.length > 0;
+    });
+
+    if (compatibleMatches.length > 0) {
+      compatibleMatches.forEach((match: any, index: number) => {
+        const commonSports = profile?.sports?.filter((sport: string) => 
+          match.sports?.includes(sport)
+        ) || [];
+        prompt += `- Match ${index + 1}: Shares ${commonSports.join(', ')}, Availability: ${JSON.stringify(match.availability)}\n`;
+      });
+      
+      prompt += `\nPROVIDE INTELLIGENT SUGGESTIONS: Analyze the availability patterns and suggest specific days/times that work for both the user and potential matches. Be specific about timing and mention the shared sports interests.\n\n`;
+    } else {
+      prompt += `No compatible matches found in the area yet. Suggest general optimal workout times and encourage the user to be flexible with their schedule to increase matching opportunities.\n\n`;
+    }
+  }
+
+  prompt += `USER QUESTION: ${question}
+
+INSTRUCTIONS:
+- Be highly intelligent and contextual - use ALL the profile information
+- If asking about workouts, be sport-specific and experience-level appropriate
+- If asking about timing/partners, provide intelligent compatibility insights
+- Keep responses conversational but information-rich
+- Maximum 200 words
+- Always be encouraging and motivational
+- Use their name when appropriate`;
+
+  return prompt;
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -35,58 +197,46 @@ serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const authHeader = req.headers.get('Authorization');
+    const { question, sessionId } = await req.json();
     
+    // Get user from request headers
+    const authHeader = req.headers.get('authorization');
     if (!authHeader) {
       throw new Error('No authorization header');
     }
 
-    // Get user from auth header
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
-
-    if (authError || !user) {
-      throw new Error('Unauthorized');
-    }
-
-    const { question, sessionId } = await req.json();
-
-    if (!question || question.trim().length === 0) {
-      throw new Error('Question is required');
-    }
-
-    console.log('Chatbot request from user:', user.id, 'Question:', question);
-
-    // Check daily usage limit (5 questions per day)
-    const today = new Date().toISOString().split('T')[0];
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
-    const { data: usage, error: usageError } = await supabase
-      .from('chatbot_usage')
-      .select('questions_used')
-      .eq('user_id', user.id)
-      .eq('date', today)
-      .single();
-
-    if (usageError && usageError.code !== 'PGRST116') {
-      console.error('Error checking usage:', usageError);
-      throw new Error('Error checking usage limits');
+    if (authError || !user) {
+      throw new Error('Invalid user token');
     }
 
-    const questionsUsed = usage?.questions_used || 0;
-    if (questionsUsed >= 5) {
+    // Check daily usage limit
+    const { canUse, questionsUsed } = await checkDailyUsage(user.id);
+    if (!canUse) {
       return new Response(JSON.stringify({ 
-        error: 'Daily limit reached',
-        message: 'You have reached your daily limit of 5 questions. Please try again tomorrow.',
+        response: `Hi there! You've reached your daily limit of 8 AI questions. You've used ${questionsUsed}/8 questions today. Come back tomorrow for more personalized assistance! 🏃‍♂️`,
+        isLimitReached: true,
+        questionsUsed,
         questionsRemaining: 0
       }), {
-        status: 429,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Call OpenAI API
+    // Get user profile for personalization
+    const profile = await getUserProfile(user.id);
+    
+    // Get match compatibility data if relevant
+    const matchData = await getMatchCompatibility(user.id, question);
+
+    // Create highly personalized prompt
+    const systemPrompt = createPersonalizedPrompt(profile, question, matchData);
+
+    console.log('Intelligent prompt created for user:', user.id);
+
+    // Call OpenAI with personalized context
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -94,74 +244,49 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: systemPrompt },
           { role: 'user', content: question }
         ],
+        max_tokens: 350,
         temperature: 0.7,
-        max_tokens: 200, // Keep responses concise
       }),
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const botResponse = data.choices[0].message.content;
+    const aiResponse = data.choices[0].message.content;
 
-    // Store conversation in database
-    const { data: conversation, error: conversationError } = await supabase
-      .from('chatbot_conversations')
-      .insert({
-        user_id: user.id,
-        question: question.trim(),
-        response: botResponse,
-        session_id: sessionId
-      })
-      .select()
-      .single();
+    // Update daily usage
+    await updateDailyUsage(user.id);
 
-    if (conversationError) {
-      console.error('Error storing conversation:', conversationError);
-      throw new Error('Error storing conversation');
-    }
+    // Store conversation
+    await supabase.from('chatbot_conversations').insert({
+      user_id: user.id,
+      session_id: sessionId,
+      question: question,
+      response: aiResponse,
+    });
 
-    // Update usage count
-    const { error: upsertError } = await supabase
-      .from('chatbot_usage')
-      .upsert({
-        user_id: user.id,
-        date: today,
-        questions_used: questionsUsed + 1
-      }, {
-        onConflict: 'user_id,date'
-      });
-
-    if (upsertError) {
-      console.error('Error updating usage:', upsertError);
-    }
-
-    const questionsRemaining = 5 - (questionsUsed + 1);
+    // Get updated usage count
+    const { questionsUsed: newCount } = await checkDailyUsage(user.id);
 
     return new Response(JSON.stringify({ 
-      response: botResponse,
-      conversationId: conversation.id,
-      questionsRemaining
+      response: aiResponse,
+      questionsRemaining: 8 - newCount,
+      questionsUsed: newCount
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
     console.error('Error in stride-chatbot function:', error);
-    return new Response(JSON.stringify({ 
-      error: error.message,
-      response: 'Sorry, I encountered an error. Please try again.' 
-    }), {
-      status: error.message === 'Unauthorized' ? 401 : 500,
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

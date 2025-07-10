@@ -3,42 +3,42 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { MessageCircle, ThumbsUp, ThumbsDown, HelpCircle, Send, ArrowLeft } from 'lucide-react';
+import { Bot, Send, ArrowLeft, Dumbbell, Clock, Users, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-interface Conversation {
+interface Message {
   id: string;
-  question: string;
-  response: string;
-  created_at: string;
-  feedback?: boolean | null;
+  content: string;
+  isUser: boolean;
+  timestamp: Date;
 }
 
-const FAQ_SUGGESTIONS = [
-  "How do I find people who run at my pace?",
-  "Is my exact location shared with other users?", 
-  "How do I chat with someone safely?",
-  "Can I block or report someone?",
-  "How do I change my fitness goals?",
-  "What's a good warm-up before a 5K?",
-  "How many buddies can I match with?",
-  "How do I stay safe meeting someone new?",
-  "Why didn't I get any matches?",
-  "Where can I give feedback about the app?"
+const SMART_SUGGESTIONS = [
+  { icon: Dumbbell, text: "Give me workout ideas for my sports", category: "workout" },
+  { icon: Clock, text: "When's the best time to find workout partners?", category: "timing" },
+  { icon: Users, text: "How do I find people with similar fitness goals?", category: "social" },
+  { icon: Target, text: "Help me create a training plan", category: "planning" }
 ];
 
 export default function Chatbot() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [question, setQuestion] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [questionsRemaining, setQuestionsRemaining] = useState(5);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      content: "Hi! I'm Stride AI, your intelligent fitness companion! 🏃‍♂️ I know your sports, fitness goals, and can help you find the perfect workout partners. I can provide personalized workout ideas, analyze your compatibility with other users, and suggest optimal times to connect. You get 8 questions per day. What would you like help with?",
+      isUser: false,
+      timestamp: new Date(),
+    },
+  ]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [dailyUsage, setDailyUsage] = useState({ used: 0, remaining: 8 });
   const [sessionId] = useState(() => crypto.randomUUID());
+  const { user, session } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -47,7 +47,7 @@ export default function Chatbot() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [conversations]);
+  }, [messages]);
 
   useEffect(() => {
     if (user) {
@@ -71,7 +71,7 @@ export default function Chatbot() {
       }
 
       const used = data?.questions_used || 0;
-      setQuestionsRemaining(5 - used);
+      setDailyUsage({ used, remaining: 8 - used });
     } catch (error) {
       console.error('Error loading usage:', error);
     }
@@ -79,94 +79,72 @@ export default function Chatbot() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!question.trim() || isLoading || questionsRemaining <= 0) return;
+    if (!input.trim() || loading || dailyUsage.remaining <= 0) return;
 
-    const currentQuestion = question.trim();
-    setQuestion('');
-    setIsLoading(true);
+    const userInput = input.trim();
+    setInput('');
+    setLoading(true);
+
+    // Add user message
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content: userInput,
+      isUser: true,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, userMessage]);
 
     try {
-      const { data, error } = await supabase.functions.invoke('stride-chatbot', {
-        body: {
-          question: currentQuestion,
-          sessionId
-        }
+      const response = await supabase.functions.invoke('stride-chatbot', {
+        body: { question: userInput, sessionId },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
       });
 
-      if (error) throw error;
-
-      if (data.error) {
-        if (data.error === 'Daily limit reached') {
-          toast({
-            title: "Daily Limit Reached",
-            description: data.message,
-            variant: "destructive",
-          });
-          setQuestionsRemaining(0);
-          return;
-        }
-        throw new Error(data.error);
+      if (response.error) {
+        throw new Error(response.error.message || 'Failed to get AI response');
       }
 
-      const newConversation: Conversation = {
-        id: data.conversationId,
-        question: currentQuestion,
-        response: data.response,
-        created_at: new Date().toISOString()
-      };
+      const { response: aiResponse, questionsRemaining, questionsUsed, isLimitReached } = response.data;
 
-      setConversations(prev => [...prev, newConversation]);
-      setQuestionsRemaining(data.questionsRemaining);
+      // Update usage tracking
+      if (questionsRemaining !== undefined && questionsUsed !== undefined) {
+        setDailyUsage({ used: questionsUsed, remaining: questionsRemaining });
+      }
+
+      // Add AI response
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        content: aiResponse,
+        isUser: false,
+        timestamp: new Date(),
+      }]);
+
+      // Show limit reached notification
+      if (isLimitReached) {
+        toast({
+          title: "Daily Limit Reached",
+          description: "You've used all 8 questions for today. Come back tomorrow!",
+          variant: "destructive",
+        });
+      }
 
     } catch (error) {
-      console.error('Error asking question:', error);
+      console.error('Error:', error);
       toast({
         title: "Error",
         description: "Failed to get response. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleFeedback = async (conversationId: string, isHelpful: boolean) => {
-    try {
-      const { error } = await supabase.functions.invoke('chatbot-feedback', {
-        body: {
-          conversationId,
-          isHelpful
-        }
-      });
-
-      if (error) throw error;
-
-      setConversations(prev =>
-        prev.map(conv =>
-          conv.id === conversationId
-            ? { ...conv, feedback: isHelpful }
-            : conv
-        )
-      );
-
-      toast({
-        title: "Thank you!",
-        description: "Your feedback helps us improve.",
-      });
-
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-      toast({
-        title: "Error",
-        description: "Failed to submit feedback.",
-        variant: "destructive",
-      });
+      setLoading(false);
     }
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    if (questionsRemaining > 0 && !isLoading) {
-      setQuestion(suggestion);
+    if (dailyUsage.remaining > 0 && !loading) {
+      setInput(suggestion);
     }
   };
 
@@ -175,10 +153,10 @@ export default function Chatbot() {
       <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center">
-            <MessageCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <Bot className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
             <p className="text-muted-foreground mb-4">
-              Please sign in to use the AI assistant.
+              Please sign in to use the intelligent AI assistant.
             </p>
             <Button onClick={() => navigate('/auth')} className="w-full">
               Sign In
@@ -203,100 +181,63 @@ export default function Chatbot() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-foreground">AI Assistant</h1>
+            <h1 className="text-2xl font-bold text-foreground">Intelligent AI Assistant</h1>
             <p className="text-muted-foreground">
-              Get help with the app, workout tips, and safety advice
+              Personalized fitness guidance based on your profile
             </p>
           </div>
           <div className="text-right">
             <div className="text-sm font-medium text-foreground">
-              {questionsRemaining} questions left
+              {dailyUsage.remaining} questions left
             </div>
             <div className="text-xs text-muted-foreground">today</div>
           </div>
         </div>
 
-        {/* Chat Area */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Conversation */}
+          {/* Chat Area */}
           <div className="lg:col-span-2">
             <Card className="h-[600px] flex flex-col">
-              <CardHeader className="shrink-0">
+              <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <MessageCircle className="h-5 w-5" />
-                  Chat with Stride Assistant
+                  <Bot className="h-5 w-5" />
+                  Stride AI Assistant
                 </CardTitle>
+                <CardDescription>
+                  Personalized fitness companion • {dailyUsage.remaining} questions remaining today
+                </CardDescription>
               </CardHeader>
               
               <CardContent className="flex-1 flex flex-col overflow-hidden">
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto mb-4 space-y-4">
-                  {conversations.length === 0 && (
-                    <div className="text-center text-muted-foreground py-8">
-                      <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>Hi! I'm your Stride Together assistant.</p>
-                      <p className="text-sm mt-2">Ask me about using the app, workout tips, or safety advice!</p>
-                    </div>
-                  )}
-                  
-                  {conversations.map((conv) => (
-                    <div key={conv.id} className="space-y-3">
-                      {/* User Question */}
-                      <div className="flex justify-end">
-                        <div className="bg-primary text-primary-foreground rounded-lg px-4 py-2 max-w-[80%]">
-                          {conv.question}
-                        </div>
-                      </div>
-                      
-                      {/* Bot Response */}
-                      <div className="flex justify-start">
-                        <div className="bg-muted rounded-lg px-4 py-2 max-w-[80%]">
-                          {conv.response}
-                          
-                          {/* Feedback Buttons */}
-                          {conv.feedback === undefined && (
-                            <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border">
-                              <span className="text-xs text-muted-foreground">Was this helpful?</span>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => handleFeedback(conv.id, true)}
-                                className="h-6 w-6 p-0"
-                              >
-                                <ThumbsUp className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => handleFeedback(conv.id, false)}
-                                className="h-6 w-6 p-0"
-                              >
-                                <ThumbsDown className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          )}
-                          
-                          {conv.feedback !== undefined && (
-                            <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border">
-                              <span className="text-xs text-muted-foreground">
-                                Thanks for your feedback!
-                              </span>
-                              {conv.feedback ? (
-                                <ThumbsUp className="h-3 w-3 text-green-600" />
-                              ) : (
-                                <ThumbsDown className="h-3 w-3 text-red-600" />
-                              )}
-                            </div>
-                          )}
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                          message.isUser
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-foreground'
+                        }`}
+                      >
+                        <p className="whitespace-pre-wrap">{message.content}</p>
+                        <div className="text-xs opacity-70 mt-1">
+                          {message.timestamp.toLocaleTimeString([], { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}
                         </div>
                       </div>
                     </div>
                   ))}
                   
-                  {isLoading && (
+                  {loading && (
                     <div className="flex justify-start">
                       <div className="bg-muted rounded-lg px-4 py-2">
-                        <LoadingSpinner size="sm" message="Thinking..." />
+                        <LoadingSpinner size="sm" message="Analyzing your profile..." />
                       </div>
                     </div>
                   )}
@@ -307,17 +248,22 @@ export default function Chatbot() {
                 {/* Input Form */}
                 <form onSubmit={handleSubmit} className="flex gap-2">
                   <Input
-                    value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
-                    placeholder={questionsRemaining > 0 ? "Ask me anything about the app or workouts..." : "Daily limit reached"}
-                    disabled={isLoading || questionsRemaining <= 0}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder={
+                      dailyUsage.remaining > 0 
+                        ? "Ask me about workouts, timing, or finding partners..." 
+                        : "Daily limit reached - come back tomorrow!"
+                    }
+                    disabled={loading || dailyUsage.remaining <= 0}
                     className="flex-1"
                     maxLength={500}
                   />
-                  <Button 
-                    type="submit" 
-                    disabled={!question.trim() || isLoading || questionsRemaining <= 0}
-                    size="icon"
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={loading || !input.trim() || dailyUsage.remaining <= 0}
+                    className="px-3"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
@@ -326,26 +272,27 @@ export default function Chatbot() {
             </Card>
           </div>
 
-          {/* FAQ Suggestions */}
+          {/* Smart Suggestions */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <HelpCircle className="h-5 w-5" />
-                  Try asking...
-                </CardTitle>
+                <CardTitle className="text-lg">Smart Suggestions</CardTitle>
+                <CardDescription>
+                  AI-powered questions based on your profile
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
-                {FAQ_SUGGESTIONS.map((suggestion, index) => (
+                {SMART_SUGGESTIONS.map((suggestion, index) => (
                   <Button
                     key={index}
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start text-left h-auto py-2 px-3 whitespace-normal"
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    disabled={questionsRemaining <= 0 || isLoading}
+                    className="w-full justify-start text-left h-auto py-3 px-3"
+                    onClick={() => handleSuggestionClick(suggestion.text)}
+                    disabled={dailyUsage.remaining <= 0 || loading}
                   >
-                    {suggestion}
+                    <suggestion.icon className="h-4 w-4 mr-2 shrink-0" />
+                    <span className="text-sm">{suggestion.text}</span>
                   </Button>
                 ))}
               </CardContent>
@@ -353,18 +300,25 @@ export default function Chatbot() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Important</CardTitle>
+                <CardTitle className="text-lg">AI Features</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm text-muted-foreground">
-                <p>
-                  💡 I can help with app features, basic workout tips, and safety advice.
-                </p>
-                <p>
-                  🚫 I cannot provide medical, legal, or professional advice.
-                </p>
-                <p>
-                  🔒 Always prioritize safety when meeting new workout partners.
-                </p>
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex items-start gap-2">
+                  <Dumbbell className="h-4 w-4 mt-0.5 text-primary" />
+                  <p>Sport-specific workout suggestions based on your chosen activities</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Clock className="h-4 w-4 mt-0.5 text-primary" />
+                  <p>Smart timing analysis for finding compatible workout partners</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Users className="h-4 w-4 mt-0.5 text-primary" />
+                  <p>Compatibility insights based on your location and interests</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Target className="h-4 w-4 mt-0.5 text-primary" />
+                  <p>Personalized advice using your fitness goals and experience level</p>
+                </div>
               </CardContent>
             </Card>
           </div>
