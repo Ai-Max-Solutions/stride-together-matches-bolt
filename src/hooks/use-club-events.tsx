@@ -11,28 +11,38 @@ export const useClubEvents = () => {
 
   const fetchClubEvents = async () => {
     try {
-      // Get events with organization data and participant counts
+      // Get events first
       const { data: eventsData, error: eventsError } = await supabase
         .from('club_events')
-        .select(`
-          *,
-          organizations:organization_id (
-            id,
-            name,
-            logo_url,
-            organization_type,
-            verification_status
-          )
-        `)
+        .select('*')
         .eq('event_status', 'upcoming')
         .gte('event_date', new Date().toISOString())
         .order('event_date', { ascending: true });
 
       if (eventsError) throw eventsError;
 
+      if (!eventsData || eventsData.length === 0) {
+        setEvents([]);
+        return;
+      }
+
+      // Get unique organization IDs
+      const orgIds = [...new Set(eventsData.map(event => event.organization_id))];
+      
+      // Get organization data
+      const { data: orgsData, error: orgsError } = await supabase
+        .from('organizations')
+        .select('*')
+        .in('id', orgIds);
+
+      if (orgsError) throw orgsError;
+
+      // Create a map for quick lookup
+      const orgsMap = new Map(orgsData?.map(org => [org.id, org]) || []);
+
       // Get participant counts and check if user joined
       const eventsWithParticipants = await Promise.all(
-        (eventsData || []).map(async (event) => {
+        eventsData.map(async (event) => {
           const { count } = await supabase
             .from('club_event_participants')
             .select('*', { count: 'exact', head: true })
@@ -45,14 +55,14 @@ export const useClubEvents = () => {
               .select('id')
               .eq('event_id', event.id)
               .eq('user_id', user.id)
-              .single();
+              .maybeSingle();
             
             isJoined = !!participation;
           }
 
           return {
             ...event,
-            organization: Array.isArray(event.organizations) ? event.organizations[0] : event.organizations,
+            organization: orgsMap.get(event.organization_id),
             participant_count: count || 0,
             is_joined: isJoined,
           } as ClubEvent;
