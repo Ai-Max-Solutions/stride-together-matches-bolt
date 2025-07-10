@@ -17,8 +17,10 @@ const generateSessionId = () => {
 };
 
 export const useAnalytics = () => {
+  console.log('useAnalytics: Hook initializing...');
   const location = useLocation();
   const { user } = useAuth();
+  console.log('useAnalytics: Auth context loaded, user:', user?.id || 'anonymous');
 
   const trackPageVisit = async (pagePath: string) => {
     try {
@@ -39,6 +41,7 @@ export const useAnalytics = () => {
   };
 
   useEffect(() => {
+    console.log('useAnalytics: useEffect triggered for path:', location.pathname);
     // Track page visit when location changes
     trackPageVisit(location.pathname);
   }, [location.pathname, user?.id]);

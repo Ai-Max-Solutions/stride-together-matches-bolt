@@ -34,7 +34,9 @@ const PageFallback = () => (
 );
 
 const AppContent = () => {
+  console.log('App.tsx: AppContent rendering...');
   useAnalytics(); // Track page visits
+  console.log('App.tsx: useAnalytics completed');
   return (
     <>
       <BetaBadge />
@@ -65,7 +67,9 @@ const AppContent = () => {
   );
 };
 
-const App = () => (
+const App = () => {
+  console.log('App.tsx: Main App component rendering...');
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
@@ -75,6 +79,7 @@ const App = () => (
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
