@@ -106,11 +106,17 @@ export function FlashRunCard({ flashRun, onJoin, onLeave }: FlashRunCardProps) {
             <div className="flex flex-wrap gap-2 mb-3">
               <Badge variant="secondary" className="text-xs">
                 <Activity className="w-3 h-3 mr-1" />
-                {flashRun.sport_type === 'workout' ? `~${flashRun.distance}` : flashRun.distance}
+                {flashRun.sport_type === 'workout' || flashRun.sport_type === 'yoga' ? `~${flashRun.distance}` : flashRun.distance}
               </Badge>
-              <Badge variant="outline" className="text-xs">
-                {getPaceIcon(flashRun.pace, flashRun.sport_type)} {flashRun.sport_type === 'workout' ? flashRun.pace : `${flashRun.pace} pace`}
-              </Badge>
+              {flashRun.sport_type === 'yoga' ? (
+                <Badge variant="outline" className="text-xs">
+                  🧘 {flashRun.title}
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="text-xs">
+                  {getPaceIcon(flashRun.pace, flashRun.sport_type)} {flashRun.sport_type === 'workout' ? flashRun.pace : `${flashRun.pace} pace`}
+                </Badge>
+              )}
               <Badge variant="outline" className="text-xs">
                 <Clock className="w-3 h-3 mr-1" />
                 {getTimeRemaining()}

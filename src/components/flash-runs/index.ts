@@ -4,3 +4,4 @@ export { FlashRunModal } from './FlashRunModal';
 export { FlashRunsList } from './FlashRunsList';
 export { FlashRideModal } from './FlashRideModal';
 export { FlashWorkoutModal } from './FlashWorkoutModal';
+export { FlashYogaModal } from './FlashYogaModal';

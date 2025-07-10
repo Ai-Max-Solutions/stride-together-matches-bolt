@@ -109,6 +109,8 @@ export function useFlashRuns(sportType?: string) {
         expiresAt.setHours(expiresAt.getHours() + 2); // 2 hours for cycling
       } else if (data.sport_type === 'workout') {
         expiresAt.setMinutes(expiresAt.getMinutes() + 90); // 90 minutes for workouts
+      } else if (data.sport_type === 'yoga') {
+        expiresAt.setMinutes(expiresAt.getMinutes() + 75); // 75 minutes for yoga
       } else {
         expiresAt.setHours(expiresAt.getHours() + 1); // 1 hour for running
       }
@@ -126,7 +128,7 @@ export function useFlashRuns(sportType?: string) {
           meeting_coordinates: data.meeting_coordinates,
           sport_type: data.sport_type,
           route_type: data.route_type || null,
-          max_participants: data.sport_type === 'workout' ? 6 : 8, // Default 6 for workouts, 8 for others
+          max_participants: data.sport_type === 'workout' ? 6 : (data.sport_type === 'yoga' ? 8 : 8), // Default 6 for workouts, 8 for yoga/others
           expires_at: expiresAt.toISOString()
         })
         .select()
@@ -147,6 +149,10 @@ export function useFlashRuns(sportType?: string) {
         eventType = 'Flash Workout';
         eventEmoji = '💪';
         description = `Your ${data.distance} workout is live and ready for participants!`;
+      } else if (data.sport_type === 'yoga') {
+        eventType = 'Flash Yoga';
+        eventEmoji = '🧘';
+        description = `Your peaceful ${data.distance} session is ready for participants.`;
       }
       
       toast({
@@ -195,6 +201,9 @@ export function useFlashRuns(sportType?: string) {
         }
       } else if (flashEvent?.sport_type === 'cycling') {
         message = "🚴 See you on the saddle!";
+      } else if (flashEvent?.sport_type === 'yoga') {
+        title = "Time to unwind! 🧘";
+        message = "Don't forget your mat! Your peaceful session awaits.";
       }
       
       toast({

@@ -22,6 +22,7 @@ import { FlashRunFAB } from '@/components/flash-runs/FlashRunFAB';
 import { FlashRunModal } from '@/components/flash-runs/FlashRunModal';
 import { FlashRideModal } from '@/components/flash-runs/FlashRideModal';
 import { FlashWorkoutModal } from '@/components/flash-runs/FlashWorkoutModal';
+import { FlashYogaModal } from '@/components/flash-runs/FlashYogaModal';
 import { 
   Pagination,
   PaginationContent,
@@ -111,16 +112,20 @@ export default function Browse() {
   const [showFlashRunModal, setShowFlashRunModal] = useState(false);
   const [showFlashRideModal, setShowFlashRideModal] = useState(false);
   const [showFlashWorkoutModal, setShowFlashWorkoutModal] = useState(false);
-  const [flashEventTab, setFlashEventTab] = useState<'runs' | 'rides' | 'workouts'>('runs');
+  const [showYogaModal, setShowYogaModal] = useState(false);
+  const [flashEventTab, setFlashEventTab] = useState<'runs' | 'rides' | 'workouts' | 'yoga'>('runs');
   
-  // Get Flash Runs, Rides, and Workouts separately
+  // Get Flash Runs, Rides, Workouts, and Yoga separately
   const { flashRuns: flashRunsData, loading: flashRunsLoading, createFlashRun, joinFlashRun: joinFlashRunAction, leaveFlashRun: leaveFlashRunAction } = useFlashRuns('running');
   const { flashRuns: flashRidesData, loading: flashRidesLoading, createFlashRun: createFlashRide, joinFlashRun: joinFlashRideAction, leaveFlashRun: leaveFlashRideAction } = useFlashRuns('cycling');
   const { flashRuns: flashWorkoutsData, loading: flashWorkoutsLoading, createFlashRun: createFlashWorkout, joinFlashRun: joinFlashWorkoutAction, leaveFlashRun: leaveFlashWorkoutAction } = useFlashRuns('workout');
+  const { flashRuns: flashYogaData, loading: flashYogaLoading, createFlashRun: createFlashYoga, joinFlashRun: joinFlashYogaAction, leaveFlashRun: leaveFlashYogaAction } = useFlashRuns('yoga');
   
   // Determine user's primary sport for smart FAB
   const userPrimarySport = currentUserProfile?.sports?.[0] || 'running';
   const workoutSports = ['gym', 'crossfit', 'boxing', 'strength', 'hiit'];
+  const yogaSports = ['yoga', 'pilates', 'mobility', 'meditation', 'stretching'];
+  const shouldShowYogaFAB = yogaSports.some(sport => userPrimarySport.toLowerCase().includes(sport.toLowerCase()));
   const shouldShowWorkoutFAB = workoutSports.some(sport => userPrimarySport.toLowerCase().includes(sport.toLowerCase()));
   const shouldShowCyclingFAB = userPrimarySport === 'cycling';
   const shouldShowBothSports = currentUserProfile?.sports?.includes('running') && currentUserProfile?.sports?.includes('cycling');
@@ -617,6 +622,14 @@ export default function Browse() {
                 >
                   💪 Flash Workouts
                 </Button>
+                <Button
+                  variant={flashEventTab === 'yoga' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFlashEventTab('yoga')}
+                  className="flex items-center gap-2"
+                >
+                  🧘 Flash Yoga
+                </Button>
               </div>
             </div>
           </CardHeader>
@@ -643,6 +656,14 @@ export default function Browse() {
                 loading={flashWorkoutsLoading}
                 onJoin={joinFlashWorkoutAction}
                 onLeave={leaveFlashWorkoutAction}
+              />
+            )}
+            {flashEventTab === 'yoga' && (
+              <FlashRunsList
+                flashRuns={flashYogaData}
+                loading={flashYogaLoading}
+                onJoin={joinFlashYogaAction}
+                onLeave={leaveFlashYogaAction}
               />
             )}
           </CardContent>
@@ -803,9 +824,11 @@ export default function Browse() {
 
       {/* Smart FAB - Shows based on user's primary sport */}
       <FlashRunFAB 
-        sportType={shouldShowWorkoutFAB ? 'workout' : shouldShowCyclingFAB ? 'cycling' : 'running'}
+        sportType={shouldShowYogaFAB ? 'yoga' : shouldShowWorkoutFAB ? 'workout' : shouldShowCyclingFAB ? 'cycling' : 'running'}
         onClick={() => {
-          if (shouldShowWorkoutFAB) {
+          if (shouldShowYogaFAB) {
+            setShowYogaModal(true);
+          } else if (shouldShowWorkoutFAB) {
             setShowFlashWorkoutModal(true);
           } else if (shouldShowCyclingFAB) {
             setShowFlashRideModal(true);
@@ -846,6 +869,12 @@ export default function Browse() {
           });
           return !!result;
         }}
+      />
+
+      {/* Flash Yoga Modal */}
+      <FlashYogaModal 
+        open={showYogaModal} 
+        onOpenChange={setShowYogaModal} 
       />
     </div>
   );
