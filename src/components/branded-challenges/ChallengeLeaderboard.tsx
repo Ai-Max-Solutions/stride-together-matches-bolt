@@ -5,7 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Trophy, Medal, Award, ChevronDown, ChevronUp } from 'lucide-react';
-import { useChallengeLeaderboard, BrandedChallenge } from '@/hooks/use-branded-challenges';
+import { BrandedChallenge, useChallengeLeaderboard } from '@/hooks/use-branded-challenges';
 import { cn } from '@/lib/utils';
 
 interface ChallengeLeaderboardProps {
