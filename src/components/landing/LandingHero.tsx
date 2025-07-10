@@ -48,7 +48,7 @@ export const LandingHero = () => {
               className="absolute inset-0 bg-cover bg-center bg-no-repeat"
               style={{ backgroundImage: 'url(/lovable-uploads/5c3d2b7b-4d6d-46ba-8599-c2c76c3470c9.png)' }}
             >
-              <div className="absolute inset-0 bg-gradient-hero"></div>
+              <div className="absolute inset-0"></div>
             </div>
           </div>
         </div>
