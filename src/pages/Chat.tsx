@@ -35,6 +35,7 @@ import { SafetyTipsSheet } from '@/components/chat/SafetyTipsSheet';
 import { useMobileDetection } from '@/hooks/use-mobile-detection';
 import { MobileNav } from '@/components/ui/mobile-nav';
 import { useUserPresence } from '@/hooks/use-user-presence';
+import { useTypingIndicator } from '@/hooks/use-typing-indicator';
 import { cn } from '@/lib/utils';
 
 interface Message {
@@ -96,6 +97,9 @@ export default function Chat() {
     ? conversation.participant_2_id 
     : conversation?.participant_1_id;
   const { isOnline, statusText, statusColor } = useUserPresence(otherUserId);
+  
+  // Use typing indicator hook
+  const { typingUsers, handleTyping: onTyping, stopTyping } = useTypingIndicator(conversationId);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -272,6 +276,7 @@ export default function Chat() {
       
       setNewMessage('');
       setShowSuggestions(false);
+      stopTyping(); // Stop typing indicator
       
       // Show feedback based on user's online status
       if (!isOnline) {
@@ -372,35 +377,10 @@ export default function Chat() {
   const handleTyping = (value: string) => {
     setNewMessage(value);
     
-    if (!isTyping && value.length > 0) {
-      setIsTyping(true);
-      
-      // Send typing status
-      const typingChannel = supabase.channel(`typing-${conversationId}`);
-      typingChannel.track({
-        user_id: user?.id,
-        typing: true,
-        timestamp: Date.now()
-      });
+    // Use the typing indicator hook
+    if (value.length > 0) {
+      onTyping();
     }
-    
-    // Clear existing timeout
-    if (typingTimeout) {
-      clearTimeout(typingTimeout);
-    }
-    
-    // Set new timeout to stop typing
-    const timeout = setTimeout(() => {
-      setIsTyping(false);
-      const typingChannel = supabase.channel(`typing-${conversationId}`);
-      typingChannel.track({
-        user_id: user?.id,
-        typing: false,
-        timestamp: Date.now()
-      });
-    }, 2000);
-    
-    setTypingTimeout(timeout);
   };
 
   // Auto-scroll when messages change
@@ -628,7 +608,7 @@ export default function Chat() {
         {/* Messages */}
         <Card className={cn(
           "flex flex-col rounded-xl shadow-sm bg-gradient-to-b from-background to-muted/20",
-          isMobile ? "h-[calc(100vh-280px)]" : "h-[60vh]"
+          isMobile ? "h-[calc(100vh-420px)] min-h-[300px]" : "h-[50vh] min-h-[400px]"
         )}>
           {/* Debug info */}
           <div className="sr-only">
@@ -726,7 +706,7 @@ export default function Chat() {
                 {/* Typing Indicator */}
                 <TypingIndicator 
                   userProfile={otherUserProfile} 
-                  isVisible={otherUserTyping} 
+                  isVisible={typingUsers.includes(otherUserId || '')} 
                 />
               </>
             )}

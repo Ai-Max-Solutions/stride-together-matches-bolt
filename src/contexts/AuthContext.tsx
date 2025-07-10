@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { usePresenceTracker } from '@/hooks/use-presence-tracker';
 
 interface AuthContextType {
   user: User | null;
@@ -18,6 +19,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Track user presence when authenticated
+  usePresenceTracker();
 
   useEffect(() => {
     // Set up auth state listener

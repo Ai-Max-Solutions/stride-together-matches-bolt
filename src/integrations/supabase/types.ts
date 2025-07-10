@@ -275,6 +275,7 @@ export type Database = {
           full_name: string | null
           gender_preference: string | null
           id: string
+          last_active_at: string | null
           location_visible: boolean | null
           pace_metrics: Json | null
           profile_picture_url: string | null
@@ -297,6 +298,7 @@ export type Database = {
           full_name?: string | null
           gender_preference?: string | null
           id?: string
+          last_active_at?: string | null
           location_visible?: boolean | null
           pace_metrics?: Json | null
           profile_picture_url?: string | null
@@ -319,6 +321,7 @@ export type Database = {
           full_name?: string | null
           gender_preference?: string | null
           id?: string
+          last_active_at?: string | null
           location_visible?: boolean | null
           pace_metrics?: Json | null
           profile_picture_url?: string | null
