@@ -646,7 +646,7 @@ export default function Browse() {
                                 <Badge 
                                   key={index} 
                                   variant="secondary" 
-                                  className="text-xs bg-accent/20 text-accent-foreground border-accent/30 hover:bg-accent/30 transition-colors"
+                                  className="text-xs bg-orange-700 text-white border-orange-600 hover:bg-orange-800 transition-colors"
                                 >
                                   {tag}
                                 </Badge>
