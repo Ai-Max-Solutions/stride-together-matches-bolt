@@ -251,6 +251,7 @@ export type Database = {
       }
       flash_runs: {
         Row: {
+          average_speed: string | null
           created_at: string
           creator_id: string
           distance: string
@@ -260,11 +261,14 @@ export type Database = {
           meeting_coordinates: Json | null
           meeting_spot: string
           pace: string
+          route_type: string | null
+          sport_type: string
           start_time: string
           status: string
           title: string
         }
         Insert: {
+          average_speed?: string | null
           created_at?: string
           creator_id: string
           distance: string
@@ -274,11 +278,14 @@ export type Database = {
           meeting_coordinates?: Json | null
           meeting_spot: string
           pace: string
+          route_type?: string | null
+          sport_type?: string
           start_time?: string
           status?: string
           title: string
         }
         Update: {
+          average_speed?: string | null
           created_at?: string
           creator_id?: string
           distance?: string
@@ -288,6 +295,8 @@ export type Database = {
           meeting_coordinates?: Json | null
           meeting_spot?: string
           pace?: string
+          route_type?: string | null
+          sport_type?: string
           start_time?: string
           status?: string
           title?: string

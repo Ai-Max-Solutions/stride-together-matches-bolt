@@ -20,6 +20,7 @@ import { useFlashRuns } from '@/hooks/use-flash-runs';
 import { FlashRunsList } from '@/components/flash-runs/FlashRunsList';
 import { FlashRunFAB } from '@/components/flash-runs/FlashRunFAB';
 import { FlashRunModal } from '@/components/flash-runs/FlashRunModal';
+import { FlashRideModal } from '@/components/flash-runs/FlashRideModal';
 import { 
   Pagination,
   PaginationContent,
@@ -105,9 +106,19 @@ export default function Browse() {
   // AI Assistant states
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   
-  // Flash Run states
+  // Flash Events states
   const [showFlashRunModal, setShowFlashRunModal] = useState(false);
-  const { flashRuns, loading: flashRunsLoading, createFlashRun, joinFlashRun, leaveFlashRun } = useFlashRuns();
+  const [showFlashRideModal, setShowFlashRideModal] = useState(false);
+  const [flashEventTab, setFlashEventTab] = useState<'runs' | 'rides'>('runs');
+  
+  // Get Flash Runs and Rides separately
+  const { flashRuns: flashRunsData, loading: flashRunsLoading, createFlashRun, joinFlashRun: joinFlashRunAction, leaveFlashRun: leaveFlashRunAction } = useFlashRuns('running');
+  const { flashRuns: flashRidesData, loading: flashRidesLoading, createFlashRun: createFlashRide, joinFlashRun: joinFlashRideAction, leaveFlashRun: leaveFlashRideAction } = useFlashRuns('cycling');
+  
+  // Determine user's primary sport for smart FAB
+  const userPrimarySport = currentUserProfile?.sports?.[0] || 'running';
+  const shouldShowCyclingFAB = userPrimarySport === 'cycling';
+  const shouldShowBothSports = currentUserProfile?.sports?.includes('running') && currentUserProfile?.sports?.includes('cycling');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -571,15 +582,50 @@ export default function Browse() {
           </Card>
         )}
 
-        {/* Flash Runs Section */}
-        <div className="mb-8">
-          <FlashRunsList
-            flashRuns={flashRuns}
-            loading={flashRunsLoading}
-            onJoin={joinFlashRun}
-            onLeave={leaveFlashRun}
-          />
-        </div>
+        {/* Flash Events Section with Tabs */}
+        <Card className="mb-8">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Flash Events</h3>
+              <div className="flex gap-2">
+                <Button
+                  variant={flashEventTab === 'runs' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFlashEventTab('runs')}
+                  className="flex items-center gap-2"
+                >
+                  🏃 Flash Runs
+                </Button>
+                <Button
+                  variant={flashEventTab === 'rides' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setFlashEventTab('rides')}
+                  className="flex items-center gap-2"
+                >
+                  🚴 Flash Rides
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {flashEventTab === 'runs' && (
+              <FlashRunsList
+                flashRuns={flashRunsData}
+                loading={flashRunsLoading}
+                onJoin={joinFlashRunAction}
+                onLeave={leaveFlashRunAction}
+              />
+            )}
+            {flashEventTab === 'rides' && (
+              <FlashRunsList
+                flashRuns={flashRidesData}
+                loading={flashRidesLoading}
+                onJoin={joinFlashRideAction}
+                onLeave={leaveFlashRideAction}
+              />
+            )}
+          </CardContent>
+        </Card>
 
         {/* Results Count & Pagination Info */}
         <div className="mb-6 flex items-center justify-between">
@@ -734,17 +780,36 @@ export default function Browse() {
         </Alert>
       </div>
 
-      {/* Flash Run FAB */}
-      <FlashRunFAB onClick={() => setShowFlashRunModal(true)} />
+      {/* Smart FAB - Shows based on user's primary sport */}
+      <FlashRunFAB 
+        sportType={userPrimarySport}
+        onClick={() => {
+          if (shouldShowCyclingFAB) {
+            setShowFlashRideModal(true);
+          } else {
+            setShowFlashRunModal(true);
+          }
+        }} 
+      />
 
       {/* Flash Run Modal */}
       <FlashRunModal
         isOpen={showFlashRunModal}
         onClose={() => setShowFlashRunModal(false)}
         onSubmit={async (data) => {
-          const result = await createFlashRun(data);
+          const result = await createFlashRun({
+            ...data,
+            sport_type: 'running'
+          });
           return !!result;
         }}
+      />
+
+      {/* Flash Ride Modal */}
+      <FlashRideModal
+        open={showFlashRideModal}
+        onOpenChange={setShowFlashRideModal}
+        onCreateFlashRide={createFlashRide}
       />
     </div>
   );

@@ -8,7 +8,8 @@ export interface FlashRun {
   creator_id: string;
   title: string;
   distance: string;
-  pace: string;
+  pace?: string;
+  average_speed?: string;
   start_time: string;
   meeting_spot: string;
   meeting_coordinates?: any;
@@ -16,6 +17,8 @@ export interface FlashRun {
   status: string;
   expires_at: string;
   created_at: string;
+  sport_type: string;
+  route_type?: string;
   creator?: {
     full_name: string;
     profile_picture_url?: string;
@@ -33,7 +36,7 @@ export interface FlashRun {
   is_participant?: boolean;
 }
 
-export function useFlashRuns() {
+export function useFlashRuns(sportType?: string) {
   const [flashRuns, setFlashRuns] = useState<FlashRun[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -41,7 +44,7 @@ export function useFlashRuns() {
 
   const fetchFlashRuns = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('flash_runs')
         .select(`
           *,
@@ -56,6 +59,13 @@ export function useFlashRuns() {
         .eq('status', 'active')
         .gt('expires_at', new Date().toISOString())
         .order('start_time', { ascending: true });
+
+      // Filter by sport type if specified
+      if (sportType) {
+        query = query.eq('sport_type', sportType);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -81,16 +91,21 @@ export function useFlashRuns() {
   const createFlashRun = async (data: {
     title: string;
     distance: string;
-    pace: string;
+    pace?: string;
+    average_speed?: string;
     start_time: string;
     meeting_spot: string;
+    sport_type: string;
+    route_type?: string;
     meeting_coordinates?: { lat: number; lng: number };
   }) => {
     if (!user) return null;
 
     try {
       const startTime = new Date(data.start_time);
-      const expiresAt = new Date(startTime.getTime() + 60 * 60 * 1000); // +1 hour
+      // Calculate expiration time based on sport type
+      const hoursToAdd = data.sport_type === 'cycling' ? 2 : 1; // 2 hours for cycling, 1 for running
+      const expiresAt = new Date(startTime.getTime() + hoursToAdd * 60 * 60 * 1000);
 
       const { data: flashRun, error } = await supabase
         .from('flash_runs')
@@ -98,10 +113,13 @@ export function useFlashRuns() {
           creator_id: user.id,
           title: data.title,
           distance: data.distance,
-          pace: data.pace,
+          pace: data.pace || null,
+          average_speed: data.average_speed || null,
           start_time: startTime.toISOString(),
           meeting_spot: data.meeting_spot,
           meeting_coordinates: data.meeting_coordinates,
+          sport_type: data.sport_type,
+          route_type: data.route_type || null,
           expires_at: expiresAt.toISOString()
         })
         .select()
@@ -109,9 +127,12 @@ export function useFlashRuns() {
 
       if (error) throw error;
 
+      const eventType = data.sport_type === 'cycling' ? 'Flash Ride' : 'Flash Run';
+      const eventEmoji = data.sport_type === 'cycling' ? '🚴' : '⚡';
+      
       toast({
-        title: "⚡ Flash Run Created!",
-        description: `Your ${data.distance} run is live and ready for participants!`,
+        title: `${eventEmoji} ${eventType} Created!`,
+        description: `Your ${data.distance} ${data.sport_type === 'cycling' ? 'ride' : 'run'} is live and ready for participants!`,
       });
 
       return flashRun;
@@ -140,9 +161,14 @@ export function useFlashRuns() {
 
       if (error) throw error;
 
+      // Find the flash event to determine sport type
+      const flashEvent = flashRuns.find(run => run.id === flashRunId);
+      const isCycling = flashEvent?.sport_type === 'cycling';
+      const message = isCycling ? "🚴 See you on the saddle!" : "See you at the Flash Run!";
+      
       toast({
         title: "🎉 You're in!",
-        description: "See you at the Flash Run!",
+        description: message,
       });
 
       return true;
@@ -191,7 +217,7 @@ export function useFlashRuns() {
 
     // Set up real-time subscription
     const channel = supabase
-      .channel('flash-runs-updates')
+      .channel(`flash-runs-updates-${sportType || 'all'}`)
       .on(
         'postgres_changes',
         {
@@ -219,7 +245,7 @@ export function useFlashRuns() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, sportType]);
 
   return {
     flashRuns,
