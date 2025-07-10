@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, MapPin, Clock, Star, Zap, Trophy, Heart } from "lucide-react";
+import { MessageCircle, MapPin, Clock, Star, Zap, Trophy, Heart, Ban } from "lucide-react";
 import { BlockReportDialog } from "@/components/chat/BlockReportDialog";
 import { MatchToast } from "@/components/common/MatchToast";
 import { ConfettiEffect } from "@/components/common/ConfettiEffect";
@@ -255,6 +255,20 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
                 </Badge>
               );
             })}
+            
+            {/* Block badge */}
+            <Badge
+              onClick={() => setIsBlockReportOpen(true)}
+              className={cn(
+                "px-3 py-1 text-xs font-medium rounded-full cursor-pointer",
+                "flex items-center gap-1.5 transition-all",
+                "hover:scale-105 hover:shadow-sm",
+                "bg-red-600 text-white border-red-500 hover:bg-red-700"
+              )}
+            >
+              <Ban className="h-3 w-3" />
+              BLOCK
+            </Badge>
           </div>
 
           {/* Mentor specialties */}
