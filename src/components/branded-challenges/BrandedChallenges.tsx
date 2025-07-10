@@ -18,6 +18,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import Navigation from '@/components/Navigation';
 
 export function BrandedChallenges() {
   const { challenges, loading, joinChallenge, updateProgress } = useBrandedChallenges();
@@ -80,16 +81,21 @@ export function BrandedChallenges() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 space-y-6">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin" />
+      <>
+        <Navigation />
+        <div className="container mx-auto px-4 py-8 space-y-6">
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-6">
+    <>
+      <Navigation />
+      <div className="container mx-auto px-4 py-8 space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold">Branded Challenges</h1>
@@ -293,6 +299,7 @@ export function BrandedChallenges() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </>
   );
 }
