@@ -221,7 +221,7 @@ export function FloatingAssistant({ className }: FloatingAssistantProps) {
           size="icon"
           className={cn(
             "fixed z-50 h-12 w-12 rounded-full shadow-card hover:shadow-primary transition-all duration-300",
-            "bg-gradient-primary text-white hover-lift animate-pulse-glow",
+            "bg-gradient-primary text-white hover-lift",
             buttonPositionClass,
             className
           )}
