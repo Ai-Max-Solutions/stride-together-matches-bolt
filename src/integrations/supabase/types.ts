@@ -46,6 +46,10 @@ export type Database = {
       }
       challenges: {
         Row: {
+          brand_logo_url: string | null
+          brand_name: string | null
+          coupon_code: string | null
+          coupon_url: string | null
           created_at: string
           description: string
           ends_at: string
@@ -54,10 +58,15 @@ export type Database = {
           starts_at: string
           status: Database["public"]["Enums"]["challenge_status"]
           target_count: number
+          target_distance: number | null
           title: string
           type: Database["public"]["Enums"]["challenge_type"]
         }
         Insert: {
+          brand_logo_url?: string | null
+          brand_name?: string | null
+          coupon_code?: string | null
+          coupon_url?: string | null
           created_at?: string
           description: string
           ends_at: string
@@ -66,10 +75,15 @@ export type Database = {
           starts_at: string
           status?: Database["public"]["Enums"]["challenge_status"]
           target_count: number
+          target_distance?: number | null
           title: string
           type: Database["public"]["Enums"]["challenge_type"]
         }
         Update: {
+          brand_logo_url?: string | null
+          brand_name?: string | null
+          coupon_code?: string | null
+          coupon_url?: string | null
           created_at?: string
           description?: string
           ends_at?: string
@@ -78,6 +92,7 @@ export type Database = {
           starts_at?: string
           status?: Database["public"]["Enums"]["challenge_status"]
           target_count?: number
+          target_distance?: number | null
           title?: string
           type?: Database["public"]["Enums"]["challenge_type"]
         }
@@ -801,7 +816,9 @@ export type Database = {
           completed_at: string | null
           created_at: string
           current_count: number
+          current_distance: number | null
           id: string
+          total_activities: number | null
           updated_at: string
           user_id: string
         }
@@ -810,7 +827,9 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           current_count?: number
+          current_distance?: number | null
           id?: string
+          total_activities?: number | null
           updated_at?: string
           user_id: string
         }
@@ -819,7 +838,9 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           current_count?: number
+          current_distance?: number | null
           id?: string
+          total_activities?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -862,6 +883,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_branded_challenge: {
+        Args: { p_user_id: string; p_challenge_id: string }
+        Returns: Json
+      }
       expire_old_flash_runs: {
         Args: Record<PropertyKey, never>
         Returns: undefined
