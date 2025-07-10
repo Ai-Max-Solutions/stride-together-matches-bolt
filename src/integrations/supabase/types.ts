@@ -470,6 +470,36 @@ export type Database = {
           },
         ]
       }
+      mentorships: {
+        Row: {
+          created_at: string | null
+          ended_at: string | null
+          id: string
+          mentee_id: string
+          mentor_id: string
+          sport: string
+          status: string
+        }
+        Insert: {
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          mentee_id: string
+          mentor_id: string
+          sport: string
+          status?: string
+        }
+        Update: {
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          mentee_id?: string
+          mentor_id?: string
+          sport?: string
+          status?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -595,8 +625,10 @@ export type Database = {
           full_name: string | null
           gender_preference: string | null
           id: string
+          is_mentor_available: boolean | null
           last_active_at: string | null
           location_visible: boolean | null
+          mentor_specialties: string[] | null
           pace_metrics: Json | null
           profile_picture_url: string | null
           region: string | null
@@ -606,6 +638,7 @@ export type Database = {
           trust_score: number | null
           updated_at: string
           user_id: string
+          years_experience: number | null
         }
         Insert: {
           age_range_max?: number | null
@@ -621,8 +654,10 @@ export type Database = {
           full_name?: string | null
           gender_preference?: string | null
           id?: string
+          is_mentor_available?: boolean | null
           last_active_at?: string | null
           location_visible?: boolean | null
+          mentor_specialties?: string[] | null
           pace_metrics?: Json | null
           profile_picture_url?: string | null
           region?: string | null
@@ -632,6 +667,7 @@ export type Database = {
           trust_score?: number | null
           updated_at?: string
           user_id: string
+          years_experience?: number | null
         }
         Update: {
           age_range_max?: number | null
@@ -647,8 +683,10 @@ export type Database = {
           full_name?: string | null
           gender_preference?: string | null
           id?: string
+          is_mentor_available?: boolean | null
           last_active_at?: string | null
           location_visible?: boolean | null
+          mentor_specialties?: string[] | null
           pace_metrics?: Json | null
           profile_picture_url?: string | null
           region?: string | null
@@ -658,6 +696,7 @@ export type Database = {
           trust_score?: number | null
           updated_at?: string
           user_id?: string
+          years_experience?: number | null
         }
         Relationships: []
       }
