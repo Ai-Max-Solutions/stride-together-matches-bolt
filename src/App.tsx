@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 
 // Lazy load heavy pages for better performance
 const Browse = lazy(() => import("./pages/Browse"));
+const ClubEvents = lazy(() => import("./pages/ClubEvents"));
 const Messages = lazy(() => import("./pages/Messages"));
 const Chat = lazy(() => import("./pages/Chat"));
 const Settings = lazy(() => import("./pages/Settings"));
@@ -47,6 +48,7 @@ const AppContent = () => {
             <Route path="/auth" element={<Auth />} />
             <Route path="/profile/setup" element={<ProfileSetup />} />
             <Route path="/browse" element={<Browse />} />
+            <Route path="/clubs" element={<ClubEvents />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/chat/:conversationId" element={<Chat />} />
             <Route path="/chatbot" element={<Chatbot />} />
