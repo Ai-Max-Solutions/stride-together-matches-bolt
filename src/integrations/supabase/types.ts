@@ -854,6 +854,42 @@ export type Database = {
           },
         ]
       }
+      user_role_audit: {
+        Row: {
+          action: string
+          assigned_at: string
+          assigned_by: string | null
+          id: string
+          ip_address: unknown | null
+          reason: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          ip_address?: unknown | null
+          reason?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          ip_address?: unknown | null
+          reason?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           assigned_at: string
@@ -883,6 +919,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_user_role: {
+        Args: {
+          target_user_id: string
+          target_role: Database["public"]["Enums"]["app_role"]
+          assignment_reason?: string
+        }
+        Returns: boolean
+      }
       complete_branded_challenge: {
         Args: { p_user_id: string; p_challenge_id: string }
         Returns: Json
@@ -895,6 +939,16 @@ export type Database = {
         Args: { user1_id: string; user2_id: string }
         Returns: string
       }
+      get_user_role_history: {
+        Args: { target_user_id: string }
+        Returns: {
+          role: Database["public"]["Enums"]["app_role"]
+          action: string
+          assigned_by: string
+          assigned_at: string
+          reason: string
+        }[]
+      }
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
@@ -903,6 +957,14 @@ export type Database = {
         Args: {
           _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
+      revoke_user_role: {
+        Args: {
+          target_user_id: string
+          target_role: Database["public"]["Enums"]["app_role"]
+          revocation_reason?: string
         }
         Returns: boolean
       }
