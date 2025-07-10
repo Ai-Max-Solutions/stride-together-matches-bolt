@@ -10,7 +10,8 @@ import {
   X,
   Settings,
   Bot,
-  LogOut
+  LogOut,
+  Trophy
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,6 +42,7 @@ const Navigation = () => {
   const navItems = [
     { label: "Browse", path: "/browse", icon: Search },
     { label: "Messages", path: "/messages", icon: MessageCircle },
+    { label: "Progress", path: "/progress", icon: Trophy },
     { label: "Profile", path: "/profile/setup", icon: User },
   ];
 

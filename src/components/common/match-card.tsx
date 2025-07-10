@@ -9,6 +9,8 @@ import { TrustBadges } from "./TrustBadges";
 import { BlockReportDialog } from "@/components/chat/BlockReportDialog";
 import { MatchToast } from "./MatchToast";
 import { useUserPresence } from "@/hooks/use-user-presence";
+import { useAchievements } from "@/hooks/use-achievements";
+import { useChallenges } from "@/hooks/use-challenges";
 import { cn } from '@/lib/utils';
 
 interface Profile {
@@ -49,6 +51,8 @@ export function MatchCard({ profile, matchScore, onConnect, className, currentUs
   const [connecting, setConnecting] = useState(false);
   const [hasConnected, setHasConnected] = useState(false);
   const { isOnline, statusText, statusColor } = useUserPresence(profile.user_id);
+  const { checkAchievements } = useAchievements();
+  const { updateProgress, challenges } = useChallenges();
   const formatLocation = (profile: Profile) => {
     if (!profile.location_visible) return 'Location private';
     if (profile.city && profile.region) {
@@ -70,13 +74,31 @@ export function MatchCard({ profile, matchScore, onConnect, className, currentUs
     setHasConnected(true);
     
     // Add a small delay for button animation
-    setTimeout(() => {
+    setTimeout(async () => {
       // Simulate checking if it's a mutual match (for demo purposes)
       const isMatch = Math.random() > 0.7; // 30% chance of mutual match
       
       setShowMatchToast(true);
       onConnect(profile.user_id);
       setConnecting(false);
+
+      // Update gamification progress
+      try {
+        // Check for achievements based on connections
+        await checkAchievements({ connectionsCount: 1 });
+        
+        // Update challenge progress for connection-based challenges
+        const connectionChallenges = challenges.filter(c => 
+          c.title.toLowerCase().includes('connect') || 
+          c.title.toLowerCase().includes('buddy')
+        );
+        
+        for (const challenge of connectionChallenges) {
+          await updateProgress(challenge.id, 1);
+        }
+      } catch (error) {
+        console.error('Error updating gamification progress:', error);
+      }
     }, 600);
   };
 

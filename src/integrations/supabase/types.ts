@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          points: number
+          title: string
+          type: Database["public"]["Enums"]["achievement_type"]
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          icon: string
+          id?: string
+          points?: number
+          title: string
+          type: Database["public"]["Enums"]["achievement_type"]
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          points?: number
+          title?: string
+          type?: Database["public"]["Enums"]["achievement_type"]
+        }
+        Relationships: []
+      }
+      challenges: {
+        Row: {
+          created_at: string
+          description: string
+          ends_at: string
+          id: string
+          points_reward: number
+          starts_at: string
+          status: Database["public"]["Enums"]["challenge_status"]
+          target_count: number
+          title: string
+          type: Database["public"]["Enums"]["challenge_type"]
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          ends_at: string
+          id?: string
+          points_reward?: number
+          starts_at: string
+          status?: Database["public"]["Enums"]["challenge_status"]
+          target_count: number
+          title: string
+          type: Database["public"]["Enums"]["challenge_type"]
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          ends_at?: string
+          id?: string
+          points_reward?: number
+          starts_at?: string
+          status?: Database["public"]["Enums"]["challenge_status"]
+          target_count?: number
+          title?: string
+          type?: Database["public"]["Enums"]["challenge_type"]
+        }
+        Relationships: []
+      }
       chatbot_conversations: {
         Row: {
           created_at: string
@@ -281,6 +350,9 @@ export type Database = {
           profile_picture_url: string | null
           region: string | null
           sports: string[] | null
+          total_points: number | null
+          training_goals: string[] | null
+          trust_score: number | null
           updated_at: string
           user_id: string
         }
@@ -304,6 +376,9 @@ export type Database = {
           profile_picture_url?: string | null
           region?: string | null
           sports?: string[] | null
+          total_points?: number | null
+          training_goals?: string[] | null
+          trust_score?: number | null
           updated_at?: string
           user_id: string
         }
@@ -327,6 +402,9 @@ export type Database = {
           profile_picture_url?: string | null
           region?: string | null
           sports?: string[] | null
+          total_points?: number | null
+          training_goals?: string[] | null
+          trust_score?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -371,6 +449,35 @@ export type Database = {
         }
         Relationships: []
       }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_blocks: {
         Row: {
           blocked_id: string
@@ -395,6 +502,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_challenge_progress: {
+        Row: {
+          challenge_id: string
+          completed_at: string | null
+          created_at: string
+          current_count: number
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string | null
+          created_at?: string
+          current_count?: number
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string | null
+          created_at?: string
+          current_count?: number
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_challenge_progress_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -406,7 +551,17 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      achievement_type:
+        | "first_connection"
+        | "social_butterfly"
+        | "marathon_matcher"
+        | "early_bird"
+        | "consistent_connector"
+        | "meetup_master"
+        | "goal_achiever"
+        | "community_builder"
+      challenge_status: "active" | "completed" | "expired"
+      challenge_type: "weekly" | "monthly" | "seasonal"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -533,6 +688,19 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      achievement_type: [
+        "first_connection",
+        "social_butterfly",
+        "marathon_matcher",
+        "early_bird",
+        "consistent_connector",
+        "meetup_master",
+        "goal_achiever",
+        "community_builder",
+      ],
+      challenge_status: ["active", "completed", "expired"],
+      challenge_type: ["weekly", "monthly", "seasonal"],
+    },
   },
 } as const
