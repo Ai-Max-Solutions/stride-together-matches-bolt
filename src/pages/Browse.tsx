@@ -43,7 +43,8 @@ import {
   Bot,
   ChevronDown,
   ChevronUp,
-  MapPin
+  MapPin,
+  MessageCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Navigation from '@/components/Navigation';
@@ -653,9 +654,19 @@ export default function Browse() {
                               ))}
                             </div>
                             
-                            <p className="text-xs text-muted-foreground leading-relaxed">
+                            <p className="text-xs text-muted-foreground leading-relaxed mb-4">
                               {matchData.reasons.slice(0, 2).join(' • ')}
                             </p>
+                            
+                            {/* Connect Button */}
+                            <Button 
+                              onClick={() => handleConnect(profile.id)}
+                              size="sm"
+                              className="w-full bg-gradient-primary hover:shadow-premium text-primary-foreground"
+                            >
+                              <MessageCircle className="w-4 h-4 mr-2" />
+                              Connect Now
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
