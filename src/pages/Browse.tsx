@@ -678,105 +678,181 @@ export default function Browse() {
           </Card>
         )}
 
-        {/* Flash Events Section with Tabs */}
-        <Card className="mb-8">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Flash Events</h3>
-              <div className="flex items-center gap-4">
-                {/* Create Flash Event Button */}
-                <Button
-                  onClick={() => {
-                    if (flashEventTab === 'yoga') {
-                      setShowYogaModal(true);
-                    } else if (flashEventTab === 'workouts') {
-                      setShowFlashWorkoutModal(true);
-                    } else if (flashEventTab === 'rides') {
-                      setShowFlashRideModal(true);
-                    } else {
-                      setShowFlashRunModal(true);
-                    }
-                  }}
-                  className="bg-gradient-primary hover:shadow-premium text-primary-foreground shadow-md hover:scale-105 transition-all"
-                  size="sm"
-                >
-                  <span className="mr-2">+</span>
-                  Create Flash Event
-                </Button>
-                
-                {/* Tab Buttons */}
-                <div className="flex gap-2">
-                  <Button
-                    variant={flashEventTab === 'runs' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setFlashEventTab('runs')}
-                    className="flex items-center gap-2"
-                  >
-                    🏃 Flash Runs
-                  </Button>
-                  <Button
-                    variant={flashEventTab === 'rides' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setFlashEventTab('rides')}
-                    className="flex items-center gap-2"
-                  >
-                    🚴 Flash Rides
-                  </Button>
-                  <Button
-                    variant={flashEventTab === 'workouts' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setFlashEventTab('workouts')}
-                    className="flex items-center gap-2"
-                  >
-                    💪 Flash Workouts
-                  </Button>
-                  <Button
-                    variant={flashEventTab === 'yoga' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setFlashEventTab('yoga')}
-                    className="flex items-center gap-2"
-                  >
-                    🧘 Flash Yoga
-                  </Button>
+        {/* Flash Events Section with Smart Display */}
+        {(() => {
+          // Check if any tab has events
+          const hasRuns = flashRunsData.length > 0;
+          const hasRides = flashRidesData.length > 0;
+          const hasWorkouts = flashWorkoutsData.length > 0;
+          const hasYoga = flashYogaData.length > 0;
+          const hasAnyEvents = hasRuns || hasRides || hasWorkouts || hasYoga;
+
+          // If no events at all, show simplified create-only interface
+          if (!hasAnyEvents && !flashRunsLoading && !flashRidesLoading && !flashWorkoutsLoading && !flashYogaLoading) {
+            return (
+              <Card className="mb-8 bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20">
+                <CardContent className="p-8 text-center">
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center">
+                      <Sparkles className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold mb-2">Create Flash Events</h3>
+                      <p className="text-muted-foreground mb-6 max-w-md">
+                        Start spontaneous workouts, runs, rides, or yoga sessions in your area. 
+                        Connect with nearby fitness enthusiasts instantly!
+                      </p>
+                    </div>
+                    
+                    {/* Create Event Buttons Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-2xl">
+                      <Button
+                        onClick={() => setShowFlashRunModal(true)}
+                        variant="outline"
+                        className="h-20 flex flex-col gap-2 hover:bg-primary/5 hover:border-primary/30 transition-all"
+                      >
+                        <span className="text-2xl">🏃</span>
+                        <span className="text-sm font-medium">Flash Run</span>
+                      </Button>
+                      <Button
+                        onClick={() => setShowFlashRideModal(true)}
+                        variant="outline"
+                        className="h-20 flex flex-col gap-2 hover:bg-primary/5 hover:border-primary/30 transition-all"
+                      >
+                        <span className="text-2xl">🚴</span>
+                        <span className="text-sm font-medium">Flash Ride</span>
+                      </Button>
+                      <Button
+                        onClick={() => setShowFlashWorkoutModal(true)}
+                        variant="outline"
+                        className="h-20 flex flex-col gap-2 hover:bg-primary/5 hover:border-primary/30 transition-all"
+                      >
+                        <span className="text-2xl">💪</span>
+                        <span className="text-sm font-medium">Flash Workout</span>
+                      </Button>
+                      <Button
+                        onClick={() => setShowYogaModal(true)}
+                        variant="outline"
+                        className="h-20 flex flex-col gap-2 hover:bg-primary/5 hover:border-primary/30 transition-all"
+                      >
+                        <span className="text-2xl">🧘</span>
+                        <span className="text-sm font-medium">Flash Yoga</span>
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          }
+
+          // If there are events, show the full interface with tabs
+          return (
+            <Card className="mb-8">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Flash Events</h3>
+                  <div className="flex items-center gap-4">
+                    {/* Create Flash Event Button */}
+                    <Button
+                      onClick={() => {
+                        if (flashEventTab === 'yoga') {
+                          setShowYogaModal(true);
+                        } else if (flashEventTab === 'workouts') {
+                          setShowFlashWorkoutModal(true);
+                        } else if (flashEventTab === 'rides') {
+                          setShowFlashRideModal(true);
+                        } else {
+                          setShowFlashRunModal(true);
+                        }
+                      }}
+                      className="bg-gradient-primary hover:shadow-premium text-primary-foreground shadow-md hover:scale-105 transition-all"
+                      size="sm"
+                    >
+                      <span className="mr-2">+</span>
+                      Create Flash Event
+                    </Button>
+                    
+                    {/* Tab Buttons */}
+                    <div className="flex gap-2">
+                      <Button
+                        variant={flashEventTab === 'runs' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setFlashEventTab('runs')}
+                        className="flex items-center gap-2"
+                      >
+                        🏃 Flash Runs
+                        {hasRuns && <Badge variant="secondary" className="ml-1 h-4 text-xs">{flashRunsData.length}</Badge>}
+                      </Button>
+                      <Button
+                        variant={flashEventTab === 'rides' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setFlashEventTab('rides')}
+                        className="flex items-center gap-2"
+                      >
+                        🚴 Flash Rides
+                        {hasRides && <Badge variant="secondary" className="ml-1 h-4 text-xs">{flashRidesData.length}</Badge>}
+                      </Button>
+                      <Button
+                        variant={flashEventTab === 'workouts' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setFlashEventTab('workouts')}
+                        className="flex items-center gap-2"
+                      >
+                        💪 Flash Workouts
+                        {hasWorkouts && <Badge variant="secondary" className="ml-1 h-4 text-xs">{flashWorkoutsData.length}</Badge>}
+                      </Button>
+                      <Button
+                        variant={flashEventTab === 'yoga' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setFlashEventTab('yoga')}
+                        className="flex items-center gap-2"
+                      >
+                        🧘 Flash Yoga
+                        {hasYoga && <Badge variant="secondary" className="ml-1 h-4 text-xs">{flashYogaData.length}</Badge>}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {flashEventTab === 'runs' && (
-              <FlashRunsList
-                flashRuns={flashRunsData}
-                loading={flashRunsLoading}
-                onJoin={joinFlashRunAction}
-                onLeave={leaveFlashRunAction}
-              />
-            )}
-            {flashEventTab === 'rides' && (
-              <FlashRunsList
-                flashRuns={flashRidesData}
-                loading={flashRidesLoading}
-                onJoin={joinFlashRideAction}
-                onLeave={leaveFlashRideAction}
-              />
-            )}
-            {flashEventTab === 'workouts' && (
-              <FlashRunsList
-                flashRuns={flashWorkoutsData}
-                loading={flashWorkoutsLoading}
-                onJoin={joinFlashWorkoutAction}
-                onLeave={leaveFlashWorkoutAction}
-              />
-            )}
-            {flashEventTab === 'yoga' && (
-              <FlashRunsList
-                flashRuns={flashYogaData}
-                loading={flashYogaLoading}
-                onJoin={joinFlashYogaAction}
-                onLeave={leaveFlashYogaAction}
-              />
-            )}
-          </CardContent>
-        </Card>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {flashEventTab === 'runs' && (
+                    <FlashRunsList
+                      flashRuns={flashRunsData}
+                      loading={flashRunsLoading}
+                      onJoin={joinFlashRunAction}
+                      onLeave={leaveFlashRunAction}
+                    />
+                  )}
+                  {flashEventTab === 'rides' && (
+                    <FlashRunsList
+                      flashRuns={flashRidesData}
+                      loading={flashRidesLoading}
+                      onJoin={joinFlashRideAction}
+                      onLeave={leaveFlashRideAction}
+                    />
+                  )}
+                  {flashEventTab === 'workouts' && (
+                    <FlashRunsList
+                      flashRuns={flashWorkoutsData}
+                      loading={flashWorkoutsLoading}
+                      onJoin={joinFlashWorkoutAction}
+                      onLeave={leaveFlashWorkoutAction}
+                    />
+                  )}
+                  {flashEventTab === 'yoga' && (
+                    <FlashRunsList
+                      flashRuns={flashYogaData}
+                      loading={flashYogaLoading}
+                      onJoin={joinFlashYogaAction}
+                      onLeave={leaveFlashYogaAction}
+                    />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })()}
 
         {/* Results Count & Pagination Info */}
         <div className="mb-6 flex items-center justify-between">
