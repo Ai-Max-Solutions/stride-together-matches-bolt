@@ -92,19 +92,24 @@ export function SignUpForm({ onSwitchToSignIn }: SignUpFormProps) {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
+          <div className="space-y-3 border rounded-lg p-4 bg-muted/20">
+            <div className="flex items-start space-x-3">
               <input
                 id="isOrganization"
                 type="checkbox"
                 checked={formData.isOrganization}
                 onChange={(e) => updateField('isOrganization', e.target.checked)}
                 disabled={loading}
-                className="rounded border-input"
+                className="rounded border-input mt-1"
               />
-              <Label htmlFor="isOrganization" className="text-sm font-medium">
-                I represent a club or charity organization
-              </Label>
+              <div className="space-y-1">
+                <Label htmlFor="isOrganization" className="text-sm font-medium cursor-pointer">
+                  I represent a club or charity organization
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Check this if you're signing up on behalf of a sports club or charity to organize events
+                </p>
+              </div>
             </div>
           </div>
 

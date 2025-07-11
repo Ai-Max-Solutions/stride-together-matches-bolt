@@ -8,12 +8,14 @@ import { Camera, User } from 'lucide-react';
 import { useImageUpload } from '@/hooks/use-image-upload';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfileValidation } from '@/hooks/use-profile-validation';
+import { SelfieVerificationCard } from '@/components/settings/SelfieVerificationCard';
 
 interface BasicInfoStepProps {
   data: {
     full_name: string;
     bio: string;
     profile_picture_url?: string;
+    selfie_verified?: boolean;
   };
   onChange: (updates: any) => void;
 }
@@ -48,6 +50,10 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
     setErrors(prev => ({ ...prev, [field]: error || '' }));
     
     onChange({ [field]: value });
+  };
+
+  const handleVerificationComplete = (verified: boolean) => {
+    onChange({ selfie_verified: verified });
   };
 
   return (
@@ -115,12 +121,22 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
         </div>
       </div>
 
+      {/* Selfie Verification */}
+      <div className="space-y-3">
+        <Label className="text-base font-medium">Profile Verification</Label>
+        <SelfieVerificationCard
+          isVerified={data.selfie_verified || false}
+          onVerificationComplete={handleVerificationComplete}
+        />
+      </div>
+
       <div className="bg-muted/50 p-4 rounded-lg">
         <h4 className="font-semibold text-sm mb-2">Tips for a great profile:</h4>
         <ul className="text-sm text-muted-foreground space-y-1">
           <li>• Use a clear photo where you're easily recognizable</li>
           <li>• Mention your fitness goals and favorite activities</li>
           <li>• Share what you're looking for in a workout partner</li>
+          <li>• Verify your profile with a selfie to build trust</li>
         </ul>
       </div>
     </div>
