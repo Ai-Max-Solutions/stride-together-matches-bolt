@@ -31,8 +31,8 @@ export function EmptyState({
         <div className="mb-4">{icon}</div>
       ) : null}
       
-      <h3 className="text-xl font-semibold mb-2 text-text-primary">{title}</h3>
-      <p className="text-text-secondary mb-6 max-w-md">{description}</p>
+      <h3 className="text-xl font-semibold mb-2 text-foreground">{title}</h3>
+      <p className="text-muted-foreground mb-6 max-w-md">{description}</p>
       
       {actionLabel && onAction && (
         <Button onClick={onAction}>

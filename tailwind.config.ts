@@ -27,11 +27,7 @@ export default {
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))',
-					glow: 'hsl(var(--primary-glow))',
-					// Sports theme electric teal
-					sports: '#00E0FF',
-					light: '#73EBF5',
-					dark: '#00B8D4',
+					glow: 'hsl(var(--primary-glow))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -47,10 +43,7 @@ export default {
 				},
 				accent: {
 					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))',
-					red: '#FF5A5F',     // For high energy/intensity
-					green: '#01C38D',   // For progress/achievement 
-					yellow: '#FFD166',  // For warnings/cautions
+					foreground: 'hsl(var(--accent-foreground))'
 				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
@@ -58,8 +51,7 @@ export default {
 				},
 				card: {
 					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))',
-					bg: '#FFFFFF',
+					foreground: 'hsl(var(--card-foreground))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
@@ -77,29 +69,19 @@ export default {
 				fitness: 'hsl(var(--fitness))',
 				success: 'hsl(var(--success))',
 				warning: 'hsl(var(--warning))',
-				// Sports UI theme additions
-				surface: {
-					DEFAULT: '#F9FBFC', // Off-white background
-					dark: '#101820',    // Charcoal dark mode
-					card: '#FFFFFF',    // Card background
-				},
-				text: {
-					primary: '#101820',   // Main text
-					secondary: '#555A64', // Secondary text
-					tertiary: '#9DA3AE',  // Helper text
-					inverse: '#FFFFFF',   // Text on dark backgrounds
-				},
+				// Sports activity colors using CSS variables
 				activity: {
-					run: '#FF5A5F',      // Running
-					cycle: '#01C38D',    // Cycling
-					workout: '#7B61FF',  // Gym workouts
-					yoga: '#FFD166',     // Yoga/flexibility
+					run: 'hsl(var(--activity-run))',
+					cycle: 'hsl(var(--activity-cycle))',
+					workout: 'hsl(var(--activity-workout))',
+					yoga: 'hsl(var(--activity-yoga))',
 				},
+				// Match level colors using CSS variables
 				match: {
-					high: '#01C38D',     // 90-100%
-					medium: '#FFD166',   // 70-89%
-					low: '#FF5A5F',      // <70%
-				},
+					high: 'hsl(var(--match-high))',
+					medium: 'hsl(var(--match-medium))',
+					low: 'hsl(var(--match-low))',
+				}
 			},
 			backgroundImage: {
 				'gradient-primary': 'var(--gradient-primary)',

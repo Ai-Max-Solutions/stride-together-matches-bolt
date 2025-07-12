@@ -18,9 +18,9 @@ export function MatchBadge({
   else if (matchPercent >= 70) matchLevel = 'medium';
 
   const matchColors = {
-    high: 'bg-match-high text-text-inverse',
-    medium: 'bg-match-medium text-text-primary',
-    low: 'bg-match-low text-text-inverse',
+    high: 'bg-match-high text-white',
+    medium: 'bg-match-medium text-black',
+    low: 'bg-match-low text-white',
   };
 
   const sportDisplay = {

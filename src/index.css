@@ -71,6 +71,17 @@ Inspired by modern fitness apps with energetic but professional feel
     --confetti-4: 285 85% 70%;
     --confetti-5: 125 65% 55%;
 
+    /* Activity colors */
+    --activity-run: 0 68% 62%;      /* Red for running */
+    --activity-cycle: 142 76% 36%;  /* Green for cycling */
+    --activity-workout: 258 90% 66%; /* Purple for workouts */
+    --activity-yoga: 43 96% 56%;    /* Yellow for yoga */
+
+    /* Match level colors */
+    --match-high: 142 76% 36%;      /* Green for high match */
+    --match-medium: 43 96% 56%;     /* Yellow for medium match */
+    --match-low: 0 68% 62%;         /* Red for low match */
+
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
@@ -143,6 +154,17 @@ Inspired by modern fitness apps with energetic but professional feel
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Dark mode activity colors */
+    --activity-run: 0 68% 70%;      
+    --activity-cycle: 142 76% 45%;  
+    --activity-workout: 258 90% 75%; 
+    --activity-yoga: 43 96% 65%;    
+
+    /* Dark mode match colors */
+    --match-high: 142 76% 45%;      
+    --match-medium: 43 96% 65%;     
+    --match-low: 0 68% 70%;         
   }
 }
 

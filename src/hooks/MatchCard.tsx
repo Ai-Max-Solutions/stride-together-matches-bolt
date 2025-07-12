@@ -83,10 +83,10 @@ export function MatchCard({
             </Avatar>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-lg text-text-primary">{name}, {age}</h3>
+                <h3 className="font-bold text-lg text-foreground">{name}, {age}</h3>
                 <SportIcon sport={sport} />
               </div>
-              <div className="flex items-center text-sm text-text-secondary gap-1">
+              <div className="flex items-center text-sm text-muted-foreground gap-1">
                 <MapPin size={14} />
                 <span>{location} • {distance} away</span>
               </div>
@@ -97,21 +97,21 @@ export function MatchCard({
       </CardHeader>
       
       <CardContent className="pb-2">
-        <p className="text-text-secondary text-sm line-clamp-2">{bio}</p>
+        <p className="text-muted-foreground text-sm line-clamp-2">{bio}</p>
         <div className="mt-3 flex flex-wrap gap-2 text-sm">
           {stats.pace && (
-            <div className="rounded-md bg-surface-dark/5 px-2 py-1 flex items-center gap-1">
+            <div className="rounded-md bg-muted px-2 py-1 flex items-center gap-1">
               <Clock size={14} className="text-activity-run" />
-              <span className="text-text-primary font-medium">Pace:</span> {stats.pace}
+              <span className="text-foreground font-medium">Pace:</span> {stats.pace}
             </div>
           )}
           {stats.avgDistance && (
-            <div className="rounded-md bg-surface-dark/5 px-2 py-1 flex items-center gap-1">
-              <span className="text-text-primary font-medium">Avg:</span> {stats.avgDistance}
+            <div className="rounded-md bg-muted px-2 py-1 flex items-center gap-1">
+              <span className="text-foreground font-medium">Avg:</span> {stats.avgDistance}
             </div>
           )}
           {stats.preferredTime && (
-            <div className="rounded-md bg-surface-dark/5 px-2 py-1 flex items-center gap-1">
+            <div className="rounded-md bg-muted px-2 py-1 flex items-center gap-1">
               <Calendar size={14} className="text-primary" />
               <span>{stats.preferredTime}</span>
             </div>
@@ -121,7 +121,7 @@ export function MatchCard({
       
       <CardFooter className="pt-2">
         <div className="w-full flex justify-between items-center">
-          <span className="text-xs text-text-tertiary">Active {lastActive}</span>
+          <span className="text-xs text-muted-foreground">Active {lastActive}</span>
           <div className="flex gap-2">
             <Button 
               variant="outline" 
