@@ -143,23 +143,23 @@ export function BrandedChallenges() {
       )}
 
       {/* Challenge Tabs */}
-      <Tabs defaultValue="participating" className="space-y-6">
+      <Tabs defaultValue="available" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="participating" className="gap-2">
-            <Activity className="h-4 w-4" />
-            Participating
-            {participatingChallenges.length > 0 && (
-              <Badge variant="secondary" className="ml-1">
-                {participatingChallenges.length}
-              </Badge>
-            )}
-          </TabsTrigger>
           <TabsTrigger value="available" className="gap-2">
             <Plus className="h-4 w-4" />
             Available
             {availableChallenges.length > 0 && (
               <Badge variant="secondary" className="ml-1">
                 {availableChallenges.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="participating" className="gap-2">
+            <Activity className="h-4 w-4" />
+            Participating
+            {participatingChallenges.length > 0 && (
+              <Badge variant="secondary" className="ml-1">
+                {participatingChallenges.length}
               </Badge>
             )}
           </TabsTrigger>
@@ -173,6 +173,31 @@ export function BrandedChallenges() {
             )}
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="available" className="space-y-4">
+          {availableChallenges.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Plus className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2">No New Challenges</h3>
+                <p className="text-muted-foreground">
+                  Check back later for new brand challenges
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {availableChallenges.map((challenge) => (
+                <BrandedChallengeCard
+                  key={challenge.id}
+                  challenge={challenge}
+                  onJoin={joinChallenge}
+                  onViewLeaderboard={handleViewLeaderboard}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
 
         <TabsContent value="participating" className="space-y-4">
           {participatingChallenges.length === 0 ? (
@@ -194,31 +219,6 @@ export function BrandedChallenges() {
                   onJoin={joinChallenge}
                   onViewLeaderboard={handleViewLeaderboard}
                   onUpdateProgress={handleUpdateProgress}
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="available" className="space-y-4">
-          {availableChallenges.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <Plus className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2">No New Challenges</h3>
-                <p className="text-muted-foreground">
-                  Check back later for new brand challenges
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {availableChallenges.map((challenge) => (
-                <BrandedChallengeCard
-                  key={challenge.id}
-                  challenge={challenge}
-                  onJoin={joinChallenge}
-                  onViewLeaderboard={handleViewLeaderboard}
                 />
               ))}
             </div>
