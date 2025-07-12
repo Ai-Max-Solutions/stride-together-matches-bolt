@@ -27,11 +27,15 @@ export default {
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))',
-					glow: 'hsl(var(--primary-glow))'
+					glow: 'hsl(var(--primary-glow))',
+					// Sports theme electric teal
+					sports: '#00E0FF',
+					light: '#73EBF5',
+					dark: '#00B8D4',
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))'
+					foreground: 'hsl(var(--secondary-foreground))',
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
@@ -43,7 +47,10 @@ export default {
 				},
 				accent: {
 					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))'
+					foreground: 'hsl(var(--accent-foreground))',
+					red: '#FF5A5F',     // For high energy/intensity
+					green: '#01C38D',   // For progress/achievement 
+					yellow: '#FFD166',  // For warnings/cautions
 				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
@@ -51,7 +58,8 @@ export default {
 				},
 				card: {
 					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))'
+					foreground: 'hsl(var(--card-foreground))',
+					bg: '#FFFFFF',
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
@@ -68,7 +76,30 @@ export default {
 				cycling: 'hsl(var(--cycling))',
 				fitness: 'hsl(var(--fitness))',
 				success: 'hsl(var(--success))',
-				warning: 'hsl(var(--warning))'
+				warning: 'hsl(var(--warning))',
+				// Sports UI theme additions
+				surface: {
+					DEFAULT: '#F9FBFC', // Off-white background
+					dark: '#101820',    // Charcoal dark mode
+					card: '#FFFFFF',    // Card background
+				},
+				text: {
+					primary: '#101820',   // Main text
+					secondary: '#555A64', // Secondary text
+					tertiary: '#9DA3AE',  // Helper text
+					inverse: '#FFFFFF',   // Text on dark backgrounds
+				},
+				activity: {
+					run: '#FF5A5F',      // Running
+					cycle: '#01C38D',    // Cycling
+					workout: '#7B61FF',  // Gym workouts
+					yoga: '#FFD166',     // Yoga/flexibility
+				},
+				match: {
+					high: '#01C38D',     // 90-100%
+					medium: '#FFD166',   // 70-89%
+					low: '#FF5A5F',      // <70%
+				},
 			},
 			backgroundImage: {
 				'gradient-primary': 'var(--gradient-primary)',
@@ -79,8 +110,8 @@ export default {
 			boxShadow: {
 				'primary': 'var(--shadow-primary)',
 				'accent': 'var(--shadow-accent)',
-				'card': 'var(--shadow-card)',
-				'card-hover': '0 8px 25px -3px hsla(210, 22%, 15%, 0.12), 0 4px 6px -2px hsla(210, 22%, 15%, 0.05)',
+				'card': '0 4px 6px hsla(210, 22%, 15%, 0.08)',
+				'card-hover': '0 8px 12px hsla(210, 22%, 15%, 0.12)',
 				'premium': '0 6px 20px -6px hsla(210, 22%, 15%, 0.15)',
 				'avatar': '0 2px 8px hsla(210, 22%, 15%, 0.08)',
 				'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.15)'
@@ -90,12 +121,11 @@ export default {
 				'bounce': 'var(--transition-bounce)'
 			},
 			borderRadius: {
-				lg: 'var(--radius)',
+				lg: '12px', // Sports theme: 12px
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			keyframes: {
-				// Accordion animations
 				'accordion-down': {
 					from: { height: '0', opacity: '0' },
 					to: { height: 'var(--radix-accordion-content-height)', opacity: '1' }
@@ -104,8 +134,6 @@ export default {
 					from: { height: 'var(--radix-accordion-content-height)', opacity: '1' },
 					to: { height: '0', opacity: '0' }
 				},
-				
-				// Fade animations
 				'fade-in': {
 					'0%': { opacity: '0', transform: 'translateY(10px)' },
 					'100%': { opacity: '1', transform: 'translateY(0)' }
@@ -114,8 +142,6 @@ export default {
 					'0%': { opacity: '1', transform: 'translateY(0)' },
 					'100%': { opacity: '0', transform: 'translateY(10px)' }
 				},
-				
-				// Scale animations
 				'scale-in': {
 					'0%': { transform: 'scale(0.95)', opacity: '0' },
 					'100%': { transform: 'scale(1)', opacity: '1' }
@@ -124,8 +150,6 @@ export default {
 					from: { transform: 'scale(1)', opacity: '1' },
 					to: { transform: 'scale(0.95)', opacity: '0' }
 				},
-				
-				// Slide animations
 				'slide-in-right': {
 					'0%': { transform: 'translateX(100%)' },
 					'100%': { transform: 'translateX(0)' }
@@ -134,8 +158,6 @@ export default {
 					'0%': { transform: 'translateX(0)' },
 					'100%': { transform: 'translateX(100%)' }
 				},
-				
-				// Slide down animation for dropdowns
 				'slide-down': {
 					'0%': { 
 						transform: 'translateY(-10px)', 
@@ -148,21 +170,21 @@ export default {
 						maxHeight: '600px'
 					}
 				},
-				
-				// Pulse glow for emphasis
 				'pulse-glow': {
 					'0%, 100%': { boxShadow: '0 0 0 0 hsl(var(--primary) / 0.4)' },
 					'50%': { boxShadow: '0 0 0 8px hsl(var(--primary) / 0)' }
 				},
-				
-				// Bounce for interactive elements
 				'bounce-light': {
 					'0%, 100%': { transform: 'translateY(0)' },
 					'50%': { transform: 'translateY(-3px)' }
-				}
+				},
+				// Sports UI shimmer skeleton
+				'shimmer': {
+					'0%': { backgroundPosition: '-200% 0' },
+					'100%': { backgroundPosition: '200% 0' },
+				},
 			},
 			animation: {
-				// Basic animations
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.3s ease-out',
@@ -172,14 +194,11 @@ export default {
 				'slide-in-right': 'slide-in-right 0.3s ease-out',
 				'slide-out-right': 'slide-out-right 0.3s ease-out',
 				'slide-down': 'slide-down 0.3s ease-out',
-				
-				// Combined animations
 				'enter': 'fade-in 0.3s ease-out, scale-in 0.2s ease-out',
 				'exit': 'fade-out 0.3s ease-out, scale-out 0.2s ease-out',
-				
-				// Interactive animations
 				'pulse-glow': 'pulse-glow 2s infinite',
-				'bounce-light': 'bounce-light 1s ease-in-out'
+				'bounce-light': 'bounce-light 1s ease-in-out',
+				'shimmer': 'shimmer 2s infinite linear',
 			}
 		}
 	},
