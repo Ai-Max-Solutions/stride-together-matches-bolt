@@ -212,8 +212,10 @@ export default function Browse() {
     const tags: string[] = [];
 
     // Sport compatibility (40 points)
-    const commonSports = profile.sports.filter(sport => 
-      currentUserProfile.sports.includes(sport)
+    const userSports = currentUserProfile.sports || [];
+    const profileSports = profile.sports || [];
+    const commonSports = profileSports.filter(sport => 
+      userSports.includes(sport)
     );
     if (commonSports.length > 0) {
       score += 40;
@@ -245,8 +247,10 @@ export default function Browse() {
     }
 
     // Fitness goals alignment (15 points)
-    const commonGoals = profile.fitness_goals.filter(goal =>
-      currentUserProfile.fitness_goals.includes(goal)
+    const userGoals = currentUserProfile.fitness_goals || [];
+    const profileGoals = profile.fitness_goals || [];
+    const commonGoals = profileGoals.filter(goal =>
+      userGoals.includes(goal)
     );
     if (commonGoals.length > 0) {
       score += 15;
@@ -254,9 +258,11 @@ export default function Browse() {
     }
 
     // Availability overlap (bonus points)
-    const hasOverlap = Object.keys(profile.availability).some(day =>
-      profile.availability[day]?.some(time =>
-        currentUserProfile.availability[day]?.includes(time)
+    const userAvailability = currentUserProfile.availability || {};
+    const profileAvailability = profile.availability || {};
+    const hasOverlap = Object.keys(profileAvailability).some(day =>
+      profileAvailability[day]?.some(time =>
+        userAvailability[day]?.includes(time)
       )
     );
     if (hasOverlap) {
@@ -268,7 +274,7 @@ export default function Browse() {
     // Mentor boost for beginners and first marathoners
     if (profile.is_mentor_available && profile.years_experience && profile.years_experience >= 3) {
       // Boost for first-time marathoners
-      if (currentUserProfile.fitness_goals.includes('first_marathon')) {
+      if (userGoals.includes('first_marathon')) {
         score += 30;
         reasons.push('Experienced mentor for marathon training');
         tags.push('marathon mentor');
@@ -283,7 +289,7 @@ export default function Browse() {
       
       // Specialty matching
       const relevantSpecialties = profile.mentor_specialties?.filter(specialty =>
-        currentUserProfile.fitness_goals.some(goal => {
+        userGoals.some(goal => {
           if (goal === 'first_marathon' && specialty === 'pacing_strategies') return true;
           if (goal === 'weight_loss' && specialty === 'nutrition_planning') return true;
           if (goal === 'strength' && specialty === 'strength_training') return true;
