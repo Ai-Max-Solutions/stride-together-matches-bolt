@@ -1,5 +1,5 @@
 import React from 'react';
-import { Run, Bike, Dumbbell, Yoga } from 'lucide-react';
+import { Activity, Bike, Dumbbell, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export type SportType = 'run' | 'cycle' | 'workout' | 'yoga';
@@ -18,10 +18,10 @@ export function SportIcon({
   withBackground = false 
 }: SportIconProps) {
   const iconMap = {
-    run: Run,
+    run: Activity,
     cycle: Bike,
     workout: Dumbbell,
-    yoga: Yoga
+    yoga: Heart
   };
 
   const Icon = iconMap[sport];

@@ -1,5 +1,5 @@
 import React from 'react';
-import { SportIcon, SportType } from '@/components/ui/SportIcon';
+import { SportIcon, SportType } from './SportIcon';
 import { Button } from '@/components/ui/button';
 
 interface EmptyStateProps {

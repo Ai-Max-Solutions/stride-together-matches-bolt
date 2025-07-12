@@ -2,8 +2,8 @@ import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { SportIcon, SportType } from '@/components/ui/SportIcon';
-import { MatchBadge } from '@/components/ui/MatchBadge';
+import { SportIcon, SportType } from './SportIcon';
+import { MatchBadge } from './MatchBadge';
 import { MessageSquare, MapPin, Calendar, Clock } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
