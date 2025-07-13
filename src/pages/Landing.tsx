@@ -7,7 +7,6 @@ import { LandingCTA } from "@/components/landing/LandingCTA";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 
 const Landing = () => {
-  console.log('Landing.tsx: Landing component rendering...');
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-accent/10 animate-fade-in">
       <LandingHeader />

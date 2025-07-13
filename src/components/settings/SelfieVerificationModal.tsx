@@ -83,10 +83,10 @@ export function SelfieVerificationModal({ open, onOpenChange, onVerificationComp
                 <Shield className="h-8 w-8 text-white" />
               </div>
               <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                🚀 Elite Verification Process
+                🚀 Identity Verification
               </DialogTitle>
               <DialogDescription className="text-green-700 font-semibold text-base">
-                Join the trusted elite athlete community with instant verification!
+                Join the trusted athlete community with instant verification!
               </DialogDescription>
             </DialogHeader>
             
@@ -94,7 +94,7 @@ export function SelfieVerificationModal({ open, onOpenChange, onVerificationComp
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-5 rounded-lg border-2 border-green-200 space-y-4">
                 <h4 className="font-bold text-green-800 flex items-center gap-2">
                   <Star className="h-5 w-5 text-amber-500" />
-                  Elite Benefits You'll Get:
+                  Verified Athlete Benefits:
                 </h4>
                 <ul className="space-y-3 text-sm">
                   <li className="flex items-start gap-3">
@@ -111,7 +111,7 @@ export function SelfieVerificationModal({ open, onOpenChange, onVerificationComp
                       <Trophy className="h-4 w-4 text-white" />
                     </div>
                     <div>
-                      <p className="font-semibold text-green-800">Elite verified badge on your profile</p>
+                      <p className="font-semibold text-green-800">Verified athlete badge on your profile</p>
                       <p className="text-green-600">Stand out as a trusted athlete</p>
                     </div>
                   </li>
@@ -121,7 +121,7 @@ export function SelfieVerificationModal({ open, onOpenChange, onVerificationComp
                     </div>
                     <div>
                       <p className="font-semibold text-green-800">3x more training partner requests</p>
-                      <p className="text-green-600">Elite athletes prefer verified profiles</p>
+                      <p className="text-green-600">Athletes prefer verified profiles</p>
                     </div>
                   </li>
                 </ul>
@@ -170,7 +170,7 @@ export function SelfieVerificationModal({ open, onOpenChange, onVerificationComp
                   className="flex-1 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white border-0 shadow-lg hover:shadow-xl text-base font-bold py-6"
                 >
                   <Camera className="h-5 w-5 mr-2" />
-                  🚀 Start Elite Verification!
+                  🚀 Start Verification!
                 </Button>
                 <Button variant="outline" onClick={handleClose} className="border-gray-300">
                   Maybe Later
@@ -194,7 +194,7 @@ export function SelfieVerificationModal({ open, onOpenChange, onVerificationComp
                 <Loader2 className="h-8 w-8 animate-spin text-white" />
               </div>
               <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent text-center">
-                🔍 Elite Verification in Progress...
+                🔍 Identity Verification in Progress...
               </DialogTitle>
               <DialogDescription className="text-blue-700 font-semibold text-center">
                 Our advanced AI is verifying your identity. This usually takes just 5-10 seconds.
@@ -207,7 +207,7 @@ export function SelfieVerificationModal({ open, onOpenChange, onVerificationComp
                   <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full opacity-20"></div>
                 </div>
               </div>
-              <p className="text-sm text-blue-600 font-medium">✨ Processing your elite verification...</p>
+              <p className="text-sm text-blue-600 font-medium">✨ Processing your identity verification...</p>
             </div>
           </>
         )}
@@ -231,13 +231,13 @@ export function SelfieVerificationModal({ open, onOpenChange, onVerificationComp
                   ? 'from-green-600 to-emerald-600' 
                   : 'from-amber-600 to-orange-600'
               } bg-clip-text text-transparent`}>
-                {verificationResult.verified ? '🎉 Elite Verification Complete!' : '⚠️ Verification Needs Retry'}
+                {verificationResult.verified ? '🎉 Identity Verification Complete!' : '⚠️ Verification Needs Retry'}
               </DialogTitle>
               <DialogDescription className={`font-semibold ${
                 verificationResult.verified ? 'text-green-700' : 'text-amber-700'
               }`}>
                 {verificationResult.verified 
-                  ? 'Welcome to the elite verified athlete community!' 
+                  ? 'Welcome to the verified athlete community!' 
                   : verificationResult.message
                 }
               </DialogDescription>
@@ -250,7 +250,7 @@ export function SelfieVerificationModal({ open, onOpenChange, onVerificationComp
                     <Trophy className="h-5 w-5 text-white" />
                   </div>
                   <span className="font-bold text-green-800 text-lg">
-                    🏆 Elite Status Unlocked!
+                    🏆 Verified Status Unlocked!
                   </span>
                 </div>
                 <ul className="space-y-2 text-sm text-green-800">
@@ -264,7 +264,7 @@ export function SelfieVerificationModal({ open, onOpenChange, onVerificationComp
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span><strong>Elite athlete</strong> community access</span>
+                    <span><strong>Verified athlete</strong> community access</span>
                   </li>
                 </ul>
               </div>

@@ -156,7 +156,7 @@ export default function Chatbot() {
             <Bot className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
             <p className="text-muted-foreground mb-4">
-              Please sign in to use the intelligent AI assistant.
+              Please sign in to use the AI fitness assistant.
             </p>
             <Button onClick={() => navigate('/auth')} className="w-full">
               Sign In
@@ -182,7 +182,7 @@ export default function Chatbot() {
           </Button>
           <div className="flex-1">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
-              ✨ Intelligent AI Assistant
+              ✨ AI Fitness Assistant
             </h1>
             <p className="text-amber-700">
               Personalized fitness guidance based on your profile
@@ -208,7 +208,7 @@ export default function Chatbot() {
                     <Bot className="h-5 w-5 text-white" />
                   </div>
                   <span className="bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent font-bold">
-                    Elite AI Coach
+                    AI Fitness Coach
                   </span>
                 </CardTitle>
                 <CardDescription className="text-amber-700">

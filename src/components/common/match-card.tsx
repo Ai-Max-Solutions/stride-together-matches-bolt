@@ -12,6 +12,7 @@ import { useUserPresence } from "@/hooks/use-user-presence";
 import { useAchievements } from "@/hooks/use-achievements";
 import { useChallenges } from "@/hooks/use-challenges";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 // Profile interface matching the Browse page structure
 interface Profile {
@@ -106,21 +107,21 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
       setTimeout(() => setShowConfetti(false), 3000);
       
     } catch (error) {
-      console.error("Error connecting:", error);
+      logger.error("Error connecting:", error);
     }
   }, [profile.id, onConnect, awardAchievement, updateProgress]);
 
   const handleStartChat = () => {
-    console.log("Starting chat with:", profile.user_id);
+    logger.debug("Starting chat with:", profile.user_id);
   };
 
   const handleDismissToast = () => {
     setShowMatchToast(false);
   };
 
-  // Determine if this is an elite match (90%+ compatibility score)
-  const isEliteMatch = matchScore.score >= 90;
-  const isHighPerformanceMatch = matchScore.score >= 75;
+  // Determine if this is a perfect match (90%+ compatibility score)
+  const isPerfectMatch = matchScore.score >= 90;
+  const isHighCompatibilityMatch = matchScore.score >= 75;
 
   // Generate dynamic badges based on match score and profile
   const generateMatchBadges = () => {
@@ -129,8 +130,8 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
     // Performance compatibility badge
     badges.push({
       label: `${matchScore.score}% compatible`,
-      variant: isEliteMatch ? "elite" : isHighPerformanceMatch ? "performance" : "secondary",
-      icon: isEliteMatch ? Trophy : Medal
+      variant: isPerfectMatch ? "perfect" : isHighCompatibilityMatch ? "performance" : "secondary",
+      icon: isPerfectMatch ? Trophy : Medal
     });
 
     // Activity compatibility
@@ -145,7 +146,7 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
     // Coach/Mentor status
     if (profile.is_mentor_available) {
       badges.push({
-        label: "Elite Coach",
+        label: "Expert Coach",
         variant: "accent",
         icon: Award
       });
@@ -164,8 +165,8 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
           "group relative overflow-hidden transition-all duration-300 ease-out",
           "bg-card border-0 shadow-card hover:shadow-card-hover",
           "hover:scale-[1.02] hover:-translate-y-1",
-          // Elite match gradient accent strip
-          isEliteMatch && "border-l-4 border-l-amber-500",
+          // Perfect match gradient accent strip
+          isPerfectMatch && "border-l-4 border-l-amber-500",
           // Glass effect on hover
           "hover:backdrop-blur-sm",
           className
@@ -174,8 +175,8 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
           willChange: "transform"
         }}
       >
-        {/* Elite match gradient overlay */}
-        {isEliteMatch && (
+        {/* Perfect match gradient overlay */}
+        {isPerfectMatch && (
           <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-transparent to-yellow-500/5 pointer-events-none" />
         )}
 
@@ -259,7 +260,7 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
                     "px-3 py-1 text-xs font-medium rounded-full",
                     "flex items-center gap-1.5 transition-all",
                     "hover:scale-105 hover:shadow-sm",
-                    badge.variant === "elite" && "bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-lg",
+                    badge.variant === "perfect" && "bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-lg",
                     badge.variant === "performance" && "bg-slate-800 text-white border-slate-700",
                     badge.variant === "success" && "bg-success/10 text-success border-success/20",
                     badge.variant === "fitness" && "bg-accent/10 text-accent border-accent/20",
@@ -309,7 +310,7 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
             className={cn(
               "w-full mt-4 transition-all duration-200",
               "hover:scale-[1.02] active:scale-[0.98]",
-              isEliteMatch 
+              isPerfectMatch 
                 ? "bg-gradient-to-r from-slate-800 to-slate-700 hover:shadow-lg text-white" 
                 : "bg-slate-700 hover:bg-slate-600 text-white"
             )}

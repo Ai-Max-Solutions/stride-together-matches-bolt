@@ -23,7 +23,7 @@ export type VerificationLevel =
   | 'verified_strava'
   | 'verified_results';
 
-interface EliteVerificationBadgeProps {
+interface VerificationBadgeProps {
   level: VerificationLevel;
   className?: string;
   showLabel?: boolean;
@@ -45,9 +45,9 @@ const verificationConfig = {
   },
   elite: {
     icon: Trophy,
-    label: 'Elite',
+    label: 'Advanced',
     color: 'bg-amber-100 text-amber-800 border-amber-400',
-    description: 'Top 10% performance level'
+    description: 'Advanced performance level'
   },
   professional: {
     icon: Award,
@@ -69,9 +69,9 @@ const verificationConfig = {
   },
   coach_elite: {
     icon: Crown,
-    label: 'Elite Coach',
+    label: 'Expert Coach',
     color: 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-500',
-    description: 'Elite/professional coach'
+    description: 'Expert/professional coach'
   },
   verified_strava: {
     icon: CheckCircle2,
@@ -87,12 +87,12 @@ const verificationConfig = {
   }
 };
 
-export const EliteVerificationBadge = ({ 
+export const VerificationBadge = ({ 
   level, 
   className, 
   showLabel = true,
   size = 'md' 
-}: EliteVerificationBadgeProps) => {
+}: VerificationBadgeProps) => {
   const config = verificationConfig[level];
   const IconComponent = config.icon;
   
@@ -151,11 +151,11 @@ export const VerificationStatus = ({ verifications, className }: VerificationSta
   return (
     <div className={cn("flex flex-wrap gap-2", className)}>
       {/* Primary level badge */}
-      <EliteVerificationBadge level={highestLevel} />
+      <VerificationBadge level={highestLevel} />
       
       {/* Coach certification */}
       {hasCoachVerification && (
-        <EliteVerificationBadge 
+        <VerificationBadge 
           level={verifications.includes('coach_elite') ? 'coach_elite' : 'coach_certified'} 
           size="sm"
         />
@@ -163,11 +163,14 @@ export const VerificationStatus = ({ verifications, className }: VerificationSta
       
       {/* Data verifications */}
       {verifications.includes('verified_strava') && (
-        <EliteVerificationBadge level="verified_strava" size="sm" showLabel={false} />
+        <VerificationBadge level="verified_strava" size="sm" showLabel={false} />
       )}
       {verifications.includes('verified_results') && (
-        <EliteVerificationBadge level="verified_results" size="sm" showLabel={false} />
+        <VerificationBadge level="verified_results" size="sm" showLabel={false} />
       )}
     </div>
   );
 };
+
+// Legacy export for backwards compatibility
+export const EliteVerificationBadge = VerificationBadge;

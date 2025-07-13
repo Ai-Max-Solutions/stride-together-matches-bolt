@@ -22,7 +22,7 @@ interface TrainingPlan {
   title: string;
   description: string;
   duration: number; // weeks
-  difficulty: 'beginner' | 'intermediate' | 'advanced' | 'elite';
+  difficulty: 'beginner' | 'intermediate' | 'advanced' | 'expert';
   sport: string;
   goal: string;
   weeklyHours: number;
@@ -64,7 +64,7 @@ export const TrainingPlanCard = ({
       case 'beginner': return 'bg-green-100 text-green-800 border-green-200';
       case 'intermediate': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'advanced': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'elite': return 'bg-gradient-to-r from-amber-400 to-yellow-500 text-white border-amber-500';
+      case 'expert': return 'bg-gradient-to-r from-amber-400 to-yellow-500 text-white border-amber-500';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };

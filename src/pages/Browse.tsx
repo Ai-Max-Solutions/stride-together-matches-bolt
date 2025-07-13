@@ -54,7 +54,7 @@ import Navigation from '@/components/Navigation';
 import { AISuggestions } from '@/components/chat/AISuggestions';
 import { BROWSE_SPORTS_OPTIONS, BROWSE_EXPERIENCE_LEVELS } from '@/constants';
 import { PerformanceDashboard } from '@/components/performance/PerformanceDashboard';
-import { EliteVerificationBadge, VerificationStatus } from '@/components/verification/EliteVerificationBadge';
+import { VerificationBadge, VerificationStatus } from '@/components/verification/EliteVerificationBadge';
 import { TrainingPlanCard } from '@/components/training/TrainingPlanCard';
 import { LeaderboardCard } from '@/components/competition/LeaderboardCard';
 
@@ -442,9 +442,9 @@ export default function Browse() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Elite Training Network</h1>
+              <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Find Your Perfect Workout Partner</h1>
               <p className="text-muted-foreground">
-                Connect with high-performance athletes and coaches in your discipline
+                Connect. Train. Succeed—together. From couch-to-5K beginners to seasoned marathoners.
               </p>
             </div>
             
@@ -606,7 +606,7 @@ export default function Browse() {
             <CardContent className="p-4 text-center">
               <Trophy className="h-8 w-8 mx-auto mb-2 text-amber-400" />
               <h3 className="font-semibold mb-1">Performance Analytics</h3>
-              <p className="text-xs text-slate-300">Track your elite progress</p>
+              <p className="text-xs text-slate-300">Track your fitness journey</p>
             </CardContent>
           </Card>
 
@@ -614,8 +614,8 @@ export default function Browse() {
           <Card className="bg-gradient-to-br from-amber-500 to-amber-600 text-white border-amber-400 cursor-pointer hover:scale-105 transition-transform" onClick={() => setShowTrainingPlans(!showTrainingPlans)}>
             <CardContent className="p-4 text-center">
               <Target className="h-8 w-8 mx-auto mb-2 text-white" />
-              <h3 className="font-semibold mb-1">Elite Training Plans</h3>
-              <p className="text-xs text-amber-100">Pro coaching programs</p>
+              <h3 className="font-semibold mb-1">Personalized Training Plans</h3>
+              <p className="text-xs text-amber-100">Expert coaching for all levels</p>
             </CardContent>
           </Card>
 
@@ -624,7 +624,7 @@ export default function Browse() {
             <CardContent className="p-4 text-center">
               <Medal className="h-8 w-8 mx-auto mb-2 text-white" />
               <h3 className="font-semibold mb-1">Competitions</h3>
-              <p className="text-xs text-blue-100">Elite leaderboards</p>
+              <p className="text-xs text-blue-100">Community challenges</p>
             </CardContent>
           </Card>
         </div>
@@ -656,7 +656,7 @@ export default function Browse() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5 text-amber-600" />
-                Elite Training Plans
+                Personalized Training Plans
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -664,10 +664,10 @@ export default function Browse() {
                 <TrainingPlanCard 
                   plan={{
                     id: "1",
-                    title: "Elite Marathon Training",
+                    title: "Expert Marathon Training",
                     description: "Advanced 16-week marathon preparation for sub-3:00 times",
                     duration: 16,
-                    difficulty: "elite",
+                    difficulty: "expert",
                     sport: "Running",
                     goal: "Marathon PR",
                     weeklyHours: 12,
@@ -700,7 +700,7 @@ export default function Browse() {
                     weeklyHours: 10,
                     sessionsPerWeek: 5,
                     author: {
-                      name: "Elite Cycling Academy",
+                      name: "Expert Cycling Academy",
                       isVerified: true,
                       isCoach: true
                     },
@@ -725,7 +725,7 @@ export default function Browse() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Medal className="h-5 w-5 text-amber-600" />
-                Elite Competitions
+                Community Challenges
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -733,12 +733,12 @@ export default function Browse() {
                 competition={{
                   id: "monthly-5k",
                   title: "Monthly 5K Challenge",
-                  description: "Fastest 5K time this month wins elite coaching session",
+                  description: "Fastest 5K time this month wins personal coaching session",
                   type: "time",
                   sport: "Running",
                   duration: "Monthly",
                   participantCount: 1247,
-                  prize: "Elite Coaching Session",
+                  prize: "Personal Coaching Session",
                   endDate: "Dec 31",
                   isActive: true
                 }}
@@ -798,9 +798,9 @@ export default function Browse() {
             <CardHeader className="pb-4">
               <div className="flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-amber-600" />
-                <h3 className="text-xl font-semibold text-foreground">Elite Performance Matches</h3>
+                <h3 className="text-xl font-semibold text-foreground">Perfect Training Matches</h3>
                 <Badge variant="outline" className="border-amber-500/30 bg-amber-50 text-amber-700">
-                  Performance-based
+                  Pace & goal matched
                 </Badge>
               </div>
             </CardHeader>
@@ -1076,7 +1076,7 @@ export default function Browse() {
         {/* Results Count & Pagination Info */}
         <div className="mb-6 flex items-center justify-between">
           <p className="text-muted-foreground">
-            {totalItems} elite athletes found
+            {totalItems} training partners found
             {totalPages > 1 && (
               <span className="ml-2">
                 (Page {currentPage} of {totalPages})
@@ -1086,7 +1086,7 @@ export default function Browse() {
           {currentUserProfile && (
             <Badge variant="outline" className="gap-2">
               <Trophy className="h-3 w-3" />
-              Performance-Based Matching
+              Pace & Goal Matching
             </Badge>
           )}
         </div>
@@ -1119,9 +1119,9 @@ export default function Browse() {
         ) : filteredProfiles.length === 0 ? (
           <div className="text-center py-16 animate-fade-in">
             <div className="text-6xl mb-4">🏃‍♀️</div>
-            <h3 className="text-xl font-semibold mb-2">No elite athletes found?</h3>
+            <h3 className="text-xl font-semibold mb-2">No training partners nearby yet?</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Optimize your performance profile and training metrics. Elite athletes are joining the network daily.
+              Keep your profile updated and start a Flash Run! New athletes join our community daily.
             </p>
             <Button onClick={() => navigate('/profile-setup')} className="button-bounce">
               Update Profile
@@ -1133,10 +1133,10 @@ export default function Browse() {
               {/* Section Header */}
               <div className="text-center pb-4">
                 <h2 className="text-2xl font-bold text-foreground mb-2">
-                  Elite Athletes & Coaches
+                  Dedicated Athletes & Coaches
                 </h2>
                 <p className="text-muted-foreground">
-                  Connect with top-tier athletes and certified coaches in your discipline
+                  Connect with committed athletes and certified coaches at every level
                 </p>
               </div>
               

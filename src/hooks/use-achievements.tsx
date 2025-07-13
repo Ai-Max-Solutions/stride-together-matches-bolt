@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
 import { useToast } from '@/hooks/use-toast';
 
 export interface Achievement {
@@ -45,7 +46,7 @@ export const useAchievements = () => {
       if (error) throw error;
       setAchievements(data || []);
     } catch (error) {
-      console.error('Error fetching achievements:', error);
+      logger.error('Error fetching achievements:', error);
     }
   };
 
@@ -65,7 +66,7 @@ export const useAchievements = () => {
       if (error) throw error;
       setUserAchievements(data || []);
     } catch (error) {
-      console.error('Error fetching user achievements:', error);
+      logger.error('Error fetching user achievements:', error);
     } finally {
       setLoading(false);
     }
@@ -112,7 +113,7 @@ export const useAchievements = () => {
       // Refresh achievements
       fetchUserAchievements();
     } catch (error) {
-      console.error('Error awarding achievement:', error);
+      logger.error('Error awarding achievement:', error);
     }
   };
 

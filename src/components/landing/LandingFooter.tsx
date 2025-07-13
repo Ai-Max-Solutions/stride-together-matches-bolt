@@ -44,7 +44,7 @@ export const LandingFooter = () => {
           ))}
         </div>
         <div className="border-t pt-8 mt-8 text-center text-sm text-muted-foreground">
-          © 2024 Stride Together. All rights reserved. • Connecting fitness enthusiasts worldwide.
+          © 2025 Stride Together. All rights reserved. • Connecting fitness enthusiasts worldwide.
         </div>
       </div>
     </footer>
