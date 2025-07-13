@@ -10,7 +10,7 @@ export const LandingSafety = () => {
   ];
 
   return (
-    <section className="container mx-auto px-4 py-20">
+    <section className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
