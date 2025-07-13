@@ -19,10 +19,13 @@ import { usePagination } from '@/hooks/use-pagination';
 import { useFlashRuns } from '@/hooks/use-flash-runs';
 import { FlashRunsList } from '@/components/flash-runs/FlashRunsList';
 import { FlashRunFAB } from '@/components/flash-runs/FlashRunFAB';
-import { FlashRunModal } from '@/components/flash-runs/FlashRunModal';
-import { FlashRideModal } from '@/components/flash-runs/FlashRideModal';
-import { FlashWorkoutModal } from '@/components/flash-runs/FlashWorkoutModal';
-import { FlashYogaModal } from '@/components/flash-runs/FlashYogaModal';
+import { 
+  LazyFlashRunModal,
+  LazyFlashRideModal,
+  LazyFlashWorkoutModal,
+  LazyFlashYogaModal,
+  preloadFlashRunModals
+} from '@/components/flash-runs/lazy-modals';
 import { 
   Pagination,
   PaginationContent,
@@ -927,6 +930,7 @@ export default function Browse() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-2xl">
                       <Button
                         onClick={() => setShowFlashRunModal(true)}
+                        onMouseEnter={() => preloadFlashRunModals()}
                         variant="outline"
                         className="h-20 flex flex-col gap-2 hover:bg-primary/5 hover:border-primary/30 transition-all"
                       >
@@ -935,6 +939,7 @@ export default function Browse() {
                       </Button>
                       <Button
                         onClick={() => setShowFlashRideModal(true)}
+                        onMouseEnter={() => preloadFlashRunModals()}
                         variant="outline"
                         className="h-20 flex flex-col gap-2 hover:bg-primary/5 hover:border-primary/30 transition-all"
                       >
@@ -943,6 +948,7 @@ export default function Browse() {
                       </Button>
                       <Button
                         onClick={() => setShowFlashWorkoutModal(true)}
+                        onMouseEnter={() => preloadFlashRunModals()}
                         variant="outline"
                         className="h-20 flex flex-col gap-2 hover:bg-primary/5 hover:border-primary/30 transition-all"
                       >
@@ -1245,7 +1251,7 @@ export default function Browse() {
 
 
       {/* Flash Run Modal */}
-      <FlashRunModal
+      <LazyFlashRunModal
         isOpen={showFlashRunModal}
         onClose={() => setShowFlashRunModal(false)}
         onSubmit={async (data) => {
@@ -1258,14 +1264,14 @@ export default function Browse() {
       />
 
       {/* Flash Ride Modal */}
-      <FlashRideModal
+      <LazyFlashRideModal
         open={showFlashRideModal}
         onOpenChange={setShowFlashRideModal}
         onCreateFlashRide={createFlashRide}
       />
 
       {/* Flash Workout Modal */}
-      <FlashWorkoutModal
+      <LazyFlashWorkoutModal
         isOpen={showFlashWorkoutModal}
         onClose={() => setShowFlashWorkoutModal(false)}
         onSubmit={async (data) => {
@@ -1278,7 +1284,7 @@ export default function Browse() {
       />
 
       {/* Flash Yoga Modal */}
-      <FlashYogaModal 
+      <LazyFlashYogaModal 
         open={showYogaModal} 
         onOpenChange={setShowYogaModal} 
       />
