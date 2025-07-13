@@ -181,10 +181,10 @@ export default function Chatbot() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold text-foreground">
               ✨ AI Fitness Assistant
             </h1>
-            <p className="text-amber-700">
+            <p className="text-muted-foreground">
               Personalized fitness guidance based on your profile
             </p>
           </div>
@@ -201,17 +201,17 @@ export default function Chatbot() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Chat Area */}
           <div className="lg:col-span-2">
-            <Card className="h-[600px] flex flex-col">
-              <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-200">
+            <Card className="h-[600px] flex flex-col shadow-lg">
+              <CardHeader className="border-b">
                 <CardTitle className="flex items-center gap-2">
                   <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full">
                     <Bot className="h-5 w-5 text-white" />
                   </div>
-                  <span className="bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent font-bold">
+                  <span className="font-bold">
                     AI Fitness Coach
                   </span>
                 </CardTitle>
-                <CardDescription className="text-amber-700">
+                <CardDescription>
                   ✨ Personalized fitness companion • {dailyUsage.remaining} questions remaining today
                 </CardDescription>
               </CardHeader>
@@ -225,13 +225,13 @@ export default function Chatbot() {
                       className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[80%] rounded-lg px-4 py-3 shadow-sm ${
+                        className={`max-w-[98%] rounded-lg px-4 py-3 shadow-md ${
                           message.isUser
-                            ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white'
-                            : 'bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-900 border border-amber-200'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-foreground border'
                         }`}
                       >
-                        <p className="whitespace-pre-wrap">{message.content}</p>
+                        <p className="whitespace-pre-wrap text-sm">{message.content}</p>
                         <div className="text-xs opacity-70 mt-1">
                           {message.timestamp.toLocaleTimeString([], { 
                             hour: '2-digit', 
@@ -244,15 +244,15 @@ export default function Chatbot() {
                   
                   {loading && (
                     <div className="flex justify-start">
-                      <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg px-4 py-3 shadow-sm">
+                      <div className="bg-muted border rounded-lg px-4 py-3 shadow-sm">
                         <div className="flex items-center gap-2">
                           <div className="relative">
-                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-amber-200 border-t-amber-500"></div>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-muted-foreground border-t-primary"></div>
                             <div className="absolute inset-0 animate-pulse">
-                              <div className="w-4 h-4 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full opacity-20"></div>
+                              <div className="w-4 h-4 bg-primary rounded-full opacity-20"></div>
                             </div>
                           </div>
-                          <span className="text-sm text-amber-700 font-medium">✨ Analyzing your profile...</span>
+                          <span className="text-sm text-muted-foreground font-medium">✨ Analyzing your profile...</span>
                         </div>
                       </div>
                     </div>
@@ -290,15 +290,17 @@ export default function Chatbot() {
 
           {/* Smart Suggestions */}
           <div className="space-y-6">
-            <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50">
+            <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-amber-600" />
-                  <span className="bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
+                  <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-1 rounded-full">
+                    <Sparkles className="h-4 w-4 text-white" />
+                  </div>
+                  <span>
                     Smart Suggestions
                   </span>
                 </CardTitle>
-                <CardDescription className="text-amber-700">
+                <CardDescription>
                   ✨ AI-powered questions based on your profile
                 </CardDescription>
               </CardHeader>
@@ -308,54 +310,54 @@ export default function Chatbot() {
                     key={index}
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start text-left h-auto py-4 px-4 hover:bg-gradient-to-r hover:from-amber-100 hover:to-yellow-100 transition-all duration-300 hover-scale-102 group border border-transparent hover:border-amber-200 rounded-lg"
+                    className="w-full justify-start text-left h-auto py-4 px-4 hover:bg-muted transition-all duration-300 hover-scale-102 group border border-transparent hover:border-border rounded-lg"
                     onClick={() => handleSuggestionClick(suggestion.text)}
                     disabled={dailyUsage.remaining <= 0 || loading}
                   >
                     <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full mr-3 group-hover:scale-110 transition-transform">
                       <suggestion.icon className="h-4 w-4 text-white" />
                     </div>
-                    <span className="text-sm font-medium text-amber-800 group-hover:text-amber-900">{suggestion.text}</span>
+                    <span className="text-sm font-medium text-foreground">{suggestion.text}</span>
                   </Button>
                 ))}
               </CardContent>
             </Card>
 
-            <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50">
+            <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full">
                     <Bot className="h-4 w-4 text-white" />
                   </div>
-                  <span className="bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
+                  <span>
                     AI Features
                   </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
-                <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-200">
+                <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
                   <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full">
                     <Dumbbell className="h-4 w-4 text-white" />
                   </div>
-                  <p className="text-amber-800 font-medium">Sport-specific workout suggestions based on your chosen activities</p>
+                  <p className="text-foreground font-medium">Sport-specific workout suggestions based on your chosen activities</p>
                 </div>
-                <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-200">
+                <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
                   <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full">
                     <Clock className="h-4 w-4 text-white" />
                   </div>
-                  <p className="text-amber-800 font-medium">Smart timing analysis for finding compatible workout partners</p>
+                  <p className="text-foreground font-medium">Smart timing analysis for finding compatible workout partners</p>
                 </div>
-                <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-200">
+                <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
                   <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full">
                     <Users className="h-4 w-4 text-white" />
                   </div>
-                  <p className="text-amber-800 font-medium">Compatibility insights based on your location and interests</p>
+                  <p className="text-foreground font-medium">Compatibility insights based on your location and interests</p>
                 </div>
-                <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-200">
+                <div className="flex items-start gap-3 p-3 bg-background rounded-lg border">
                   <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full">
                     <Target className="h-4 w-4 text-white" />
                   </div>
-                  <p className="text-amber-800 font-medium">Personalized advice using your fitness goals and experience level</p>
+                  <p className="text-foreground font-medium">Personalized advice using your fitness goals and experience level</p>
                 </div>
               </CardContent>
             </Card>
