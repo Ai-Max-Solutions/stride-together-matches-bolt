@@ -34,7 +34,9 @@ const PageFallback = () => (
 );
 
 const AppContent = () => {
+  console.log('App.tsx: AppContent rendering...');
   useAnalytics(); // Track page visits
+  console.log('App.tsx: useAnalytics completed');
   return (
     <>
       <BetaBadge />

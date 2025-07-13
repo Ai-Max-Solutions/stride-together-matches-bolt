@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,7 +12,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { profileQueries, memoizeQuery } from '@/lib/database-queries';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import MatchCard from '@/components/common/match-card';
 import { OptimizedImage } from '@/components/ui/optimized-image';
@@ -20,13 +19,10 @@ import { usePagination } from '@/hooks/use-pagination';
 import { useFlashRuns } from '@/hooks/use-flash-runs';
 import { FlashRunsList } from '@/components/flash-runs/FlashRunsList';
 import { FlashRunFAB } from '@/components/flash-runs/FlashRunFAB';
-import { 
-  LazyFlashRunModal,
-  LazyFlashRideModal,
-  LazyFlashWorkoutModal,
-  LazyFlashYogaModal,
-  preloadFlashRunModals
-} from '@/components/flash-runs/lazy-modals';
+import { FlashRunModal } from '@/components/flash-runs/FlashRunModal';
+import { FlashRideModal } from '@/components/flash-runs/FlashRideModal';
+import { FlashWorkoutModal } from '@/components/flash-runs/FlashWorkoutModal';
+import { FlashYogaModal } from '@/components/flash-runs/FlashYogaModal';
 import { 
   Pagination,
   PaginationContent,
@@ -179,15 +175,12 @@ export default function Browse() {
   }, [profiles, searchQuery, selectedSport, selectedExperience, currentUserProfile]);
 
   const fetchCurrentUserProfile = async () => {
-    if (!user?.id) return;
-    
     try {
-      const cacheKey = `current-user-profile-${user.id}`;
-      const { data, error } = await memoizeQuery(
-        cacheKey,
-        () => profileQueries.getCurrentProfile(user.id),
-        5 * 60 * 1000 // 5 minute cache
-      );
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user?.id)
+        .maybeSingle();
 
       if (error) throw error;
       if (data) {
@@ -203,21 +196,13 @@ export default function Browse() {
   };
 
   const fetchProfiles = async () => {
-    if (!user?.id) return;
-    
     try {
       setLoading(true);
-      const filters = {
-        sports: selectedSport ? [selectedSport] : undefined,
-        experience: selectedExperience || undefined
-      };
-      
-      const { data, error } = await profileQueries.getBrowseProfiles({
-        currentUserId: user.id,
-        limit: 50, // Reasonable limit for initial load
-        offset: 0,
-        ...filters
-      });
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .neq('user_id', user?.id) // Exclude current user
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       
@@ -239,7 +224,7 @@ export default function Browse() {
     }
   };
 
-  const calculateMatchScore = useCallback((profile: Profile): MatchScore => {
+  const calculateMatchScore = (profile: Profile): MatchScore => {
     if (!currentUserProfile) return { score: 0, reasons: [], tags: [] };
 
     let score = 0;
@@ -352,17 +337,15 @@ export default function Browse() {
     }
 
     return { score, reasons, tags };
-  }, [currentUserProfile]);
+  };
 
   const applyFilters = () => {
     let filtered = [...profiles];
 
-    // Calculate match scores for all profiles (optimized)
+    // Calculate match scores for all profiles
     const scores = new Map<string, MatchScore>();
     filtered.forEach(profile => {
-      const cacheKey = `match-${currentUserProfile?.id}-${profile.id}`;
-      const matchScore = calculateMatchScore(profile);
-      scores.set(profile.id, matchScore);
+      scores.set(profile.id, calculateMatchScore(profile));
     });
     setMatchScores(scores);
 
@@ -944,7 +927,6 @@ export default function Browse() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-2xl">
                       <Button
                         onClick={() => setShowFlashRunModal(true)}
-                        onMouseEnter={() => preloadFlashRunModals()}
                         variant="outline"
                         className="h-20 flex flex-col gap-2 hover:bg-primary/5 hover:border-primary/30 transition-all"
                       >
@@ -953,7 +935,6 @@ export default function Browse() {
                       </Button>
                       <Button
                         onClick={() => setShowFlashRideModal(true)}
-                        onMouseEnter={() => preloadFlashRunModals()}
                         variant="outline"
                         className="h-20 flex flex-col gap-2 hover:bg-primary/5 hover:border-primary/30 transition-all"
                       >
@@ -962,7 +943,6 @@ export default function Browse() {
                       </Button>
                       <Button
                         onClick={() => setShowFlashWorkoutModal(true)}
-                        onMouseEnter={() => preloadFlashRunModals()}
                         variant="outline"
                         className="h-20 flex flex-col gap-2 hover:bg-primary/5 hover:border-primary/30 transition-all"
                       >
@@ -1265,7 +1245,7 @@ export default function Browse() {
 
 
       {/* Flash Run Modal */}
-      <LazyFlashRunModal
+      <FlashRunModal
         isOpen={showFlashRunModal}
         onClose={() => setShowFlashRunModal(false)}
         onSubmit={async (data) => {
@@ -1278,14 +1258,14 @@ export default function Browse() {
       />
 
       {/* Flash Ride Modal */}
-      <LazyFlashRideModal
+      <FlashRideModal
         open={showFlashRideModal}
         onOpenChange={setShowFlashRideModal}
         onCreateFlashRide={createFlashRide}
       />
 
       {/* Flash Workout Modal */}
-      <LazyFlashWorkoutModal
+      <FlashWorkoutModal
         isOpen={showFlashWorkoutModal}
         onClose={() => setShowFlashWorkoutModal(false)}
         onSubmit={async (data) => {
@@ -1298,7 +1278,7 @@ export default function Browse() {
       />
 
       {/* Flash Yoga Modal */}
-      <LazyFlashYogaModal 
+      <FlashYogaModal 
         open={showYogaModal} 
         onOpenChange={setShowYogaModal} 
       />

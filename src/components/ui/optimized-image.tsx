@@ -65,19 +65,9 @@ export function OptimizedImage({
       if (w) url.searchParams.set('width', w.toString());
       if (h) url.searchParams.set('height', h.toString());
       url.searchParams.set('quality', '80');
-      url.searchParams.set('format', 'webp');
       return url.toString();
     }
     return originalSrc;
-  };
-
-  const generateSrcSet = (originalSrc: string) => {
-    if (!originalSrc.includes('supabase')) return '';
-    
-    const sizes = [480, 768, 1024, 1920];
-    return sizes
-      .map(size => `${getOptimizedSrc(originalSrc, size)} ${size}w`)
-      .join(', ');
   };
 
   const imageSrc = hasError ? fallback : (src && isInView ? getOptimizedSrc(src, width, height) : placeholder);
@@ -97,8 +87,6 @@ export function OptimizedImage({
       <img
         ref={imgRef}
         src={imageSrc}
-        srcSet={src && isInView ? generateSrcSet(src) : undefined}
-        sizes="(max-width: 480px) 480px, (max-width: 768px) 768px, (max-width: 1024px) 1024px, 1920px"
         alt={alt}
         onLoad={handleLoad}
         onError={handleError}
