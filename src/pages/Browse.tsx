@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
+import { profileQueries, memoizeQuery } from '@/lib/database-queries';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import MatchCard from '@/components/common/match-card';
 import { OptimizedImage } from '@/components/ui/optimized-image';
@@ -178,12 +179,15 @@ export default function Browse() {
   }, [profiles, searchQuery, selectedSport, selectedExperience, currentUserProfile]);
 
   const fetchCurrentUserProfile = async () => {
+    if (!user?.id) return;
+    
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user?.id)
-        .maybeSingle();
+      const cacheKey = `current-user-profile-${user.id}`;
+      const { data, error } = await memoizeQuery(
+        cacheKey,
+        () => profileQueries.getCurrentProfile(user.id),
+        5 * 60 * 1000 // 5 minute cache
+      );
 
       if (error) throw error;
       if (data) {
@@ -199,13 +203,21 @@ export default function Browse() {
   };
 
   const fetchProfiles = async () => {
+    if (!user?.id) return;
+    
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .neq('user_id', user?.id) // Exclude current user
-        .order('created_at', { ascending: false });
+      const filters = {
+        sports: selectedSport ? [selectedSport] : undefined,
+        experience: selectedExperience || undefined
+      };
+      
+      const { data, error } = await profileQueries.getBrowseProfiles({
+        currentUserId: user.id,
+        limit: 50, // Reasonable limit for initial load
+        offset: 0,
+        ...filters
+      });
 
       if (error) throw error;
       
@@ -227,7 +239,7 @@ export default function Browse() {
     }
   };
 
-  const calculateMatchScore = (profile: Profile): MatchScore => {
+  const calculateMatchScore = useCallback((profile: Profile): MatchScore => {
     if (!currentUserProfile) return { score: 0, reasons: [], tags: [] };
 
     let score = 0;
@@ -340,15 +352,17 @@ export default function Browse() {
     }
 
     return { score, reasons, tags };
-  };
+  }, [currentUserProfile]);
 
   const applyFilters = () => {
     let filtered = [...profiles];
 
-    // Calculate match scores for all profiles
+    // Calculate match scores for all profiles (optimized)
     const scores = new Map<string, MatchScore>();
     filtered.forEach(profile => {
-      scores.set(profile.id, calculateMatchScore(profile));
+      const cacheKey = `match-${currentUserProfile?.id}-${profile.id}`;
+      const matchScore = calculateMatchScore(profile);
+      scores.set(profile.id, matchScore);
     });
     setMatchScores(scores);
 
