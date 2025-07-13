@@ -97,7 +97,7 @@ export function SportsStep({ data, onChange }: SportsStepProps) {
           value={data.experience_level}
           onValueChange={(value) => onChange({ experience_level: value })}
         >
-          <SelectTrigger>
+          <SelectTrigger className={`${!data.experience_level ? 'border-red-300 ring-red-200' : ''}`}>
             <SelectValue placeholder="Select your experience level" />
           </SelectTrigger>
           <SelectContent>
@@ -108,6 +108,12 @@ export function SportsStep({ data, onChange }: SportsStepProps) {
             ))}
           </SelectContent>
         </Select>
+        
+        {!data.experience_level && (
+          <p className="text-sm text-red-600 mt-1">
+            Please select your experience level to continue
+          </p>
+        )}
       </div>
 
       {/* Fitness Goals */}

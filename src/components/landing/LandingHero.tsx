@@ -5,7 +5,7 @@ import { Zap, ArrowRight, Play, Star } from "lucide-react";
 
 export const LandingHero = () => {
   return (
-    <section className="container mx-auto px-4 py-20 text-center animate-fade-in">
+    <section className="container mx-auto px-4 py-12 text-center animate-fade-in">
       <div className="max-w-4xl mx-auto">
         <Badge className="mb-6 bg-gradient-accent text-accent-foreground px-4 py-2 animate-bounce-light">
           <Zap className="h-4 w-4 mr-2" />
