@@ -171,9 +171,14 @@ export function AISuggestions({
   const renderSuggestionContent = () => {
     if (loading) {
       return (
-        <div className="flex items-center justify-center py-6">
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mr-3"></div>
-          <span className="text-sm text-muted-foreground">AI is thinking...</span>
+        <div className="flex items-center justify-center py-8">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-amber-200 border-t-amber-500"></div>
+            <div className="absolute inset-0 animate-pulse">
+              <div className="w-6 h-6 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full opacity-20"></div>
+            </div>
+          </div>
+          <span className="text-sm text-amber-700 font-medium ml-3">✨ AI is crafting your suggestion...</span>
         </div>
       );
     }
@@ -185,11 +190,15 @@ export function AISuggestions({
         const workoutMessage = suggestions.details || 
           `🏋️ Let's ${suggestions.activity || 'work out'} together! Duration: ${suggestions.duration || '45 mins'}`;
         return (
-          <div className="space-y-3">
-            <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-3 rounded-lg border border-primary/20">
-              <div className="flex items-start gap-2 mb-2">
-                <Bot className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                <p className="text-sm">{workoutMessage}</p>
+          <div className="space-y-4">
+            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-lg border border-amber-200 shadow-sm">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full flex-shrink-0">
+                  <Bot className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-amber-900 leading-relaxed">{workoutMessage}</p>
+                </div>
               </div>
               {!isExpanded && workoutMessage.length > 100 && (
                 <Button
@@ -214,9 +223,10 @@ export function AISuggestions({
             </div>
             <Button 
               onClick={() => onSendMessage(workoutMessage, 'ai_suggestion')}
-              className="w-full"
+              className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white border-0 shadow-md hover:shadow-lg hover:shadow-amber-200 transition-all duration-300 hover:scale-105"
               size="sm"
             >
+              <Dumbbell className="h-4 w-4 mr-2" />
               Send Workout Idea
             </Button>
           </div>
@@ -225,18 +235,23 @@ export function AISuggestions({
       case 'timing':
         const timingMessage = suggestions.ai_analysis || "Let's find the perfect time to meet up!";
         return (
-          <div className="space-y-3">
-            <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-3 rounded-lg border border-primary/20">
-              <div className="flex items-start gap-2">
-                <Bot className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                <p className="text-sm">{timingMessage}</p>
+          <div className="space-y-4">
+            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-lg border border-amber-200 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full flex-shrink-0">
+                  <Bot className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-amber-900 leading-relaxed">{timingMessage}</p>
+                </div>
               </div>
             </div>
             <Button 
               onClick={() => onSendMessage(`📅 ${timingMessage}`, 'ai_suggestion')}
-              className="w-full"
+              className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white border-0 shadow-md hover:shadow-lg hover:shadow-amber-200 transition-all duration-300 hover:scale-105"
               size="sm"
             >
+              <Calendar className="h-4 w-4 mr-2" />
               Share Timing Suggestion
             </Button>
           </div>
@@ -244,21 +259,26 @@ export function AISuggestions({
 
       case 'icebreaker':
         return (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {suggestions.slice(0, 2).map((suggestion: string, index: number) => (
-              <div key={index} className="space-y-2">
-                <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-3 rounded-lg border border-primary/20">
-                  <div className="flex items-start gap-2">
-                    <Bot className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                    <p className="text-sm">{suggestion}</p>
+              <div key={index} className="space-y-3">
+                <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-lg border border-amber-200 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full flex-shrink-0">
+                      <Bot className="h-4 w-4 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-amber-900 leading-relaxed">{suggestion}</p>
+                    </div>
                   </div>
                 </div>
                 <Button 
                   onClick={() => onSendMessage(suggestion, 'text')}
                   variant="outline"
                   size="sm"
-                  className="w-full"
+                  className="w-full border-amber-300 text-amber-700 hover:bg-gradient-to-r hover:from-amber-50 hover:to-yellow-50 hover:border-amber-400 transition-all duration-300 hover:scale-105"
                 >
+                  <MessageSquare className="h-4 w-4 mr-2" />
                   Send This Message
                 </Button>
               </div>
@@ -271,18 +291,23 @@ export function AISuggestions({
           suggestions.general_safety?.[0] || 
           "Let's meet in a public place for our first workout!";
         return (
-          <div className="space-y-3">
-            <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-3 rounded-lg border border-primary/20">
-              <div className="flex items-start gap-2">
-                <Bot className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                <p className="text-sm">{safetyMessage}</p>
+          <div className="space-y-4">
+            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-lg border border-amber-200 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full flex-shrink-0">
+                  <Bot className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-amber-900 leading-relaxed">{safetyMessage}</p>
+                </div>
               </div>
             </div>
             <Button 
               onClick={() => onSendMessage(`🛡️ Safety first! ${safetyMessage}`, 'ai_suggestion')}
-              className="w-full"
+              className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white border-0 shadow-md hover:shadow-lg hover:shadow-amber-200 transition-all duration-300 hover:scale-105"
               size="sm"
             >
+              <Shield className="h-4 w-4 mr-2" />
               Share Safety Tip
             </Button>
           </div>
@@ -321,14 +346,21 @@ export function AISuggestions({
   ];
 
   return (
-    <Card className={cn("border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 hover-lift transition-all duration-300", className)}>
+    <Card className={cn("border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 hover-lift transition-all duration-300 shadow-lg", className)}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Sparkles className="h-5 w-5 text-primary animate-pulse" />
-            AI Smart Suggestions
-            <Badge variant="outline" className="border-primary/20 text-xs animate-bounce-light">
-              Beta
+            <div className="relative">
+              <Sparkles className="h-5 w-5 text-amber-600 animate-pulse" />
+              <div className="absolute inset-0 h-5 w-5 text-amber-400 animate-ping opacity-30">
+                <Sparkles className="h-5 w-5" />
+              </div>
+            </div>
+            <span className="bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent font-bold">
+              AI Smart Suggestions
+            </span>
+            <Badge className="bg-gradient-to-r from-amber-400 to-yellow-500 text-white text-xs animate-bounce-light border-0 shadow-md">
+              ✨ AI
             </Badge>
           </CardTitle>
           {!isCollapsed && (
@@ -345,22 +377,43 @@ export function AISuggestions({
       </CardHeader>
       
       <CardContent className="space-y-4">
-        {/* Suggestion Buttons */}
-        <div className="grid grid-cols-2 gap-2">
+        {/* Enhanced Suggestion Buttons */}
+        <div className="grid grid-cols-2 gap-3">
           {suggestionButtons.map((button) => {
             const Icon = button.icon;
+            const isActive = activeTab === button.id;
             return (
               <Button
                 key={button.id}
-                variant={activeTab === button.id ? "default" : "outline"}
+                variant="outline"
                 size="sm"
                 onClick={button.action}
                 disabled={loading}
-                className="flex items-center gap-2 text-xs h-10 min-h-[44px] hover-scale transition-all duration-200"
+                className={cn(
+                  "flex items-center gap-2 text-xs h-12 min-h-[48px] transition-all duration-300 group relative overflow-hidden",
+                  "hover:scale-105 hover:shadow-lg hover:shadow-amber-200",
+                  isActive 
+                    ? "bg-gradient-to-r from-amber-400 to-yellow-500 text-white border-amber-400 shadow-lg shadow-amber-200" 
+                    : "bg-white hover:bg-gradient-to-r hover:from-amber-50 hover:to-yellow-50 border-amber-200 text-amber-700 hover:border-amber-400"
+                )}
                 aria-label={`Generate ${button.label.toLowerCase()}`}
               >
-                <Icon className="h-3 w-3" />
-                {button.label}
+                <div className={cn(
+                  "transition-all duration-300",
+                  isActive ? "text-white" : "text-amber-600 group-hover:text-amber-700"
+                )}>
+                  <Icon className="h-4 w-4" />
+                </div>
+                <span className={cn(
+                  "font-medium transition-all duration-300",
+                  isActive ? "text-white" : "text-amber-700 group-hover:text-amber-800"
+                )}>
+                  {button.label}
+                </span>
+                {/* Glow effect for active button */}
+                {isActive && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-yellow-500 opacity-20 animate-pulse" />
+                )}
               </Button>
             );
           })}
@@ -390,9 +443,15 @@ export function AISuggestions({
             {renderSuggestionContent()}
             
             {!activeTab && !loading && (
-              <div className="text-center py-4">
-                <p className="text-sm text-muted-foreground">
-                  Tap a button above to get AI suggestions!
+              <div className="text-center py-6">
+                <div className="bg-gradient-to-r from-amber-100 to-yellow-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                  <Sparkles className="h-8 w-8 text-amber-600" />
+                </div>
+                <p className="text-sm text-amber-700 font-medium">
+                  ✨ Tap a button above to get AI suggestions!
+                </p>
+                <p className="text-xs text-amber-600 mt-1">
+                  Powered by intelligent algorithms
                 </p>
               </div>
             )}

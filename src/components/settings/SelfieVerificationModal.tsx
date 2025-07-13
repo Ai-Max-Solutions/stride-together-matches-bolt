@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Shield, Camera, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Shield, Camera, CheckCircle, AlertCircle, Loader2, Star, Trophy } from 'lucide-react';
 import { SelfieCamera } from './SelfieCamera';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -75,45 +75,80 @@ export function SelfieVerificationModal({ open, onOpenChange, onVerificationComp
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg border-2 border-green-300 shadow-2xl">
         {step === 'consent' && (
           <>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-blue-600" />
-                Selfie Verification
+            <DialogHeader className="text-center">
+              <div className="mx-auto mb-4 bg-gradient-to-r from-green-500 to-emerald-600 p-4 rounded-full w-16 h-16 flex items-center justify-center">
+                <Shield className="h-8 w-8 text-white" />
+              </div>
+              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                🚀 Elite Verification Process
               </DialogTitle>
-              <DialogDescription>
-                Help build trust in our community with a one-time selfie verification.
+              <DialogDescription className="text-green-700 font-semibold text-base">
+                Join the trusted elite athlete community with instant verification!
               </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-lg space-y-3">
-                <h4 className="font-medium">What happens:</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 mt-0.5 text-green-600" />
-                    Take a quick selfie with your camera
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-5 rounded-lg border-2 border-green-200 space-y-4">
+                <h4 className="font-bold text-green-800 flex items-center gap-2">
+                  <Star className="h-5 w-5 text-amber-500" />
+                  Elite Benefits You'll Get:
+                </h4>
+                <ul className="space-y-3 text-sm">
+                  <li className="flex items-start gap-3">
+                    <div className="bg-green-500 p-1 rounded-full">
+                      <CheckCircle className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-green-800">Instant 30-second verification</p>
+                      <p className="text-green-600">Quick mobile camera check</p>
+                    </div>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 mt-0.5 text-green-600" />
-                    We verify it's a real photo of a real person
+                  <li className="flex items-start gap-3">
+                    <div className="bg-green-500 p-1 rounded-full">
+                      <Trophy className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-green-800">Elite verified badge on your profile</p>
+                      <p className="text-green-600">Stand out as a trusted athlete</p>
+                    </div>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 mt-0.5 text-green-600" />
-                    Get a verified badge on your profile
+                  <li className="flex items-start gap-3">
+                    <div className="bg-green-500 p-1 rounded-full">
+                      <Star className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-green-800">3x more training partner requests</p>
+                      <p className="text-green-600">Elite athletes prefer verified profiles</p>
+                    </div>
                   </li>
                 </ul>
               </div>
 
-              <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
-                <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Privacy Promise</h4>
-                <ul className="space-y-1 text-sm text-blue-800 dark:text-blue-200">
-                  <li>• We don't store your selfie image</li>
-                  <li>• Only the verification status is saved</li>
-                  <li>• This is completely optional</li>
-                  <li>• One-time verification only</li>
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h4 className="font-bold text-blue-900 mb-3 flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  🔒 Privacy & Security Promise
+                </h4>
+                <ul className="space-y-2 text-sm text-blue-800">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    <span><strong>No storage:</strong> Selfie deleted immediately after verification</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    <span><strong>Status only:</strong> We only save "verified" or "not verified"</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    <span><strong>One-time:</strong> Never need to verify again</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    <span><strong>Optional:</strong> You can skip this anytime</span>
+                  </li>
                 </ul>
               </div>
 
@@ -128,17 +163,17 @@ export function SelfieVerificationModal({ open, onOpenChange, onVerificationComp
                 </label>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <Button 
                   onClick={handleConsentNext} 
                   disabled={!consent}
-                  className="flex-1"
+                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white border-0 shadow-lg hover:shadow-xl text-base font-bold py-6"
                 >
-                  <Camera className="h-4 w-4 mr-2" />
-                  Continue
+                  <Camera className="h-5 w-5 mr-2" />
+                  🚀 Start Elite Verification!
                 </Button>
-                <Button variant="ghost" onClick={handleClose}>
-                  Skip for now
+                <Button variant="outline" onClick={handleClose} className="border-gray-300">
+                  Maybe Later
                 </Button>
               </div>
             </div>
@@ -155,56 +190,99 @@ export function SelfieVerificationModal({ open, onOpenChange, onVerificationComp
         {step === 'processing' && (
           <>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-                Verifying...
+              <div className="mx-auto mb-4 bg-gradient-to-r from-blue-500 to-indigo-600 p-4 rounded-full w-16 h-16 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-white" />
+              </div>
+              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent text-center">
+                🔍 Elite Verification in Progress...
               </DialogTitle>
-              <DialogDescription>
-                Please wait while we verify your selfie. This usually takes just a few seconds.
+              <DialogDescription className="text-blue-700 font-semibold text-center">
+                Our advanced AI is verifying your identity. This usually takes just 5-10 seconds.
               </DialogDescription>
             </DialogHeader>
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+            <div className="flex flex-col items-center py-8 space-y-4">
+              <div className="relative">
+                <Loader2 className="h-16 w-16 animate-spin text-blue-600" />
+                <div className="absolute inset-0 animate-pulse">
+                  <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full opacity-20"></div>
+                </div>
+              </div>
+              <p className="text-sm text-blue-600 font-medium">✨ Processing your elite verification...</p>
             </div>
           </>
         )}
 
         {step === 'result' && verificationResult && (
           <>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
+            <DialogHeader className="text-center">
+              <div className={`mx-auto mb-4 p-4 rounded-full w-16 h-16 flex items-center justify-center ${
+                verificationResult.verified 
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-600' 
+                  : 'bg-gradient-to-r from-amber-500 to-orange-600'
+              }`}>
                 {verificationResult.verified ? (
-                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <CheckCircle className="h-8 w-8 text-white" />
                 ) : (
-                  <AlertCircle className="h-5 w-5 text-amber-600" />
+                  <AlertCircle className="h-8 w-8 text-white" />
                 )}
-                {verificationResult.verified ? 'Verification Successful!' : 'Verification Not Complete'}
+              </div>
+              <DialogTitle className={`text-2xl font-bold bg-gradient-to-r ${
+                verificationResult.verified 
+                  ? 'from-green-600 to-emerald-600' 
+                  : 'from-amber-600 to-orange-600'
+              } bg-clip-text text-transparent`}>
+                {verificationResult.verified ? '🎉 Elite Verification Complete!' : '⚠️ Verification Needs Retry'}
               </DialogTitle>
-              <DialogDescription>
-                {verificationResult.message}
+              <DialogDescription className={`font-semibold ${
+                verificationResult.verified ? 'text-green-700' : 'text-amber-700'
+              }`}>
+                {verificationResult.verified 
+                  ? 'Welcome to the elite verified athlete community!' 
+                  : verificationResult.message
+                }
               </DialogDescription>
             </DialogHeader>
 
             {verificationResult.verified && (
-              <div className="bg-green-50 dark:bg-green-950/20 p-4 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-green-600" />
-                  <span className="font-medium text-green-900 dark:text-green-100">
-                    Your profile is now verified!
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-5 rounded-lg border-2 border-green-300">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-2 rounded-full">
+                    <Trophy className="h-5 w-5 text-white" />
+                  </div>
+                  <span className="font-bold text-green-800 text-lg">
+                    🏆 Elite Status Unlocked!
                   </span>
                 </div>
-                <p className="text-sm text-green-800 dark:text-green-200 mt-1">
-                  Other users will see a verification badge on your profile.
-                </p>
+                <ul className="space-y-2 text-sm text-green-800">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span><strong>Verified badge</strong> now shows on your profile</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span><strong>3x more</strong> training partner requests expected</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span><strong>Elite athlete</strong> community access</span>
+                  </li>
+                </ul>
               </div>
             )}
 
-            <div className="flex gap-2">
-              <Button onClick={handleComplete} className="flex-1">
-                {verificationResult.verified ? 'Done' : 'Try Again'}
+            <div className="flex gap-3">
+              <Button 
+                onClick={handleComplete} 
+                className={`flex-1 border-0 shadow-lg text-base font-bold py-6 ${
+                  verificationResult.verified 
+                    ? 'bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white' 
+                    : 'bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-700 hover:to-orange-800 text-white'
+                }`}
+              >
+                {verificationResult.verified ? '🎉 Awesome! Continue' : '🔄 Try Again'}
               </Button>
               {!verificationResult.verified && (
-                <Button variant="ghost" onClick={handleClose}>
+                <Button variant="outline" onClick={handleClose} className="border-gray-300">
                   Skip for now
                 </Button>
               )}

@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Shield, Clock } from 'lucide-react';
+import { CheckCircle, Shield, Clock, Star, Trophy, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TrustBadgesProps {
@@ -18,21 +18,22 @@ export function TrustBadges({ profile, className, size = 'md' }: TrustBadgesProp
   const getBadges = () => {
     const badges = [];
     
-    // Selfie verified badge (highest priority)
+    // Elite Selfie verified badge (highest priority)
     if (profile.selfie_verified) {
       badges.push({
-        icon: Shield,
-        label: 'Verified Profile',
-        color: 'text-blue-600',
-        bg: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800'
+        icon: Crown,
+        label: 'Elite Verified',
+        color: 'text-white',
+        bg: 'bg-gradient-to-r from-green-500 to-emerald-600 border-green-400 shadow-lg shadow-green-200',
+        isElite: true
       });
     } else if (profile.email) {
       // Email verified badge (fallback if no selfie verification)
       badges.push({
         icon: CheckCircle,
         label: 'Email Verified',
-        color: 'text-green-600',
-        bg: 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800'
+        color: 'text-green-700',
+        bg: 'bg-green-100 border-green-300'
       });
     }
     
@@ -43,17 +44,17 @@ export function TrustBadges({ profile, className, size = 'md' }: TrustBadgesProp
       
       if (monthsAgo >= 3) {
         badges.push({
-          icon: Shield,
+          icon: Trophy,
           label: 'Trusted Member',
-          color: 'text-blue-600',
-          bg: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800'
+          color: 'text-blue-700',
+          bg: 'bg-blue-100 border-blue-300'
         });
       } else if (monthsAgo >= 1) {
         badges.push({
-          icon: Clock,
+          icon: Star,
           label: 'Active Member',
-          color: 'text-purple-600',
-          bg: 'bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-800'
+          color: 'text-purple-700',
+          bg: 'bg-purple-100 border-purple-300'
         });
       }
     }
@@ -61,10 +62,10 @@ export function TrustBadges({ profile, className, size = 'md' }: TrustBadgesProp
     // Multi-sport badge
     if (profile.sports && profile.sports.length >= 3) {
       badges.push({
-        icon: null,
+        icon: Star,
         label: 'Multi-Sport',
-        color: 'text-orange-600',
-        bg: 'bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800'
+        color: 'text-orange-700',
+        bg: 'bg-orange-100 border-orange-300'
       });
     }
     
@@ -84,14 +85,22 @@ export function TrustBadges({ profile, className, size = 'md' }: TrustBadgesProp
             key={index}
             variant="outline" 
             className={cn(
-              "flex items-center gap-1 border",
+              "flex items-center gap-1.5 border-2 font-semibold transition-all duration-300 hover:scale-105",
               badge.bg,
               badge.color,
-              size === 'sm' ? 'text-[10px] px-1.5 py-0.5 h-5' : 'text-xs'
+              badge.isElite 
+                ? size === 'sm' ? 'text-[11px] px-2 py-1 h-6' : 'text-sm px-3 py-1.5'
+                : size === 'sm' ? 'text-[10px] px-1.5 py-0.5 h-5' : 'text-xs px-2 py-1',
+              badge.isElite && 'animate-pulse shadow-md'
             )}
           >
-            {Icon && <Icon className={cn(size === 'sm' ? 'h-2.5 w-2.5' : 'h-3 w-3')} />}
+            {Icon && <Icon className={cn(
+              badge.isElite
+                ? size === 'sm' ? 'h-3 w-3' : 'h-4 w-4'
+                : size === 'sm' ? 'h-2.5 w-2.5' : 'h-3 w-3'
+            )} />}
             {badge.label}
+            {badge.isElite && <span className="ml-1">✨</span>}
           </Badge>
         );
       })}

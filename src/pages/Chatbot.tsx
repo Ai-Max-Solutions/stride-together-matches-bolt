@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { Bot, Send, ArrowLeft, Dumbbell, Clock, Users, Target } from 'lucide-react';
+import { Bot, Send, ArrowLeft, Dumbbell, Clock, Users, Target, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Message {
@@ -181,16 +181,20 @@ export default function Chatbot() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-foreground">Intelligent AI Assistant</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
+              ✨ Intelligent AI Assistant
+            </h1>
+            <p className="text-amber-700">
               Personalized fitness guidance based on your profile
             </p>
           </div>
           <div className="text-right">
-            <div className="text-sm font-medium text-foreground">
-              {dailyUsage.remaining} questions left
+            <div className="bg-gradient-to-r from-amber-100 to-yellow-100 px-3 py-2 rounded-lg border border-amber-200">
+              <div className="text-sm font-bold text-amber-800">
+                {dailyUsage.remaining} questions left
+              </div>
+              <div className="text-xs text-amber-600">today</div>
             </div>
-            <div className="text-xs text-muted-foreground">today</div>
           </div>
         </div>
 
@@ -198,13 +202,17 @@ export default function Chatbot() {
           {/* Chat Area */}
           <div className="lg:col-span-2">
             <Card className="h-[600px] flex flex-col">
-              <CardHeader>
+              <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-200">
                 <CardTitle className="flex items-center gap-2">
-                  <Bot className="h-5 w-5" />
-                  Stride AI Assistant
+                  <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full">
+                    <Bot className="h-5 w-5 text-white" />
+                  </div>
+                  <span className="bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent font-bold">
+                    Elite AI Coach
+                  </span>
                 </CardTitle>
-                <CardDescription>
-                  Personalized fitness companion • {dailyUsage.remaining} questions remaining today
+                <CardDescription className="text-amber-700">
+                  ✨ Personalized fitness companion • {dailyUsage.remaining} questions remaining today
                 </CardDescription>
               </CardHeader>
               
@@ -217,10 +225,10 @@ export default function Chatbot() {
                       className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                        className={`max-w-[80%] rounded-lg px-4 py-3 shadow-sm ${
                           message.isUser
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-foreground'
+                            ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white'
+                            : 'bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-900 border border-amber-200'
                         }`}
                       >
                         <p className="whitespace-pre-wrap">{message.content}</p>
@@ -236,8 +244,16 @@ export default function Chatbot() {
                   
                   {loading && (
                     <div className="flex justify-start">
-                      <div className="bg-muted rounded-lg px-4 py-2">
-                        <LoadingSpinner size="sm" message="Analyzing your profile..." />
+                      <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg px-4 py-3 shadow-sm">
+                        <div className="flex items-center gap-2">
+                          <div className="relative">
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-amber-200 border-t-amber-500"></div>
+                            <div className="absolute inset-0 animate-pulse">
+                              <div className="w-4 h-4 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full opacity-20"></div>
+                            </div>
+                          </div>
+                          <span className="text-sm text-amber-700 font-medium">✨ Analyzing your profile...</span>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -263,7 +279,7 @@ export default function Chatbot() {
                     type="submit"
                     size="sm"
                     disabled={loading || !input.trim() || dailyUsage.remaining <= 0}
-                    className="px-3"
+                    className="px-4 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white border-0 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
@@ -274,11 +290,16 @@ export default function Chatbot() {
 
           {/* Smart Suggestions */}
           <div className="space-y-6">
-            <Card>
+            <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50">
               <CardHeader>
-                <CardTitle className="text-lg">Smart Suggestions</CardTitle>
-                <CardDescription>
-                  AI-powered questions based on your profile
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-amber-600" />
+                  <span className="bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
+                    Smart Suggestions
+                  </span>
+                </CardTitle>
+                <CardDescription className="text-amber-700">
+                  ✨ AI-powered questions based on your profile
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
@@ -287,37 +308,54 @@ export default function Chatbot() {
                     key={index}
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-start text-left h-auto py-3 px-3"
+                    className="w-full justify-start text-left h-auto py-4 px-4 hover:bg-gradient-to-r hover:from-amber-100 hover:to-yellow-100 transition-all duration-300 hover-scale-102 group border border-transparent hover:border-amber-200 rounded-lg"
                     onClick={() => handleSuggestionClick(suggestion.text)}
                     disabled={dailyUsage.remaining <= 0 || loading}
                   >
-                    <suggestion.icon className="h-4 w-4 mr-2 shrink-0" />
-                    <span className="text-sm">{suggestion.text}</span>
+                    <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full mr-3 group-hover:scale-110 transition-transform">
+                      <suggestion.icon className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-amber-800 group-hover:text-amber-900">{suggestion.text}</span>
                   </Button>
                 ))}
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50">
               <CardHeader>
-                <CardTitle className="text-lg">AI Features</CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full">
+                    <Bot className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
+                    AI Features
+                  </span>
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
-                <div className="flex items-start gap-2">
-                  <Dumbbell className="h-4 w-4 mt-0.5 text-primary" />
-                  <p>Sport-specific workout suggestions based on your chosen activities</p>
+                <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-200">
+                  <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full">
+                    <Dumbbell className="h-4 w-4 text-white" />
+                  </div>
+                  <p className="text-amber-800 font-medium">Sport-specific workout suggestions based on your chosen activities</p>
                 </div>
-                <div className="flex items-start gap-2">
-                  <Clock className="h-4 w-4 mt-0.5 text-primary" />
-                  <p>Smart timing analysis for finding compatible workout partners</p>
+                <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-200">
+                  <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full">
+                    <Clock className="h-4 w-4 text-white" />
+                  </div>
+                  <p className="text-amber-800 font-medium">Smart timing analysis for finding compatible workout partners</p>
                 </div>
-                <div className="flex items-start gap-2">
-                  <Users className="h-4 w-4 mt-0.5 text-primary" />
-                  <p>Compatibility insights based on your location and interests</p>
+                <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-200">
+                  <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full">
+                    <Users className="h-4 w-4 text-white" />
+                  </div>
+                  <p className="text-amber-800 font-medium">Compatibility insights based on your location and interests</p>
                 </div>
-                <div className="flex items-start gap-2">
-                  <Target className="h-4 w-4 mt-0.5 text-primary" />
-                  <p>Personalized advice using your fitness goals and experience level</p>
+                <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-200">
+                  <div className="bg-gradient-to-r from-amber-400 to-yellow-500 p-2 rounded-full">
+                    <Target className="h-4 w-4 text-white" />
+                  </div>
+                  <p className="text-amber-800 font-medium">Personalized advice using your fitness goals and experience level</p>
                 </div>
               </CardContent>
             </Card>

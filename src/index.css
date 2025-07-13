@@ -372,3 +372,20 @@ Inspired by professional athletics with performance-focused elite feel
   background-size: 200px 100%;
   animation: shimmer 1.5s ease-in-out infinite;
 }
+
+/* AI Assistant Enhancements */
+.hover-scale-102 {
+  transition: transform 0.2s ease-out;
+}
+
+.hover-scale-102:hover {
+  transform: scale(1.02);
+}
+
+.ai-glow {
+  box-shadow: 0 10px 25px -5px rgba(251, 191, 36, 0.2);
+}
+
+.ai-glow:hover {
+  box-shadow: 0 20px 35px -5px rgba(251, 191, 36, 0.3);
+}
