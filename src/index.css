@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Social Fitness App - Design System
+/* Elite Sport Performance App - Design System
 All colors are HSL for consistent theming across light/dark modes
-Inspired by modern fitness apps with energetic but professional feel
+Inspired by professional athletics with performance-focused elite feel
 */
 
 @layer base {
@@ -18,10 +18,10 @@ Inspired by modern fitness apps with energetic but professional feel
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 15%;
 
-    /* Primary: Energetic teal for motivation and trust */
-    --primary: 185 95% 45%;
+    /* Primary: Elite slate for professional performance */
+    --primary: 220 13% 18%;
     --primary-foreground: 0 0% 98%;
-    --primary-glow: 185 95% 55%;
+    --primary-glow: 220 13% 25%;
 
     /* Secondary: Professional blue-gray for balance */
     --secondary: 215 16% 88%;
@@ -30,9 +30,9 @@ Inspired by modern fitness apps with energetic but professional feel
     --muted: 215 16% 92%;
     --muted-foreground: 215 16% 45%;
 
-    /* Accent: Energy orange for CTAs and highlights */
-    --accent: 25 95% 58%;
-    --accent-foreground: 0 0% 98%;
+    /* Accent: Performance gold for achievements and highlights */
+    --accent: 45 100% 51%;
+    --accent-foreground: 220 13% 18%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
@@ -71,11 +71,11 @@ Inspired by modern fitness apps with energetic but professional feel
     --confetti-4: 285 85% 70%;
     --confetti-5: 125 65% 55%;
 
-    /* Activity colors */
-    --activity-run: 0 68% 62%;      /* Red for running */
-    --activity-cycle: 142 76% 36%;  /* Green for cycling */
-    --activity-workout: 258 90% 66%; /* Purple for workouts */
-    --activity-yoga: 43 96% 56%;    /* Yellow for yoga */
+    /* Elite sport discipline colors */
+    --activity-run: 220 13% 18%;      /* Elite slate for running */
+    --activity-cycle: 45 100% 51%;    /* Performance gold for cycling */
+    --activity-workout: 220 91% 59%;  /* Elite blue for workouts */
+    --activity-yoga: 142 69% 58%;     /* Coach green for yoga */
 
     /* Match level colors */
     --match-high: 142 76% 36%;      /* Green for high match */

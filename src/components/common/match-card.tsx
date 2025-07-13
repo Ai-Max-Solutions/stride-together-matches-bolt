@@ -3,10 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, MapPin, Clock, Star, Zap, Trophy, Heart, Ban } from "lucide-react";
+import { MessageCircle, MapPin, Clock, Star, Zap, Trophy, Heart, Ban, Award, Target, TrendingUp, Medal } from "lucide-react";
 import { BlockReportDialog } from "@/components/chat/BlockReportDialog";
 import { MatchToast } from "@/components/common/MatchToast";
 import { ConfettiEffect } from "@/components/common/ConfettiEffect";
+import { VerificationStatus } from "@/components/verification/EliteVerificationBadge";
 import { useUserPresence } from "@/hooks/use-user-presence";
 import { useAchievements } from "@/hooks/use-achievements";
 import { useChallenges } from "@/hooks/use-challenges";
@@ -30,6 +31,8 @@ interface Profile {
   trust_score: number | null;
   profile_picture_url: string | null;
   last_active_at: string | null;
+  verification_level?: 'amateur' | 'competitive' | 'elite' | 'professional' | 'olympic';
+  verifications?: string[];
 }
 
 interface MatchScore {
@@ -115,19 +118,19 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
     setShowMatchToast(false);
   };
 
-  // Determine if this is a premium match (90%+ match score)
-  const isPremiumMatch = matchScore.score >= 90;
-  const isHighMatch = matchScore.score >= 75;
+  // Determine if this is an elite match (90%+ compatibility score)
+  const isEliteMatch = matchScore.score >= 90;
+  const isHighPerformanceMatch = matchScore.score >= 75;
 
   // Generate dynamic badges based on match score and profile
   const generateMatchBadges = () => {
     const badges = [];
     
-    // Match percentage badge
+    // Performance compatibility badge
     badges.push({
-      label: `${matchScore.score}% match`,
-      variant: isPremiumMatch ? "premium" : isHighMatch ? "success" : "secondary",
-      icon: isPremiumMatch ? Trophy : Star
+      label: `${matchScore.score}% compatible`,
+      variant: isEliteMatch ? "elite" : isHighPerformanceMatch ? "performance" : "secondary",
+      icon: isEliteMatch ? Trophy : Medal
     });
 
     // Activity compatibility
@@ -139,12 +142,12 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
       });
     }
 
-    // Mentor status
+    // Coach/Mentor status
     if (profile.is_mentor_available) {
       badges.push({
-        label: "Mentor",
+        label: "Elite Coach",
         variant: "accent",
-        icon: Heart
+        icon: Award
       });
     }
 
@@ -161,8 +164,8 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
           "group relative overflow-hidden transition-all duration-300 ease-out",
           "bg-card border-0 shadow-card hover:shadow-card-hover",
           "hover:scale-[1.02] hover:-translate-y-1",
-          // Premium match gradient accent strip
-          isPremiumMatch && "border-l-4 border-l-gradient-primary",
+          // Elite match gradient accent strip
+          isEliteMatch && "border-l-4 border-l-amber-500",
           // Glass effect on hover
           "hover:backdrop-blur-sm",
           className
@@ -171,9 +174,9 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
           willChange: "transform"
         }}
       >
-        {/* Premium match gradient overlay */}
-        {isPremiumMatch && (
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+        {/* Elite match gradient overlay */}
+        {isEliteMatch && (
+          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-transparent to-yellow-500/5 pointer-events-none" />
         )}
 
         <CardContent className="p-6 space-y-4">
@@ -232,6 +235,18 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
             </p>
           )}
 
+          {/* Verification Status */}
+          {(profile.verification_level || profile.verifications) && (
+            <div className="mb-3">
+              <VerificationStatus 
+                verifications={[
+                  profile.verification_level || 'amateur',
+                  ...(profile.verifications || [])
+                ]} 
+              />
+            </div>
+          )}
+
           {/* Match badges with modern pill design */}
           <div className="flex flex-wrap gap-2">
             {badges.map((badge, index) => {
@@ -244,7 +259,8 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
                     "px-3 py-1 text-xs font-medium rounded-full",
                     "flex items-center gap-1.5 transition-all",
                     "hover:scale-105 hover:shadow-sm",
-                    badge.variant === "premium" && "bg-gradient-primary text-primary-foreground shadow-premium",
+                    badge.variant === "elite" && "bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-lg",
+                    badge.variant === "performance" && "bg-slate-800 text-white border-slate-700",
                     badge.variant === "success" && "bg-success/10 text-success border-success/20",
                     badge.variant === "fitness" && "bg-accent/10 text-accent border-accent/20",
                     badge.variant === "accent" && "bg-secondary text-secondary-foreground"
@@ -293,12 +309,12 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
             className={cn(
               "w-full mt-4 transition-all duration-200",
               "hover:scale-[1.02] active:scale-[0.98]",
-              isPremiumMatch 
-                ? "bg-gradient-primary hover:shadow-premium text-primary-foreground" 
-                : "bg-primary hover:bg-primary/90"
+              isEliteMatch 
+                ? "bg-gradient-to-r from-slate-800 to-slate-700 hover:shadow-lg text-white" 
+                : "bg-slate-700 hover:bg-slate-600 text-white"
             )}
           >
-            Connect
+            Partner Up
           </Button>
         </CardContent>
 

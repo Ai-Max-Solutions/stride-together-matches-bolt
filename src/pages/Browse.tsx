@@ -44,12 +44,19 @@ import {
   ChevronDown,
   ChevronUp,
   MapPin,
-  MessageCircle
+  MessageCircle,
+  Trophy,
+  Target,
+  Medal
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Navigation from '@/components/Navigation';
 import { AISuggestions } from '@/components/chat/AISuggestions';
 import { BROWSE_SPORTS_OPTIONS, BROWSE_EXPERIENCE_LEVELS } from '@/constants';
+import { PerformanceDashboard } from '@/components/performance/PerformanceDashboard';
+import { EliteVerificationBadge, VerificationStatus } from '@/components/verification/EliteVerificationBadge';
+import { TrainingPlanCard } from '@/components/training/TrainingPlanCard';
+import { LeaderboardCard } from '@/components/competition/LeaderboardCard';
 
 interface Profile {
   id: string;
@@ -73,6 +80,14 @@ interface Profile {
   mentor_specialties: string[] | null;
   trust_score: number | null;
   last_active_at: string | null;
+  verification_level?: 'amateur' | 'competitive' | 'elite' | 'professional' | 'olympic';
+  verifications?: string[];
+  performance_metrics?: {
+    weeklyDistance: number;
+    avgPace: string;
+    personalBests: number;
+    recentAchievements: string[];
+  };
 }
 
 interface MatchScore {
@@ -115,6 +130,11 @@ export default function Browse() {
   
   // AI Assistant states
   const [showAIAssistant, setShowAIAssistant] = useState(false);
+  
+  // Elite features states
+  const [showPerformanceDashboard, setShowPerformanceDashboard] = useState(false);
+  const [showTrainingPlans, setShowTrainingPlans] = useState(false);
+  const [showLeaderboards, setShowLeaderboards] = useState(false);
   
   // Flash Events states
   const [showFlashRunModal, setShowFlashRunModal] = useState(false);
@@ -219,21 +239,21 @@ export default function Browse() {
     );
     if (commonSports.length > 0) {
       score += 40;
-      reasons.push(`Both enjoy ${commonSports.join(', ')}`);
-      tags.push(`${commonSports[0]} buddy`);
+      reasons.push(`Both compete in ${commonSports.join(', ')}`);
+      tags.push(`${commonSports[0]} athlete`);
     }
 
-    // Experience level match (25 points)
+    // Performance level match (25 points)
     if (profile.experience_level === currentUserProfile.experience_level) {
       score += 25;
-      reasons.push(`Same ${profile.experience_level} level`);
-      tags.push(`${profile.experience_level} level`);
+      reasons.push(`Same ${profile.experience_level} performance level`);
+      tags.push(`${profile.experience_level} athlete`);
     } else if (
       (profile.experience_level === 'intermediate' && currentUserProfile.experience_level === 'beginner') ||
       (profile.experience_level === 'beginner' && currentUserProfile.experience_level === 'intermediate')
     ) {
       score += 15;
-      reasons.push('Compatible skill levels');
+      reasons.push('Compatible performance levels');
     }
 
     // Location proximity (20 points)
@@ -267,24 +287,24 @@ export default function Browse() {
     );
     if (hasOverlap) {
       score += 10;
-      reasons.push('Compatible schedules');
-      tags.push('good timing');
+      reasons.push('Aligned training schedules');
+      tags.push('training sync');
     }
 
-    // Mentor boost for beginners and first marathoners
+    // Elite coaching boost for developing athletes
     if (profile.is_mentor_available && profile.years_experience && profile.years_experience >= 3) {
       // Boost for first-time marathoners
       if (userGoals.includes('first_marathon')) {
         score += 30;
-        reasons.push('Experienced mentor for marathon training');
-        tags.push('marathon mentor');
+        reasons.push('Elite coach for marathon performance');
+        tags.push('marathon coach');
       }
       
-      // Boost for beginners
+      // Boost for developing athletes
       if (currentUserProfile.experience_level === 'beginner') {
         score += 20;
-        reasons.push('Experienced mentor available');
-        tags.push('mentor available');
+        reasons.push('Elite coaching available');
+        tags.push('coach available');
       }
       
       // Specialty matching
@@ -309,11 +329,11 @@ export default function Browse() {
       tags.push('new member');
     }
 
-    // Top match tag
+    // Performance compatibility tag
     if (score >= 70) {
-      tags.unshift('top match');
+      tags.unshift('elite compatible');
     } else if (score >= 50) {
-      tags.unshift('good match');
+      tags.unshift('performance match');
     }
 
     return { score, reasons, tags };
@@ -422,9 +442,9 @@ export default function Browse() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2">Discover Your Perfect Workout Partners</h1>
+              <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Elite Training Network</h1>
               <p className="text-muted-foreground">
-                Find compatible training buddies based on your fitness level, goals, and location
+                Connect with high-performance athletes and coaches in your discipline
               </p>
             </div>
             
@@ -579,15 +599,208 @@ export default function Browse() {
           </CardContent>
         </Card>
 
+        {/* Elite Features Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          {/* Performance Dashboard Toggle */}
+          <Card className="bg-gradient-to-br from-slate-800 to-slate-700 text-white border-slate-600 cursor-pointer hover:scale-105 transition-transform" onClick={() => setShowPerformanceDashboard(!showPerformanceDashboard)}>
+            <CardContent className="p-4 text-center">
+              <Trophy className="h-8 w-8 mx-auto mb-2 text-amber-400" />
+              <h3 className="font-semibold mb-1">Performance Analytics</h3>
+              <p className="text-xs text-slate-300">Track your elite progress</p>
+            </CardContent>
+          </Card>
+
+          {/* Training Plans Toggle */}
+          <Card className="bg-gradient-to-br from-amber-500 to-amber-600 text-white border-amber-400 cursor-pointer hover:scale-105 transition-transform" onClick={() => setShowTrainingPlans(!showTrainingPlans)}>
+            <CardContent className="p-4 text-center">
+              <Target className="h-8 w-8 mx-auto mb-2 text-white" />
+              <h3 className="font-semibold mb-1">Elite Training Plans</h3>
+              <p className="text-xs text-amber-100">Pro coaching programs</p>
+            </CardContent>
+          </Card>
+
+          {/* Leaderboards Toggle */}
+          <Card className="bg-gradient-to-br from-blue-600 to-blue-700 text-white border-blue-500 cursor-pointer hover:scale-105 transition-transform" onClick={() => setShowLeaderboards(!showLeaderboards)}>
+            <CardContent className="p-4 text-center">
+              <Medal className="h-8 w-8 mx-auto mb-2 text-white" />
+              <h3 className="font-semibold mb-1">Competitions</h3>
+              <p className="text-xs text-blue-100">Elite leaderboards</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Performance Dashboard */}
+        {showPerformanceDashboard && currentUserProfile?.performance_metrics && (
+          <div className="mb-8">
+            <PerformanceDashboard 
+              metrics={{
+                weeklyDistance: currentUserProfile.performance_metrics.weeklyDistance || 0,
+                weeklyDistanceChange: 12,
+                avgPace: currentUserProfile.performance_metrics.avgPace || "5:30",
+                avgPaceChange: -15,
+                weeklyWorkouts: 5,
+                workoutChange: 2,
+                personalBests: currentUserProfile.performance_metrics.personalBests || 3,
+                currentStreak: 7,
+                upcomingGoals: ["Sub 3:30 Marathon", "10K PR", "Weekly 50K"],
+                recentAchievements: currentUserProfile.performance_metrics.recentAchievements || ["10K PR", "Marathon Finisher"]
+              }}
+              sportType={currentUserProfile.sports?.[0] || 'running'}
+            />
+          </div>
+        )}
+
+        {/* Training Plans Section */}
+        {showTrainingPlans && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-amber-600" />
+                Elite Training Plans
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <TrainingPlanCard 
+                  plan={{
+                    id: "1",
+                    title: "Elite Marathon Training",
+                    description: "Advanced 16-week marathon preparation for sub-3:00 times",
+                    duration: 16,
+                    difficulty: "elite",
+                    sport: "Running",
+                    goal: "Marathon PR",
+                    weeklyHours: 12,
+                    sessionsPerWeek: 6,
+                    author: {
+                      name: "Coach Sarah Miller",
+                      isVerified: true,
+                      isCoach: true
+                    },
+                    stats: {
+                      downloads: 1247,
+                      rating: 4.9,
+                      reviews: 89,
+                      likes: 432
+                    },
+                    tags: ["marathon", "advanced", "speed", "endurance"],
+                    isPremium: true,
+                    price: 99
+                  }}
+                />
+                <TrainingPlanCard 
+                  plan={{
+                    id: "2", 
+                    title: "Cycling Power Development",
+                    description: "8-week FTP improvement program for competitive cyclists",
+                    duration: 8,
+                    difficulty: "advanced",
+                    sport: "Cycling",
+                    goal: "Power Increase",
+                    weeklyHours: 10,
+                    sessionsPerWeek: 5,
+                    author: {
+                      name: "Elite Cycling Academy",
+                      isVerified: true,
+                      isCoach: true
+                    },
+                    stats: {
+                      downloads: 856,
+                      rating: 4.8,
+                      reviews: 67,
+                      likes: 298
+                    },
+                    tags: ["cycling", "power", "FTP", "intervals"],
+                    isPremium: false
+                  }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Leaderboards Section */}
+        {showLeaderboards && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Medal className="h-5 w-5 text-amber-600" />
+                Elite Competitions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <LeaderboardCard 
+                competition={{
+                  id: "monthly-5k",
+                  title: "Monthly 5K Challenge",
+                  description: "Fastest 5K time this month wins elite coaching session",
+                  type: "time",
+                  sport: "Running",
+                  duration: "Monthly",
+                  participantCount: 1247,
+                  prize: "Elite Coaching Session",
+                  endDate: "Dec 31",
+                  isActive: true
+                }}
+                entries={[
+                  {
+                    rank: 1,
+                    athlete: {
+                      id: "1",
+                      name: "Alex Johnson",
+                      location: "San Francisco, CA",
+                      isVerified: true
+                    },
+                    score: 100,
+                    metric: "time",
+                    metricValue: "15:42",
+                    change: 2,
+                    joinedDate: "2024-12-01"
+                  },
+                  {
+                    rank: 2,
+                    athlete: {
+                      id: "2", 
+                      name: "Maria Garcia",
+                      location: "Austin, TX",
+                      isVerified: true
+                    },
+                    score: 98,
+                    metric: "time", 
+                    metricValue: "16:18",
+                    change: -1,
+                    joinedDate: "2024-12-02"
+                  },
+                  {
+                    rank: 3,
+                    athlete: {
+                      id: "3",
+                      name: "David Chen", 
+                      location: "Seattle, WA",
+                      isVerified: false
+                    },
+                    score: 95,
+                    metric: "time",
+                    metricValue: "16:45",
+                    change: 1,
+                    joinedDate: "2024-12-01"
+                  }
+                ]}
+                currentUserRank={8}
+              />
+            </CardContent>
+          </Card>
+        )}
+
         {/* AI Recommendations Section */}
         {currentUserProfile && filteredProfiles.length > 0 && (
           <Card className="mb-8 border-primary/30 bg-gradient-to-br from-primary/10 via-background to-accent/8 shadow-lg backdrop-blur-sm">
             <CardHeader className="pb-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary animate-pulse" />
-                <h3 className="text-xl font-semibold text-foreground">AI-Powered Top Matches</h3>
-                <Badge variant="outline" className="border-primary/30 bg-primary/5 text-primary">
-                  Personalized for you
+                <Trophy className="h-5 w-5 text-amber-600" />
+                <h3 className="text-xl font-semibold text-foreground">Elite Performance Matches</h3>
+                <Badge variant="outline" className="border-amber-500/30 bg-amber-50 text-amber-700">
+                  Performance-based
                 </Badge>
               </div>
             </CardHeader>
@@ -670,8 +883,8 @@ export default function Browse() {
                               size="sm"
                               className="w-full bg-gradient-primary hover:shadow-premium text-primary-foreground"
                             >
-                              <MessageCircle className="w-4 h-4 mr-2" />
-                              Connect Now
+                              <Trophy className="w-4 h-4 mr-2" />
+                              Partner Up
                             </Button>
                           </div>
                         </div>
@@ -705,8 +918,8 @@ export default function Browse() {
                     <div>
                       <h3 className="text-xl font-semibold mb-2">Create Flash Events</h3>
                       <p className="text-muted-foreground mb-6 max-w-md">
-                        Start spontaneous workouts, runs, rides, or yoga sessions in your area. 
-                        Connect with nearby fitness enthusiasts instantly!
+                        Organize high-intensity training sessions, competitive runs, cycling groups, and specialized workshops. 
+                        Connect with elite athletes instantly!
                       </p>
                     </div>
                     
@@ -863,7 +1076,7 @@ export default function Browse() {
         {/* Results Count & Pagination Info */}
         <div className="mb-6 flex items-center justify-between">
           <p className="text-muted-foreground">
-            {totalItems} workout partners found
+            {totalItems} elite athletes found
             {totalPages > 1 && (
               <span className="ml-2">
                 (Page {currentPage} of {totalPages})
@@ -872,8 +1085,8 @@ export default function Browse() {
           </p>
           {currentUserProfile && (
             <Badge variant="outline" className="gap-2">
-              <Sparkles className="h-3 w-3" />
-              AI-Powered Matching
+              <Trophy className="h-3 w-3" />
+              Performance-Based Matching
             </Badge>
           )}
         </div>
@@ -906,9 +1119,9 @@ export default function Browse() {
         ) : filteredProfiles.length === 0 ? (
           <div className="text-center py-16 animate-fade-in">
             <div className="text-6xl mb-4">🏃‍♀️</div>
-            <h3 className="text-xl font-semibold mb-2">No matches yet?</h3>
+            <h3 className="text-xl font-semibold mb-2">No elite athletes found?</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Keep your profile up to date and come back soon! More amazing workout partners join every day.
+              Optimize your performance profile and training metrics. Elite athletes are joining the network daily.
             </p>
             <Button onClick={() => navigate('/profile-setup')} className="button-bounce">
               Update Profile
@@ -920,10 +1133,10 @@ export default function Browse() {
               {/* Section Header */}
               <div className="text-center pb-4">
                 <h2 className="text-2xl font-bold text-foreground mb-2">
-                  Workout Partners Found
+                  Elite Athletes & Coaches
                 </h2>
                 <p className="text-muted-foreground">
-                  Connect with amazing fitness enthusiasts in your area
+                  Connect with top-tier athletes and certified coaches in your discipline
                 </p>
               </div>
               
