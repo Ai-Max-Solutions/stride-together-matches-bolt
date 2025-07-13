@@ -240,9 +240,9 @@ const MatchCard = ({ profile, matchScore, onConnect, className, currentUserId }:
             <div className="mb-3">
               <VerificationStatus 
                 verifications={[
-                  profile.verification_level || 'amateur',
+                  (profile.verification_level as any) || 'amateur',
                   ...(profile.verifications || [])
-                ]} 
+                ]}
               />
             </div>
           )}
