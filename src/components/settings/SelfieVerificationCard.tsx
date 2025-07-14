@@ -123,15 +123,15 @@ export function SelfieVerificationCard({ isVerified, onVerificationComplete }: S
             </div>
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Button 
               onClick={() => setShowModal(true)} 
-              className="flex-1 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white border-0 shadow-lg hover:shadow-xl hover:shadow-green-200 transition-all duration-300 hover:scale-105 text-base font-bold py-6"
+              className="w-full sm:flex-1 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white border-0 shadow-lg hover:shadow-xl hover:shadow-green-200 transition-all duration-300 hover:scale-105 text-base font-bold py-6"
             >
               <Shield className="h-5 w-5 mr-2" />
               🚀 Verify Now - Get Elite Status!
             </Button>
-            <Button variant="outline" className="text-orange-600 border-orange-300 hover:bg-orange-50">
+            <Button variant="outline" className="w-full sm:w-auto text-orange-600 border-orange-300 hover:bg-orange-50">
               Maybe Later
             </Button>
           </div>
