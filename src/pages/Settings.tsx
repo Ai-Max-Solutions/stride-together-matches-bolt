@@ -516,8 +516,25 @@ export default function Settings() {
           {/* Selfie Verification */}
           <SelfieVerificationCard 
             isVerified={profileData.selfie_verified || false}
-            onVerificationComplete={(verified) => {
+            onVerificationComplete={async (verified) => {
               setProfileData(prev => ({ ...prev, selfie_verified: verified }));
+              
+              // Save the verification status to the database immediately
+              try {
+                const { error } = await supabase
+                  .from('profiles')
+                  .update({ selfie_verified: verified })
+                  .eq('user_id', user?.id);
+
+                if (error) throw error;
+              } catch (err: any) {
+                console.error('Failed to save verification status:', err);
+                toast({
+                  title: "Verification status not saved",
+                  description: "Your verification completed but couldn't be saved. Please refresh the page.",
+                  variant: "destructive"
+                });
+              }
             }}
           />
 
