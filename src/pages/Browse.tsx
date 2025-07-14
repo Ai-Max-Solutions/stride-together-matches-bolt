@@ -629,6 +629,111 @@ export default function Browse() {
           </Card>
         </div>
 
+        {/* Top Matches Section - Prioritized for sports partner discovery */}
+        {currentUserProfile && filteredProfiles.length > 0 && (
+          <Card className="mb-8 border-primary/30 bg-gradient-to-br from-primary/10 via-background to-accent/8 shadow-lg backdrop-blur-sm">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-amber-600" />
+                <h3 className="text-xl font-semibold text-foreground">Top Matches</h3>
+                <Badge variant="outline" className="border-amber-500/30 bg-amber-50 text-amber-700">
+                  Pace & goal matched
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-6">
+                {filteredProfiles.slice(0, 2).map((profile) => {
+                  const matchData = matchScores.get(profile.id);
+                  if (!matchData || matchData.score < 50) return null;
+                  
+                  return (
+                    <Card 
+                      key={profile.id} 
+                      className={cn(
+                        "relative overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl",
+                        "bg-card/95 backdrop-blur-sm border border-border/50",
+                        "shadow-md hover:shadow-primary/20"
+                      )}
+                    >
+                      {/* Gradient accent strip for high matches */}
+                      {matchData.score >= 90 && (
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-accent to-primary animate-pulse" />
+                      )}
+                      
+                      <CardContent className="p-5 bg-gradient-to-br from-background/90 to-muted/30">
+                        <div className="flex items-start gap-4">
+                          <div className="relative">
+                            <Avatar className="h-14 w-14 shadow-lg ring-2 ring-primary/20">
+                              <AvatarImage src={profile.profile_picture_url} className="object-cover" />
+                              <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 font-semibold text-foreground">
+                                {profile.full_name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            {/* Online indicator for high trust score */}
+                            {profile.trust_score && profile.trust_score > 80 && (
+                              <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-success rounded-full border-2 border-background" />
+                            )}
+                          </div>
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold text-lg text-foreground truncate">
+                                {profile.full_name}
+                              </h4>
+                              <Badge 
+                                className={cn(
+                                  "text-xs font-bold shadow-sm",
+                                  matchData.score >= 90 
+                                    ? "bg-gradient-to-r from-primary to-accent text-primary-foreground animate-pulse" 
+                                    : "bg-primary text-primary-foreground"
+                                )}
+                              >
+                                {matchData.score}% match
+                              </Badge>
+                            </div>
+                            
+                            <p className="text-sm text-muted-foreground mb-3 flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {formatLocation(profile)}
+                            </p>
+                            
+                            <div className="flex flex-wrap gap-2 mb-3">
+                              {matchData.tags.slice(0, 3).map((tag, index) => (
+                                <Badge 
+                                  key={index} 
+                                  variant="secondary" 
+                                  className="text-xs bg-orange-500 text-white border-orange-400 hover:bg-orange-600 transition-colors"
+                                >
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                            
+                            <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+                              {matchData.reasons.slice(0, 2).join(' • ')}
+                            </p>
+                            
+                            {/* Connect Button */}
+                            <Button 
+                              onClick={() => handleConnect(profile.id)}
+                              size="sm"
+                              className="w-full bg-gradient-primary hover:shadow-premium text-primary-foreground"
+                            >
+                              <Trophy className="w-4 h-4 mr-2" />
+                              Partner Up
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Performance Dashboard */}
         {showPerformanceDashboard && currentUserProfile?.performance_metrics && (
           <div className="mb-8">
@@ -792,110 +897,6 @@ export default function Browse() {
           </Card>
         )}
 
-        {/* AI Recommendations Section */}
-        {currentUserProfile && filteredProfiles.length > 0 && (
-          <Card className="mb-8 border-primary/30 bg-gradient-to-br from-primary/10 via-background to-accent/8 shadow-lg backdrop-blur-sm">
-            <CardHeader className="pb-4">
-              <div className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-amber-600" />
-                <h3 className="text-xl font-semibold text-foreground">Perfect Training Matches</h3>
-                <Badge variant="outline" className="border-amber-500/30 bg-amber-50 text-amber-700">
-                  Pace & goal matched
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-6">
-                {filteredProfiles.slice(0, 2).map((profile) => {
-                  const matchData = matchScores.get(profile.id);
-                  if (!matchData || matchData.score < 50) return null;
-                  
-                  return (
-                    <Card 
-                      key={profile.id} 
-                      className={cn(
-                        "relative overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl",
-                        "bg-card/95 backdrop-blur-sm border border-border/50",
-                        "shadow-md hover:shadow-primary/20"
-                      )}
-                    >
-                      {/* Gradient accent strip for high matches */}
-                      {matchData.score >= 90 && (
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-accent to-primary animate-pulse" />
-                      )}
-                      
-                      <CardContent className="p-5 bg-gradient-to-br from-background/90 to-muted/30">
-                        <div className="flex items-start gap-4">
-                          <div className="relative">
-                            <Avatar className="h-14 w-14 shadow-lg ring-2 ring-primary/20">
-                              <AvatarImage src={profile.profile_picture_url} className="object-cover" />
-                              <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 font-semibold text-foreground">
-                                {profile.full_name?.charAt(0) || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                            {/* Online indicator for high trust score */}
-                            {profile.trust_score && profile.trust_score > 80 && (
-                              <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-success rounded-full border-2 border-background" />
-                            )}
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-2">
-                              <h4 className="font-semibold text-lg text-foreground truncate">
-                                {profile.full_name}
-                              </h4>
-                              <Badge 
-                                className={cn(
-                                  "text-xs font-bold shadow-sm",
-                                  matchData.score >= 90 
-                                    ? "bg-gradient-to-r from-primary to-accent text-primary-foreground animate-pulse" 
-                                    : "bg-primary text-primary-foreground"
-                                )}
-                              >
-                                {matchData.score}% match
-                              </Badge>
-                            </div>
-                            
-                            <p className="text-sm text-muted-foreground mb-3 flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {formatLocation(profile)}
-                            </p>
-                            
-                            <div className="flex flex-wrap gap-2 mb-3">
-                              {matchData.tags.slice(0, 3).map((tag, index) => (
-                                <Badge 
-                                  key={index} 
-                                  variant="secondary" 
-                                  className="text-xs bg-orange-500 text-white border-orange-400 hover:bg-orange-600 transition-colors"
-                                >
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                            
-                            <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-                              {matchData.reasons.slice(0, 2).join(' • ')}
-                            </p>
-                            
-                            {/* Connect Button */}
-                            <Button 
-                              onClick={() => handleConnect(profile.id)}
-                              size="sm"
-                              className="w-full bg-gradient-primary hover:shadow-premium text-primary-foreground"
-                            >
-                              <Trophy className="w-4 h-4 mr-2" />
-                              Partner Up
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Flash Events Section with Smart Display */}
         {(() => {
