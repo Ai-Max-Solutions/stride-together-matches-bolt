@@ -968,6 +968,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      verify_organization_and_assign_role: {
+        Args: {
+          target_user_id: string
+          organization_id: string
+          verification_reason?: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       achievement_type:
