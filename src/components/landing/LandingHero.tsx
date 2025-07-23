@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Zap, ArrowRight, Play, Star } from "lucide-react";
+import { Zap, ArrowRight, Play, Star, Heart, Users } from "lucide-react";
 
 export const LandingHero = () => {
   return (

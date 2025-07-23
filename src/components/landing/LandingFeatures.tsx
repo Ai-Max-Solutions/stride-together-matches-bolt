@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Target, Users, MessageCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const LandingFeatures = () => {
   const features = [

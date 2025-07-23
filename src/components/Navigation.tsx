@@ -18,6 +18,7 @@ import {
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const Navigation = () => {
   const location = useLocation();
@@ -143,16 +144,17 @@ const Navigation = () => {
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 hover-lift ${
-                        "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover-lift min-h-[52px]",
-                          ? 'bg-gradient-primary text-white shadow-primary glass-light' 
-                          : 'text-muted-foreground hover:text-foreground hover:bg-white/5 glass-button',
-                        "active-scale"
-                      }`}
-                      onClick={() => setMobileMenuOpen(false)}
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={cn(
+                      "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover-lift min-h-[52px]",
+                      isActive 
+                        ? 'bg-gradient-primary text-white shadow-primary glass-light' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-white/5 glass-button',
+                      "active-scale"
+                    )}
+                    onClick={() => setMobileMenuOpen(false)}
                   >
                     <item.icon className="w-5 h-5" />
                     <span>{item.label}</span>
