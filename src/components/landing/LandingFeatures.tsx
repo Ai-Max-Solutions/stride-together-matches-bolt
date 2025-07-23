@@ -40,18 +40,35 @@ export const LandingFeatures = () => {
 
       <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
         {features.map((feature, index) => (
-          <Card key={index} className="relative group hover:shadow-card transition-all duration-300 bg-gradient-card">
+          <Card 
+            key={index} 
+            className="relative group hover:shadow-card-hover transition-all duration-500 glass-card hover-lift animate-fade-in-up"
+            style={{ animationDelay: `${index * 0.2}s` }}
+          >
             <CardContent className="p-8 text-center">
-              <div className="absolute top-6 right-6 text-4xl font-bold text-muted-foreground/20">
+              <div className="absolute top-6 right-6 text-4xl font-bold text-primary/10">
                 {feature.step}
               </div>
-              <div className={`w-16 h-16 mx-auto mb-6 rounded-2xl bg-${feature.color}/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+              <div className={cn(
+                "w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center",
+                "bg-gradient-primary/10 group-hover:bg-gradient-primary/20",
+                "group-hover:scale-110 transition-all duration-500",
+                "shadow-lg group-hover:shadow-xl"
+              )}>
                 <feature.icon className={`w-8 h-8 text-${feature.color}`} />
               </div>
-              <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-              <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+              <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors duration-300">
+                {feature.title}
+              </h3>
+              <p className="text-muted-foreground leading-relaxed text-balance">
+                {feature.description}
+              </p>
               
-              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              {/* Animated border */}
+              <div className="absolute inset-0 rounded-lg border-2 border-transparent group-hover:border-primary/20 transition-colors duration-500" />
             </CardContent>
           </Card>
         ))}

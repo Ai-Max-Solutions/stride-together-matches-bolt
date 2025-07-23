@@ -52,15 +52,18 @@ export function MobileNav({ unreadCount = 0, className }: MobileNavProps) {
   return (
     <nav 
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border",
-        "safe-area-inset-bottom", // Handles iPhone notch
+        "fixed bottom-0 left-0 right-0 z-50",
+        "glass-nav border-t border-white/10",
+        "backdrop-blur-xl bg-background/80",
+        "shadow-2xl shadow-black/10",
+        "safe-area-inset-bottom",
         className
       )}
       role="navigation"
       aria-label="Mobile navigation"
     >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-around py-2">
+      <div className="container mx-auto px-2">
+        <div className="flex items-center justify-around py-3">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
@@ -72,30 +75,41 @@ export function MobileNav({ unreadCount = 0, className }: MobileNavProps) {
                 size="sm"
                 onClick={() => navigate(item.path)}
                 className={cn(
-                  "flex flex-col items-center gap-1 h-auto py-2 px-3 min-h-[44px] min-w-[44px]",
-                  "transition-colors duration-200",
-                  isActive && "text-primary bg-primary/10"
+                  "flex flex-col items-center gap-1.5 h-auto py-2 px-3 min-h-[52px] min-w-[52px]",
+                  "transition-all duration-300 ease-out rounded-xl",
+                  "hover-scale active-scale",
+                  isActive 
+                    ? "text-primary bg-gradient-primary/10 glass-light shadow-lg" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/5"
                 )}
                 aria-label={item.label}
                 aria-current={isActive ? 'page' : undefined}
               >
                 <div className="relative">
                   <Icon className={cn(
-                    "h-5 w-5",
-                    isActive ? "text-primary" : "text-muted-foreground"
+                    "h-5 w-5 transition-all duration-300",
+                    isActive ? "text-primary scale-110" : "text-muted-foreground"
                   )} />
                   {item.badge && item.badge > 0 && (
                     <span 
-                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground text-xs rounded-full h-4 w-4 flex items-center justify-center min-w-[16px]"
+                      className={cn(
+                        "absolute -top-2 -right-2 text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]",
+                        "bg-gradient-to-r from-destructive to-red-500 text-white",
+                        "shadow-lg animate-pulse border-2 border-white/20"
+                      )}
                       aria-label={`${item.badge} unread messages`}
                     >
                       {item.badge > 99 ? '99+' : item.badge}
                     </span>
                   )}
+                  {/* Active indicator */}
+                  {isActive && (
+                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full animate-pulse" />
+                  )}
                 </div>
                 <span className={cn(
-                  "text-xs font-medium",
-                  isActive ? "text-primary" : "text-muted-foreground"
+                  "text-xs font-medium transition-all duration-300",
+                  isActive ? "text-primary font-semibold" : "text-muted-foreground"
                 )}>
                   {item.label}
                 </span>
@@ -104,6 +118,9 @@ export function MobileNav({ unreadCount = 0, className }: MobileNavProps) {
           })}
         </div>
       </div>
+      
+      {/* Gradient overlay for depth */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
     </nav>
   );
 }

@@ -51,69 +51,70 @@ const Navigation = () => {
   ];
 
   return (
-    <header className="glass-effect sticky top-0 z-50 animate-fade-in">
+    <header className="glass-nav sticky top-0 z-50 animate-fade-in border-b border-white/10 shadow-lg">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 hover-scale">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center shadow-primary">
+          <Link to="/" className="flex items-center space-x-3 hover-scale transition-all duration-300">
+            <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-primary hover:shadow-lg transition-all duration-300">
               <Users className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
               Stride Together
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden md:flex items-center space-x-2">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 hover-lift ${
+                  className={cn(
+                    "flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all duration-300 hover-lift min-h-[44px]",
                     isActive 
-                      ? 'bg-primary text-primary-foreground shadow-primary' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                  }`}
+                      ? 'bg-gradient-primary text-white shadow-primary glass-light' 
+                      : 'text-muted-foreground hover:text-foreground hover:bg-white/5 glass-button'
+                  )}
                 >
                   <item.icon className="w-4 h-4" />
-                  <span>{item.label}</span>
+                  <span className="font-medium">{item.label}</span>
                 </Link>
               );
             })}
           </nav>
 
           {/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-3">
             <Link to="/chatbot">
-              <Button variant="ghost" size="icon" title="AI Assistant">
+              <Button variant="ghost" size="icon" title="AI Assistant" className="glass-button hover-scale">
                 <Bot className="h-4 w-4" />
               </Button>
             </Link>
             <Link to="/settings">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="glass-button hover-scale">
                 <Settings className="h-4 w-4" />
               </Button>
             </Link>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-xs glass-light border-primary/20 text-primary">
               Beta
             </Badge>
             {user ? (
-              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              <Button variant="ghost" size="sm" onClick={handleSignOut} className="glass-button hover-scale">
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
               </Button>
             ) : (
               <>
                 <Link to="/auth">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="glass-button">
                     Sign In
                   </Button>
                 </Link>
                 <Link to="/auth">
-                  <Button variant="hero" size="sm">
+                  <Button variant="hero" size="sm" className="hover-scale">
                     Get Started
                   </Button>
                 </Link>
@@ -125,7 +126,7 @@ const Navigation = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden glass-button hover-scale"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -134,8 +135,11 @@ const Navigation = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 border-t pt-4 animate-fade-in">
-            <nav className="space-y-2">
+          <div className="md:hidden mt-6 pb-6 border-t border-white/10 pt-6 animate-slide-down">
+            {/* Mobile menu backdrop */}
+            <div className="absolute inset-x-0 top-full bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-xl rounded-b-2xl shadow-2xl" />
+            
+            <nav className="space-y-3 relative z-10">
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
@@ -143,9 +147,10 @@ const Navigation = () => {
                       key={item.path}
                       to={item.path}
                       className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 hover-lift ${
-                        isActive 
-                          ? 'bg-primary text-primary-foreground shadow-primary' 
-                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                        "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover-lift min-h-[52px]",
+                          ? 'bg-gradient-primary text-white shadow-primary glass-light' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-white/5 glass-button',
+                        "active-scale"
                       }`}
                       onClick={() => setMobileMenuOpen(false)}
                   >
@@ -155,16 +160,16 @@ const Navigation = () => {
                 );
               })}
             </nav>
-            <div className="flex flex-col space-y-2 mt-4 pt-4 border-t">
+            <div className="flex flex-col space-y-3 mt-6 pt-6 border-t border-white/10 relative z-10">
               <Link to="/chatbot" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" size="sm" className="w-full justify-start">
-                  <Bot className="h-4 w-4 mr-2" />
+                <Button variant="ghost" size="sm" className="w-full justify-start glass-button hover-scale min-h-[44px]">
+                  <Bot className="h-4 w-4 mr-3" />
                   AI Assistant
                 </Button>
               </Link>
               <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" size="sm" className="w-full justify-start">
-                  <Settings className="h-4 w-4 mr-2" />
+                <Button variant="ghost" size="sm" className="w-full justify-start glass-button hover-scale min-h-[44px]">
+                  <Settings className="h-4 w-4 mr-3" />
                   Settings
                 </Button>
               </Link>
@@ -172,24 +177,24 @@ const Navigation = () => {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="w-full justify-start"
+                  className="w-full justify-start glass-button hover-scale min-h-[44px]"
                   onClick={() => {
                     handleSignOut();
                     setMobileMenuOpen(false);
                   }}
                 >
-                  <LogOut className="h-4 w-4 mr-2" />
+                  <LogOut className="h-4 w-4 mr-3" />
                   Sign Out
                 </Button>
               ) : (
                 <>
                   <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button variant="outline" size="sm" className="w-full glass-button min-h-[44px]">
                       Sign In
                     </Button>
                   </Link>
                   <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="hero" size="sm" className="w-full">
+                    <Button variant="hero" size="sm" className="w-full hover-scale min-h-[44px]">
                       Get Started
                     </Button>
                   </Link>
@@ -199,6 +204,9 @@ const Navigation = () => {
           </div>
         )}
       </div>
+      
+      {/* Navigation glow effect */}
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
     </header>
   );
 };

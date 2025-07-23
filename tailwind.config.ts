@@ -92,20 +92,26 @@ export default {
 			boxShadow: {
 				'primary': 'var(--shadow-primary)',
 				'accent': 'var(--shadow-accent)',
-				'card': '0 4px 6px hsla(210, 22%, 15%, 0.08)',
-				'card-hover': '0 8px 12px hsla(210, 22%, 15%, 0.12)',
+				'card': 'var(--shadow-card)',
+				'card-hover': 'var(--shadow-card-hover)',
 				'premium': '0 6px 20px -6px hsla(210, 22%, 15%, 0.15)',
 				'avatar': '0 2px 8px hsla(210, 22%, 15%, 0.08)',
-				'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.15)'
+				'glass': 'var(--shadow-glass)',
+				'glow': '0 0 20px hsl(var(--primary) / 0.3)',
+				'glow-lg': '0 0 40px hsl(var(--primary) / 0.2)'
 			},
 			transitionTimingFunction: {
-				'smooth': 'var(--transition-smooth)',
-				'bounce': 'var(--transition-bounce)'
+				'smooth': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+				'bounce': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+				'elastic': 'cubic-bezier(0.175, 0.885, 0.32, 1.275)'
 			},
 			borderRadius: {
-				lg: '12px', // Sports theme: 12px
+				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				sm: 'calc(var(--radius) - 4px)',
+				xl: 'calc(var(--radius) + 4px)',
+				'2xl': 'calc(var(--radius) + 8px)',
+				'3xl': 'calc(var(--radius) + 12px)'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -118,6 +124,10 @@ export default {
 				},
 				'fade-in': {
 					'0%': { opacity: '0', transform: 'translateY(10px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' }
+				},
+				'fade-in-up': {
+					'0%': { opacity: '0', transform: 'translateY(30px)' },
 					'100%': { opacity: '1', transform: 'translateY(0)' }
 				},
 				'fade-out': {
@@ -152,6 +162,16 @@ export default {
 						maxHeight: '600px'
 					}
 				},
+				'slide-up': {
+					'0%': { 
+						transform: 'translateY(20px)', 
+						opacity: '0'
+					},
+					'100%': { 
+						transform: 'translateY(0)', 
+						opacity: '1'
+					}
+				},
 				'pulse-glow': {
 					'0%, 100%': { boxShadow: '0 0 0 0 hsl(var(--primary) / 0.4)' },
 					'50%': { boxShadow: '0 0 0 8px hsl(var(--primary) / 0)' }
@@ -160,27 +180,49 @@ export default {
 					'0%, 100%': { transform: 'translateY(0)' },
 					'50%': { transform: 'translateY(-3px)' }
 				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0px)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				'glow': {
+					'0%, 100%': { filter: 'brightness(1) drop-shadow(0 0 0 transparent)' },
+					'50%': { filter: 'brightness(1.1) drop-shadow(0 0 20px hsl(var(--primary) / 0.3))' }
+				},
 				// Sports UI shimmer skeleton
 				'shimmer': {
 					'0%': { backgroundPosition: '-200% 0' },
 					'100%': { backgroundPosition: '200% 0' },
 				},
+				'confetti': {
+					'0%': { transform: 'translateY(-100vh) rotate(0deg) scale(1)', opacity: '1' },
+					'100%': { transform: 'translateY(100vh) rotate(720deg) scale(0.5)', opacity: '0' }
+				},
+				'wiggle': {
+					'0%, 100%': { transform: 'rotate(-3deg)' },
+					'50%': { transform: 'rotate(3deg)' }
+				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.3s ease-out',
+				'fade-in-up': 'fade-in-up 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
 				'fade-out': 'fade-out 0.3s ease-out',
 				'scale-in': 'scale-in 0.2s ease-out',
 				'scale-out': 'scale-out 0.2s ease-out',
 				'slide-in-right': 'slide-in-right 0.3s ease-out',
 				'slide-out-right': 'slide-out-right 0.3s ease-out',
 				'slide-down': 'slide-down 0.3s ease-out',
+				'slide-up': 'slide-up 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
 				'enter': 'fade-in 0.3s ease-out, scale-in 0.2s ease-out',
 				'exit': 'fade-out 0.3s ease-out, scale-out 0.2s ease-out',
 				'pulse-glow': 'pulse-glow 2s infinite',
 				'bounce-light': 'bounce-light 1s ease-in-out',
+				'float': 'float 3s ease-in-out infinite',
+				'glow': 'glow 2s ease-in-out infinite',
 				'shimmer': 'shimmer 2s infinite linear',
+				'confetti': 'confetti 1.2s ease-out forwards',
+				'wiggle': 'wiggle 1s ease-in-out infinite'
 			}
 		}
 	},
@@ -189,31 +231,71 @@ export default {
 		function({ addUtilities }: any) {
 			addUtilities({
 				'.hover-scale': {
-					'transition': 'transform 0.2s ease',
+					'transition': 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+					'will-change': 'transform',
 					'&:hover': {
 						'transform': 'scale(1.05)'
 					}
 				},
-				'.hover-lift': {
-					'transition': 'all 0.3s ease',
+				'.hover-scale-102': {
+					'transition': 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+					'will-change': 'transform',
 					'&:hover': {
-						'transform': 'translateY(-4px)',
-						'box-shadow': 'var(--shadow-card)'
+						'transform': 'scale(1.02)'
 					}
 				},
-				'.glass-effect': {
-					'background': 'hsl(var(--background) / 0.8)',
-					'backdrop-filter': 'blur(8px)',
-					'border': '1px solid hsl(var(--border) / 0.5)'
+				'.hover-lift': {
+					'transition': 'all 0.3s ease',
+					'will-change': 'transform, box-shadow',
+					'&:hover': {
+						'transform': 'translateY(-4px)',
+						'box-shadow': 'var(--shadow-card-hover)'
+					}
+				},
+				'.active-scale': {
+					'transition': 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
+					'&:active': {
+						'transform': 'scale(0.95)'
+					}
 				},
 				'.button-bounce': {
-					'transition': 'all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+					'transition': 'all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
 					'&:active': {
 						'transform': 'scale(0.95)'
 					}
 				},
 				'.success-flash': {
-					'animation': 'pulse-glow 0.8s ease-out'
+					'animation': 'glow 0.8s ease-out'
+				},
+				'.glass-effect': {
+					'background': 'var(--glass-bg)',
+					'backdrop-filter': 'var(--glass-blur)',
+					'-webkit-backdrop-filter': 'var(--glass-blur)',
+					'border': '1px solid var(--glass-border)',
+					'box-shadow': 'var(--glass-shadow)'
+				},
+				'.text-gradient': {
+					'background': 'var(--gradient-primary)',
+					'-webkit-background-clip': 'text',
+					'background-clip': 'text',
+					'-webkit-text-fill-color': 'transparent'
+				},
+				'.backdrop-blur-xs': {
+					'backdrop-filter': 'blur(2px)',
+					'-webkit-backdrop-filter': 'blur(2px)'
+				},
+				'.backdrop-blur-3xl': {
+					'backdrop-filter': 'blur(64px)',
+					'-webkit-backdrop-filter': 'blur(64px)'
+				},
+				'.will-change-transform': {
+					'will-change': 'transform'
+				},
+				'.will-change-opacity': {
+					'will-change': 'opacity'
+				},
+				'.will-change-auto': {
+					'will-change': 'auto'
 				}
 			});
 		}

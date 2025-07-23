@@ -10,6 +10,7 @@ import { AccessibilitySkipNav } from "@/components/ui/accessibility-skip-nav";
 import { BetaBadge } from "@/components/common/BetaBadge";
 import { FloatingAssistant } from "@/components/common/FloatingAssistant";
 import { useAnalytics } from "@/hooks/use-analytics";
+import { PerformanceMonitor, usePerformanceMonitor } from "@/components/ui/performance-monitor";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import ProfileSetup from "./pages/ProfileSetup";
@@ -35,6 +36,7 @@ const PageFallback = () => (
 
 const AppContent = () => {
   console.log('App.tsx: AppContent rendering...');
+  const { isEnabled: perfMonitorEnabled } = usePerformanceMonitor();
   useAnalytics(); // Track page visits
   console.log('App.tsx: useAnalytics completed');
   return (
@@ -42,6 +44,7 @@ const AppContent = () => {
       <BetaBadge />
       <FloatingAssistant />
       <AccessibilitySkipNav />
+      <PerformanceMonitor enabled={perfMonitorEnabled} />
       <Toaster />
       <Sonner />
       <Suspense fallback={<PageFallback />}>
