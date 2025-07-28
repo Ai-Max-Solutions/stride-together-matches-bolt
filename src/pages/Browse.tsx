@@ -17,7 +17,7 @@ import { useMobileDetection } from '@/hooks/use-mobile-detection';
 import { MobileNav } from '@/components/ui/mobile-nav';
 import { useFlashRuns } from '@/hooks/use-flash-runs';
 import { FlashRunsList, FlashRunFAB, FlashRunModal, FlashRideModal, FlashWorkoutModal, FlashYogaModal } from '@/components/flash-runs';
-import { AIMatchingCard } from '@/components/AIMatchingCard';
+import AIMatchingCard from '@/components/AIMatchingCard';
 import { TrainingPlanCard } from '@/components/training/TrainingPlanCard';
 import { LeaderboardCard } from '@/components/competition/LeaderboardCard';
 import MatchCard from '@/components/common/match-card';
